@@ -2325,7 +2325,7 @@ Counter46.set(ArduinoAdapter11.lastData);
             <node id="bioaohfyfaanbvadtqay">
               <data key="dName">RPM4 (целая)</data>
               <data key="dData">exit/
-Counter121.set(ArduinoAdapter11.lastData);
+Counter49.set(ArduinoAdapter11.lastData);
 
 </data>
               <data key="dGeometry">
