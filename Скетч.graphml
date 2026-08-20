@@ -157,6 +157,7 @@ Timer2.start(2000);
       <data key="dGeometry">
         <rect x="866.1099349975586" y="149.46945097446508" width="450" height="100"></rect>
       </data>
+      <data key="dColor">#FFFFFF</data>
       <graph id="kcygaolatawvngndieud">
         <node id="yfddeqwghbceqxtjnzvz">
           <data key="dName">Получение данных</data>
@@ -230,6 +231,7 @@ Counter32.set(ArduinoAdapter1.lastData);
               <data key="dGeometry">
                 <rect x="96.52800933837938" y="1241.8082736086847" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="bbwkylixlxdeaxdqswde">
               <data key="dName">Получить дробную часть температуры с улицы</data>
@@ -240,6 +242,7 @@ Counter33.set(ArduinoAdapter1.lastData);
               <data key="dGeometry">
                 <rect x="105.13999999999993" y="1446.9182736086846" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="xwetetpshnuezxvumzfh">
               <data key="dName">Получение данных с геркона 3</data>
@@ -250,6 +253,7 @@ Counter55.set(ArduinoAdapter1.lastData);
               <data key="dGeometry">
                 <rect x="691.7400000000001" y="848.768273608685" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="qqljxckjxnmctmegfedk">
               <data key="dName">Получить данные с Геркона 2</data>
@@ -260,11 +264,12 @@ Counter54.set(ArduinoAdapter1.lastData);
               <data key="dGeometry">
                 <rect x="121.9480093383773" y="669.5582736086855" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="zucycqzqhxkphazeybge">
               <data key="dVertex">initial</data>
               <data key="dGeometry">
-                <point x="61.367156677247124" y="184.88568877935379"></point>
+                <rect x="61.367156677247124" y="184.88568877935379" width="-1" height="-1"></rect>
               </data>
             </node>
           </graph>
@@ -273,10 +278,11 @@ Counter54.set(ArduinoAdapter1.lastData);
           <data key="dName">Отправка</data>
           <data key="dData">exit/
 SimpleBus2.sendPacket(12, Counter4.value);
+LED2.toggle();
 
 </data>
           <data key="dGeometry">
-            <rect x="927.8550082397452" y="702.392272670269" width="450" height="100"></rect>
+            <rect x="1375.855008239745" y="535.392272670269" width="450" height="100"></rect>
           </data>
           <data key="dColor">#FFFFFF</data>
           <graph id="wlpmdvbomkedgebdovyv">
@@ -297,6 +303,7 @@ SimpleBus2.sendPacket(12, Counter33.value);
               <data key="dGeometry">
                 <rect x="115" y="135" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="kwzqhzvzixkecxekzpbv">
               <data key="dVertex">initial</data>
@@ -320,7 +327,7 @@ ArduinoAdapter1.sendPacket(Counter5.value);
         <node id="eymhzqyyvqhqaqnwdyyq">
           <data key="dVertex">initial</data>
           <data key="dGeometry">
-            <point x="38.760000000000005" y="153.1805513143529"></point>
+            <rect x="38.760000000000005" y="153.1805513143529" width="-1" height="-1"></rect>
           </data>
         </node>
       </graph>
@@ -587,6 +594,20 @@ name/ Геркон 3
         <point x="30" y="30"></point>
       </data>
     </node>
+    <node id="cLED8">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ LED8
+
+type/ LED
+
+pin/ 2
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
     <node id="jdwqulvwejcistvcjcdd">
       <data key="dGeometry">
         <point x="581.424945068359" y="185.67500076293942"></point>
@@ -638,7 +659,6 @@ name/ Геркон 3
     <edge id="wxcvqkiadjmhbasyycwe" source="eymhzqyyvqhqaqnwdyyq" target="bgzutyuyknmdyuvfxzhe"></edge>
     <edge id="wntqyceyznblwguvfzpc" source="kcygaolatawvngndieud" target="wlvfixbyxbxbuafpgxfa">
       <data key="dData">Timer2.timeout/
-LED2.toggle();
 
 </data>
       <data key="dLabelGeometry">
@@ -747,7 +767,7 @@ Counter8.set(3);
 Counter10.set(99);
 Counter11.set(12);
 Counter24.set(6);
-Counter26.set(25);
+Counter56.set(10);
 
 Timer5.timeout/
 Counter6.add(Counter1.value);
@@ -763,6 +783,7 @@ Counter6.set(254);
       <data key="dGeometry">
         <rect x="60.199981689453125" y="136.58000076293945" width="450" height="100"></rect>
       </data>
+      <data key="dColor">#FFFFFF</data>
     </node>
     <node id="dxauwqidncgxacufeqpo">
       <data key="dName">Коммуникация</data>
@@ -779,6 +800,9 @@ Counter6.set(1);
 UserSignal7.isCalled[Counter6.value == 255]/
 Counter6.set(254);
 
+Timer7.timeout/
+Counter57.set(1);
+
 </data>
       <data key="dGeometry">
         <rect x="679.7439474487294" y="163.07570097595914" width="450" height="100"></rect>
@@ -789,6 +813,7 @@ Counter6.set(254);
           <data key="dName">Опрос</data>
           <data key="dData">entry/
 SimpleBus1.sendPacket(13, Counter7.value);
+LED3.toggle();
 
 SimpleBus1.packetReceived[else]/
 UserSignal5.call();
@@ -860,6 +885,7 @@ Counter29.set(SimpleBus1.lastData);
               <data key="dGeometry">
                 <rect x="93.5700000000001" y="1465.3099999999997" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="qquzphedvwjevjyzwlis">
               <data key="dName">Получить температуру с улицы (дроб)</data>
@@ -870,6 +896,7 @@ Counter30.set(SimpleBus1.lastData);
               <data key="dGeometry">
                 <rect x="97.58759674072084" y="1701.7006599393424" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="gfysljphpzbqjeinibtj">
               <data key="dName">Получить данные с Геркона</data>
@@ -896,7 +923,7 @@ Counter52.set(SimpleBus1.lastData);
             <node id="mjnesupnyigfidmjnyjd">
               <data key="dVertex">initial</data>
               <data key="dGeometry">
-                <point x="14.56" y="271.5908077773402"></point>
+                <rect x="14.56" y="271.5908077773402" width="-1" height="-1"></rect>
               </data>
             </node>
           </graph>
@@ -936,6 +963,7 @@ LED4.toggle();
               <data key="dGeometry">
                 <rect x="19.230001831054164" y="571.3149868762492" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="vjnsfgcgxgmwyplvviyq">
               <data key="dName">Отправляем</data>
@@ -1004,19 +1032,19 @@ UserSignal2.call();
             <node id="mwssxdhpjmwfstnjnmjh">
               <data key="dVertex">choice</data>
               <data key="dGeometry">
-                <point x="1988.9700000000012" y="791.3249868762501"></point>
+                <rect x="1988.9700000000012" y="791.3249868762501" width="-1" height="-1"></rect>
               </data>
             </node>
             <node id="xbjpqbbjluswkoqpetmb">
               <data key="dVertex">choice</data>
               <data key="dGeometry">
-                <point x="2183.610952758788" y="1030.200189950467"></point>
+                <rect x="2183.610952758788" y="1030.200189950467" width="-1" height="-1"></rect>
               </data>
             </node>
             <node id="kxqkggujhuyjginzkpiy">
               <data key="dVertex">choice</data>
               <data key="dGeometry">
-                <point x="2481.810952758787" y="918.2801899504668"></point>
+                <rect x="2481.810952758787" y="918.2801899504668" width="-1" height="-1"></rect>
               </data>
             </node>
           </graph>
@@ -1056,11 +1084,12 @@ SimpleBus1.sendPacket(Counter10.value, Counter26.value);
               <data key="dGeometry">
                 <rect x="114.33000000000004" y="141.43000000000018" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="qzblxiqfnmtydjejeuwg">
               <data key="dVertex">initial</data>
               <data key="dGeometry">
-                <point x="15.350000000000037" y="121.43000000000018"></point>
+                <rect x="15.350000000000037" y="121.43000000000018" width="-1" height="-1"></rect>
               </data>
             </node>
           </graph>
@@ -1077,6 +1106,7 @@ UserSignal5.call();
           <data key="dGeometry">
             <rect x="891.5800000000004" y="2151.285659939343" width="450" height="100"></rect>
           </data>
+          <data key="dColor">#FFFFFF</data>
           <graph id="pdjpfjgteltflagzsjbb">
             <node id="dgunjjcqqqpnjzoygaai">
               <data key="dName">Получить RPM1</data>
@@ -1087,6 +1117,7 @@ Counter34.set(SimpleBus1.lastData);
               <data key="dGeometry">
                 <rect x="102.51999999999998" y="253.72" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="jywxcynnalzbjmmkywdk">
               <data key="dName">Получить RPM3</data>
@@ -1097,6 +1128,7 @@ Counter36.set(SimpleBus1.lastData);
               <data key="dGeometry">
                 <rect x="87.85247314453228" y="680.81679901123" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="xvxtpkhlqatloitbdxfh">
               <data key="dName">Получить RPM2</data>
@@ -1107,6 +1139,7 @@ Counter35.set(SimpleBus1.lastData);
               <data key="dGeometry">
                 <rect x="94.79000000000005" y="464.2867990112312" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="aqdjacjfvdlnquncysom">
               <data key="dName">Ждем окончания передачи</data>
@@ -1114,6 +1147,7 @@ Counter35.set(SimpleBus1.lastData);
               <data key="dGeometry">
                 <rect x="796.160069885254" y="1089.8967990112287" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="anxpoiekgqwtftxmossq">
               <data key="dName">Получить RPM1 (дробная)</data>
@@ -1124,6 +1158,7 @@ Counter37.set(SimpleBus1.lastData);
               <data key="dGeometry">
                 <rect x="733.44" y="262.3600000000001" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="plefctzkkgeyoyhkyiuc">
               <data key="dName">Получить RPM3 (дробная)</data>
@@ -1134,6 +1169,7 @@ Counter39.set(SimpleBus1.lastData);
               <data key="dGeometry">
                 <rect x="740.1999999999997" y="690.2400000000001" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="geamodqtxeugyzsuuhsl">
               <data key="dName">Получить RPM2 (дробная)</data>
@@ -1144,6 +1180,7 @@ Counter38.set(SimpleBus1.lastData);
               <data key="dGeometry">
                 <rect x="734.7400000000002" y="467.64" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="iphoqqhsouxihsqmjlhu">
               <data key="dName">Получить RPM4 (дробная)</data>
@@ -1154,6 +1191,7 @@ Counter48.set(SimpleBus1.lastData);
               <data key="dGeometry">
                 <rect x="793.4399999999999" y="871.4599999999998" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="xzonqsoykamgamtsvven">
               <data key="dName">Получить RPM4</data>
@@ -1164,11 +1202,12 @@ Counter47.set(SimpleBus1.lastData);
               <data key="dGeometry">
                 <rect x="107.88247314453221" y="865.27679901123" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="slqqhjiemkflpegqtsdz">
               <data key="dVertex">initial</data>
               <data key="dGeometry">
-                <point x="20.229999999999997" y="254.57000000000005"></point>
+                <rect x="20.229999999999997" y="254.57000000000005" width="-1" height="-1"></rect>
               </data>
             </node>
           </graph>
@@ -1176,7 +1215,7 @@ Counter47.set(SimpleBus1.lastData);
         <node id="klyuxleanmqncyttcmfm">
           <data key="dVertex">initial</data>
           <data key="dGeometry">
-            <point x="44.58000000000007" y="466.11999999999966"></point>
+            <rect x="44.58000000000007" y="466.11999999999966" width="-1" height="-1"></rect>
           </data>
         </node>
       </graph>
@@ -1186,10 +1225,12 @@ Counter47.set(SimpleBus1.lastData);
       <data key="dData">entry/
 Counter6.set(1);
 UserSignal2.call();
+Counter26.set(25);
+Timer7.start(3000);
 
 </data>
       <data key="dGeometry">
-        <rect x="43.05856323242014" y="-75.63893679797577" width="450" height="100"></rect>
+        <rect x="45.05856323242014" y="-174.63893679797576" width="450" height="100"></rect>
       </data>
       <data key="dColor">#FFFFFF</data>
     </node>
@@ -1202,6 +1243,7 @@ SimpleBus1.sendPacket(14, Counter8.value);
       <data key="dGeometry">
         <rect x="2494.49654418945" y="1555.0210604554425" width="450" height="100"></rect>
       </data>
+      <data key="dColor">#FFFFFF</data>
       <graph id="swslyqwdtqamoufuodqs">
         <node id="cgboometplfpztglfqjw">
           <data key="dName">Отправка температуры</data>
@@ -1215,19 +1257,49 @@ UserSignal4.call();
           <data key="dGeometry">
             <rect x="114.04" y="135" width="450" height="100"></rect>
           </data>
+          <data key="dColor">#FFFFFF</data>
         </node>
         <node id="xeldqdmdmowibxyefdqt">
           <data key="dVertex">initial</data>
           <data key="dGeometry">
-            <point x="15" y="115"></point>
+            <rect x="15" y="115" width="-1" height="-1"></rect>
           </data>
         </node>
       </graph>
+    </node>
+    <node id="myhdbkbabfhkjjbmhexc">
+      <data key="dName">Изменилась ли эталонная температура</data>
+      <data key="dData">entry/
+SimpleBus1.sendPacket(Counter10.value, Counter11.value);
+SimpleBus1.sendPacket(Counter10.value, Counter56.value);
+SimpleBus1.sendPacket(Counter10.value, Counter11.value);
+Timer3.start(60);
+Counter57.reset();
+
+</data>
+      <data key="dGeometry">
+        <rect x="886.9206182861356" y="-358.5597362989278" width="450" height="100"></rect>
+      </data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="jnnidjnzwekaxablyshp">
+      <data key="dName">Состояние</data>
+      <data key="dData"></data>
+      <data key="dGeometry">
+        <rect x="1454.615618286135" y="-134.58375051976128" width="450" height="100"></rect>
+      </data>
+      <data key="dColor">#FFFFFF</data>
     </node>
     <node id="bqidfohenagynqmbbfct">
       <data key="dVertex">initial</data>
       <data key="dGeometry">
         <rect x="-56.94143676757986" y="-95.63893679797577" width="-1" height="-1"></rect>
+      </data>
+    </node>
+    <node id="oycnbiqhwnjlfnsicsxo">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry">
+        <rect x="1061.990618286135" y="-33.83375051976128" width="-1" height="-1"></rect>
       </data>
     </node>
     <node id="cSimpleBus1">
@@ -1828,6 +1900,54 @@ name/ Открыта дверь?
         <point x="30" y="30"></point>
       </data>
     </node>
+    <node id="cCounter56">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Counter56
+
+type/ Counter
+
+label/ ETC
+
+name/ ETALON_TEMP_CODE
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cTimer7">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Timer7
+
+type/ Timer
+
+label/ КМП
+
+name/ Таймер опроса компа
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cCounter57">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Counter57
+
+type/ Counter
+
+label/ ОПР
+
+name/ Пришло время опроса
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
     <node id="imcfhfcbcsnwcmitgbhx">
       <data key="dGeometry">
         <point x="1436.5723522949222" y="1477.3715087533005"></point>
@@ -1839,7 +1959,7 @@ START_END_SYM,
     </node>
     <node id="elstgypcvndtulbjpltk">
       <data key="dGeometry">
-        <point x="698.1735632324204" y="19.701063202024045"></point>
+        <point x="722.1135632324205" y="-242.37893679797597"></point>
       </data>
       <data key="dNote">informal</data>
       <data key="dData">TODO: Глобальное состояние, которое границы проверяет</data>
@@ -1857,7 +1977,7 @@ START_END_SYM,
 
 </data>
       <data key="dLabelGeometry">
-        <point x="503.42997253417946" y="445.96000114440903"></point>
+        <point x="528.4299725341795" y="440.96000114440903"></point>
       </data>
     </edge>
     <edge id="nuuzmseqpttghqsvbjqo" source="mjnesupnyigfidmjnyjd" target="xnvofmwhlcilouhetgay"></edge>
@@ -1895,29 +2015,12 @@ START_END_SYM,
       </data>
     </edge>
     <edge id="kmewfymxtpyxtyiiuxai" source="klyuxleanmqncyttcmfm" target="kcvmhtkvldjvvqbcbxjc"></edge>
-    <edge id="bopagudidapwoqzxmltf" source="dxauwqidncgxacufeqpo" target="wowamdwmlbciuhygevez">
-      <data key="dData">Timer4.timeout/
-LED3.toggle();
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="534.5319645690914" y="189.90785086944933"></point>
-      </data>
-    </edge>
     <edge id="dsgkydumqkktvhnpvpgt" source="puzijjqhzsjnkgalwoof" target="iqyakvjmimggptluotwo">
       <data key="dData">UserSignal5.isCalled/
 
 </data>
       <data key="dLabelGeometry">
         <point x="1058.1499645996087" y="1804.9975001525884"></point>
-      </data>
-    </edge>
-    <edge id="xusywyepwfccdealqiud" source="dxauwqidncgxacufeqpo" target="wowamdwmlbciuhygevez">
-      <data key="dData">UserSignal2.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="536.7719645690912" y="79.83785086944928"></point>
       </data>
     </edge>
     <edge id="ekbbjnzganvacfbpumzw" source="iqyakvjmimggptluotwo" target="tjmhjjgeouhdhsjwemwx">
@@ -2120,6 +2223,56 @@ SimpleBus1.sendPacket(14, Counter26.value);
         <point x="749.2189611816405" y="1400.1297086739555"></point>
       </data>
     </edge>
+    <edge id="fwumkvhtqieaezqovyal" source="myhdbkbabfhkjjbmhexc" target="wowamdwmlbciuhygevez">
+      <data key="dData">SimpleBus1.packetReceived/
+Counter26.set(SimpleBus1.lastData);
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="471.20029998779466" y="-277.9698677679942"></point>
+      </data>
+    </edge>
+    <edge id="tqnucwpjakbvusumbgcy" source="myhdbkbabfhkjjbmhexc" target="wowamdwmlbciuhygevez">
+      <data key="dData">Timer3.timeout/
+LED3.toggle();
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="538.6602999877941" y="-106.06986776799417"></point>
+      </data>
+    </edge>
+    <edge id="vyfvxjcxdfmcxmcmsykj" source="dxauwqidncgxacufeqpo" target="oycnbiqhwnjlfnsicsxo">
+      <data key="dData">Timer4.timeout/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="944.3672828674322" y="59.62097522809893"></point>
+      </data>
+    </edge>
+    <edge id="vmwyxcysdvlnyswusytl" source="dxauwqidncgxacufeqpo" target="oycnbiqhwnjlfnsicsxo">
+      <data key="dData">UserSignal2.isCalled/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="1176.367282867432" y="53.62097522809893"></point>
+      </data>
+    </edge>
+    <edge id="xcvfygjpsynklgymeysn" source="oycnbiqhwnjlfnsicsxo" target="myhdbkbabfhkjjbmhexc">
+      <data key="dData">[Counter57.value == 1]/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="897.9556182861352" y="-95.19674340934455"></point>
+      </data>
+    </edge>
+    <edge id="qqkjupcykxpklfgdyfxs" source="oycnbiqhwnjlfnsicsxo" target="wowamdwmlbciuhygevez">
+      <data key="dData">[else]/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="380.0952999877941" y="30.373125121589084"></point>
+      </data>
+    </edge>
   </graph>
   <graph id="MS1Gate1_1">
     <data key="dStateMachine"></data>
@@ -2157,6 +2310,7 @@ Counter27.set(8);
       <data key="dGeometry">
         <rect x="-35.22003662109375" y="327.4000015258789" width="450" height="100"></rect>
       </data>
+      <data key="dColor">#FFFFFF</data>
     </node>
     <node id="kcygaolatawvngndieud">
       <data key="dName">Коммуникация</data>
@@ -2171,6 +2325,7 @@ Counter28.set(1);
       <data key="dGeometry">
         <rect x="867.1699349975586" y="148.40945097446507" width="450" height="100"></rect>
       </data>
+      <data key="dColor">#FFFFFF</data>
       <graph id="kcygaolatawvngndieud">
         <node id="bgzutyuyknmdyuvfxzhe">
           <data key="dName">Команда на Ардуино</data>
@@ -2187,6 +2342,7 @@ ArduinoAdapter11.sendPacket(Counter21.value);
           <data key="dGeometry">
             <rect x="821.3300000000004" y="182.96055131435293" width="450" height="100"></rect>
           </data>
+          <data key="dColor">#FFFFFF</data>
         </node>
         <node id="iqnnfsagpucottyybfzu">
           <data key="dName">Режим отказа!</data>
@@ -2235,6 +2391,7 @@ Counter131.set(SimpleBus21.lastData);
               <data key="dGeometry">
                 <rect x="122.34799804687385" y="575.0999999999998" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="laaueqbmmeonfeajsqaw">
               <data key="dVertex">initial</data>
@@ -2256,6 +2413,7 @@ UserSignal8.call();
           <data key="dGeometry">
             <rect x="126.34300933837883" y="1300.574226336479" width="450" height="100"></rect>
           </data>
+          <data key="dColor">#FFFFFF</data>
           <graph id="sofbdcapbdqznavfddoa">
             <node id="hoppqinffvbzuysncwbd">
               <data key="dName">RPM1 (цел)</data>
@@ -2266,6 +2424,7 @@ Counter40.set(ArduinoAdapter11.lastData);
               <data key="dGeometry">
                 <rect x="91.50000000000004" y="307.95999999999987" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="pgdacwhstutamjtsiozb">
               <data key="dName">RPM1 (дроб)</data>
@@ -2276,6 +2435,7 @@ Counter42.set(ArduinoAdapter11.lastData);
               <data key="dGeometry">
                 <rect x="764.4249999999977" y="302.76276266954835" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="ucwujcmtmiohvojeytdn">
               <data key="dName">RPM2 (цел)</data>
@@ -2286,6 +2446,7 @@ Counter43.set(ArduinoAdapter11.lastData);
               <data key="dGeometry">
                 <rect x="96.38000000000012" y="510.23999999999927" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="ikhaghieueekekjjacfq">
               <data key="dName">RPM2 (дробная)</data>
@@ -2296,6 +2457,7 @@ Counter44.set(ArduinoAdapter11.lastData);
               <data key="dGeometry">
                 <rect x="759.9049999999982" y="514.9427626695482" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="lvexuwviihofzombcddu">
               <data key="dName">RPM3 (целая)</data>
@@ -2306,6 +2468,7 @@ Counter45.set(ArduinoAdapter11.lastData);
               <data key="dGeometry">
                 <rect x="91.86000000000018" y="726.6200000000008" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="vaxlpbmxdsnhpdijaqlc">
               <data key="dName">RPM3 (дробная)</data>
@@ -2316,6 +2479,7 @@ Counter46.set(ArduinoAdapter11.lastData);
               <data key="dGeometry">
                 <rect x="768.84" y="729.6200000000005" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="lpaylfodhsqqbjdimyog">
               <data key="dName">Ждем ОК</data>
@@ -2323,6 +2487,7 @@ Counter46.set(ArduinoAdapter11.lastData);
               <data key="dGeometry">
                 <rect x="785.4649999999971" y="1133.412762669548" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="bioaohfyfaanbvadtqay">
               <data key="dName">RPM4 (целая)</data>
@@ -2333,6 +2498,7 @@ Counter49.set(ArduinoAdapter11.lastData);
               <data key="dGeometry">
                 <rect x="92.80499999999329" y="940.7327626695524" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="zjkxmcbyohpodcehoijq">
               <data key="dName">RPM4 (дробная)</data>
@@ -2343,11 +2509,12 @@ Counter50.set(ArduinoAdapter11.lastData);
               <data key="dGeometry">
                 <rect x="766.8949999999932" y="915.6927626695533" width="450" height="100"></rect>
               </data>
+              <data key="dColor">#FFFFFF</data>
             </node>
             <node id="lpffxpjsntujcqfclehm">
               <data key="dVertex">initial</data>
               <data key="dGeometry">
-                <point x="15" y="247.53999999999994"></point>
+                <rect x="15" y="247.53999999999994" width="-1" height="-1"></rect>
               </data>
             </node>
           </graph>
@@ -2362,6 +2529,7 @@ LED21.toggle();
           <data key="dGeometry">
             <rect x="163.75800933837772" y="185.93698900602695" width="450" height="100"></rect>
           </data>
+          <data key="dColor">#FFFFFF</data>
         </node>
         <node id="agiwiapiuvymtxtqmhkd">
           <data key="dName">Отправка на Центральную плату</data>
@@ -2381,11 +2549,12 @@ SimpleBus21.sendPacket(12, Counter41.value);
           <data key="dGeometry">
             <rect x="1540.5880093383755" y="1309.296989006029" width="450" height="100"></rect>
           </data>
+          <data key="dColor">#FFFFFF</data>
         </node>
         <node id="eymhzqyyvqhqaqnwdyyq">
           <data key="dVertex">initial</data>
           <data key="dGeometry">
-            <point x="60.18800933837774" y="182.07698900602696"></point>
+            <rect x="60.18800933837774" y="182.07698900602696" width="-1" height="-1"></rect>
           </data>
         </node>
       </graph>
@@ -2393,7 +2562,7 @@ SimpleBus21.sendPacket(12, Counter41.value);
     <node id="ctnyjzuoxhblfovpguxh">
       <data key="dVertex">initial</data>
       <data key="dGeometry">
-        <point x="-132.60003662109375" y="307.4000015258789"></point>
+        <rect x="-132.60003662109375" y="307.4000015258789" width="-1" height="-1"></rect>
       </data>
     </node>
     <node id="cArduinoAdapter11">
@@ -2988,6 +3157,185 @@ name/ RPM4 (дробная)
 </data>
       <data key="dLabelGeometry">
         <point x="1923.9979443359325" y="2495.8114399804945"></point>
+      </data>
+    </edge>
+  </graph>
+  <graph id="MS1Main2">
+    <data key="dStateMachine"></data>
+    <data key="dName">Тест эталонной температуры с компьютера</data>
+    <data key="dGeometry">
+      <rect x="0" y="0" width="450" height="100"></rect>
+    </data>
+    <node id="coreMeta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">platform/ tjc-ms1-main-a4
+
+standardVersion/ 1.0
+
+platformVersion/ 1.0
+
+lapkiVisual/ true
+
+</data>
+    </node>
+    <node id="pafcgnnyslyxjkqnxkwx">
+      <data key="dName">Состояние</data>
+      <data key="dData">Timer6.timeout/
+SimpleBus3.setAddress(12);
+SimpleBus3.sendPacket(99, 12);
+SimpleBus3.sendPacket(99, 10);
+SimpleBus3.sendPacket(99, 12);
+
+entry/
+Timer6.start(100);
+
+</data>
+      <data key="dGeometry">
+        <rect x="430.86798095703125" y="166.87999725341797" width="450" height="100"></rect>
+      </data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="yblqnhxzeugacczxygwt">
+      <data key="dName">Состояние</data>
+      <data key="dData">entry/
+LED6.on();
+UserSignal9.call();
+
+</data>
+      <data key="dGeometry">
+        <rect x="413.7359619140625" y="583.7599945068359" width="450" height="100"></rect>
+      </data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="pantkuhcdyzcxvdpftyz">
+      <data key="dName">Состояние</data>
+      <data key="dData">entry/
+LED7.on();
+
+</data>
+      <data key="dGeometry">
+        <rect x="1234.7359619140625" y="215.75999450683594" width="450" height="100"></rect>
+      </data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="qjznlegxjawzfmyntnfs">
+      <data key="dName">Состояние</data>
+      <data key="dData"></data>
+      <data key="dGeometry">
+        <rect x="1162.7359619140625" y="614.7599945068359" width="450" height="100"></rect>
+      </data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="gjstqbnmeakzvhgbntjb">
+      <data key="dVertex">initial</data>
+      <data key="dGeometry">
+        <rect x="330.86798095703125" y="146.87999725341797" width="-1" height="-1"></rect>
+      </data>
+    </node>
+    <node id="fecaqngypvavwhmnepxg">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry">
+        <rect x="1059.7359619140625" y="361.75999450683594" width="-1" height="-1"></rect>
+      </data>
+    </node>
+    <node id="cSimpleBus3">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ SimpleBus3
+
+type/ SimpleBus
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cLED6">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ LED6
+
+type/ LED
+
+pin/ 1
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cUserSignal9">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ UserSignal9
+
+type/ UserSignal
+
+name/ Тест
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cLED7">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ LED7
+
+type/ LED
+
+pin/ 2
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <node id="cTimer6">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ Timer6
+
+type/ Timer
+
+</data>
+      <data key="dLapkiSchemePosition">
+        <point x="30" y="30"></point>
+      </data>
+    </node>
+    <edge id="gfmiifccieaydjzqglll" source="gjstqbnmeakzvhgbntjb" target="pafcgnnyslyxjkqnxkwx"></edge>
+    <edge id="zddisxoqwghsejpysfkx" source="pafcgnnyslyxjkqnxkwx" target="yblqnhxzeugacczxygwt">
+      <data key="dData">SimpleBus3.packetReceived/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="543.8019714355469" y="448.81999588012695"></point>
+      </data>
+    </edge>
+    <edge id="usyqzqcekjakcnuepynt" source="yblqnhxzeugacczxygwt" target="fecaqngypvavwhmnepxg">
+      <data key="dData">UserSignal9.isCalled/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="839.2359619140625" y="376.25999450683594"></point>
+      </data>
+    </edge>
+    <edge id="paqdgmpttksuzkaxncea" source="fecaqngypvavwhmnepxg" target="pantkuhcdyzcxvdpftyz">
+      <data key="dData">[SimpleBus3.lastData == 35]/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="1341.2359619140625" y="364.75999450683594"></point>
+      </data>
+    </edge>
+    <edge id="afyfjwvszcyynzddukfq" source="fecaqngypvavwhmnepxg" target="pafcgnnyslyxjkqnxkwx">
+      <data key="dData">[else]/
+
+</data>
+      <data key="dLabelGeometry">
+        <point x="969.3019714355469" y="221.31999588012695"></point>
       </data>
     </edge>
   </graph>
