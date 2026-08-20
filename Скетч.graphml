@@ -747,7 +747,7 @@ Counter8.set(3);
 Counter10.set(99);
 Counter11.set(12);
 Counter24.set(6);
-Counter26.set(27);
+Counter26.set(25);
 
 Timer5.timeout/
 Counter6.add(Counter1.value);
@@ -1955,6 +1955,8 @@ LED3.toggle();
     <edge id="lleicdqdctkcgbokjpao" source="mwssxdhpjmwfstnjnmjh" target="xbjpqbbjluswkoqpetmb">
       <data key="dData">[else]/
 LED5.toggle();
+SimpleBus1.sendPacket(14, Counter9.value);
+SimpleBus1.sendPacket(14, Counter26.value);
 
 </data>
       <data key="dLabelGeometry">
