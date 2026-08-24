@@ -994,7 +994,7 @@ Counter1.set(1);
                 <node id="mdwgqcqstaljvhfejulm">
                   <data key="dName">Дверь закрыта!</data>
                   <data key="dData">entry/
-UserSignal4.call();
+UserSignal2.call();
 Counter1.set(0);
 Counter6.set(1);
 
