@@ -10,11 +10,13 @@
   <key for="edge" id="dColor"></key>
   <key for="node" id="dNote"></key>
   <key for="node" id="dColor"></key>
+  <key for="node" id="dVertex"></key>
+  <key for="node" id="dStateMachine"></key>
+  <key for="edge" id="dLabelGeometry"></key>
   <graph id="ArduinoUno1">
     <data key="dStateMachine"></data>
-    <data key="dGeometry">
-      <rect x="0" y="0" width="450" height="100"></rect>
-    </data>
+    <data key="dName">Вспомогательная Arduino</data>
+    <data key="dGeometry"><rect x="0" y="0" width="450" height="100"></rect></data>
     <node id="coreMeta">
       <data key="dNote">formal</data>
       <data key="dName">CGML_META</data>
@@ -25,27 +27,20 @@ standardVersion/ 1.0
 platformVersion/ 1.0
 
 lapkiVisual/ true
-
-</data>
+    </data>
     </node>
-    <node id="dcpyonwhjdjvelwmwslb">
-      <data key="dName">Ждем</data>
+    <node id="aux_wait">
+      <data key="dName">Ждём</data>
       <data key="dData">Button1.clicked/
-LED1.toggle();
-
-</data>
-      <data key="dGeometry">
-        <rect x="365" y="282" width="450" height="100"></rect>
-      </data>
+LED1.toggle();</data>
+      <data key="dGeometry"><rect x="80" y="20" width="360" height="90"></rect></data>
       <data key="dColor">#FFFFFF</data>
     </node>
-    <node id="tosfdhwqglxuvwyalpnl">
+    <node id="aux_initial">
       <data key="dVertex">initial</data>
-      <data key="dGeometry">
-        <rect x="265" y="262" width="-1" height="-1"></rect>
-      </data>
+      <data key="dGeometry"><rect x="0" y="40" width="-1" height="-1"></rect></data>
     </node>
-    <node id="cLED1">
+    <node id="component_LED1">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
       <data key="dData">id/ LED1
@@ -53,13 +48,10 @@ LED1.toggle();
 type/ LED
 
 pin/ 8
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cButton1">
+    <node id="component_Button1">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
       <data key="dData">id/ Button1
@@ -69,54 +61,15 @@ type/ Button
 pin/ 12
 
 buttonMode/ BUTTON_PULLDOWN
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cTimer1">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Timer1
-
-type/ Timer
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cTjcSerial1">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ TjcSerial1
-
-type/ TjcSerial
-
-miso/ 2
-
-mosi/ 3
-
-clk/ 4
-
-cs/ 5
-
-irq/ 6
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <edge id="odouwekvmwxxzcsteunb" source="tosfdhwqglxuvwyalpnl" target="dcpyonwhjdjvelwmwslb"></edge>
-  </graph>
-  <graph id="MS1Gate1">
-    <data key="dStateMachine"></data>
-    <data key="dName">Датчики</data>
-    <data key="dGeometry">
-      <rect x="0" y="0" width="450" height="100"></rect>
     </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
+    </node>
+    <edge id="edge_1" source="aux_initial" target="aux_wait"></edge>
+  </graph>
+  <graph id="MS1GateSensors">
+    <data key="dStateMachine"></data>
+    <data key="dName">Датчики — мост фиксированного протокола</data>
+    <data key="dGeometry"><rect x="0" y="0" width="450" height="100"></rect></data>
     <node id="coreMeta">
       <data key="dNote">formal</data>
       <data key="dName">CGML_META</data>
@@ -127,622 +80,249 @@ standardVersion/ 1.0
 platformVersion/ 1.0
 
 lapkiVisual/ true
-
-</data>
+    </data>
     </node>
-    <node id="wlvfixbyxbxbuafpgxfa">
-      <data key="dName">Ждем команду</data>
+    <node id="sensor_idle">
+      <data key="dName">Ожидание POLL_SENSORS</data>
       <data key="dData">entry/
-SimpleBus2.setAddress(13);
-Counter5.set(1);
-Counter2.set(2);
-Counter4.set(3);
-Counter3.set(4);
-
-exit/
-LED2.toggle();
-
-</data>
-      <data key="dGeometry">
-        <rect x="-32.60003662109375" y="327.4000015258789" width="450" height="100"></rect>
-      </data>
+SensorBus.setAddress(13);</data>
+      <data key="dGeometry"><rect x="0" y="0" width="360" height="90"></rect></data>
       <data key="dColor">#FFFFFF</data>
     </node>
-    <node id="kcygaolatawvngndieud">
-      <data key="dName">Коммуникация</data>
-      <data key="dData">entry/
-Timer2.start(2000);
-
-</data>
-      <data key="dGeometry">
-        <rect x="866.1099349975586" y="149.46945097446508" width="450" height="100"></rect>
-      </data>
+    <node id="sensor_poll_wait">
+      <data key="dName">Ожидание OK после POLL_SENSORS</data>
+      <data key="dData"></data>
+      <data key="dGeometry"><rect x="420" y="0" width="360" height="90"></rect></data>
       <data key="dColor">#FFFFFF</data>
-      <graph id="kcygaolatawvngndieud">
-        <node id="yfddeqwghbceqxtjnzvz">
-          <data key="dName">Получение данных</data>
-          <data key="dData">entry/
-ArduinoAdapter1.sendPacket(Counter3.value);
-
-</data>
-          <data key="dGeometry">
-            <rect x="99" y="459.4722726702688" width="450" height="100"></rect>
-          </data>
-          <data key="dColor">#FFFFFF</data>
-          <graph id="yfddeqwghbceqxtjnzvz">
-            <node id="mpgmwjickosjjcjsnxhf">
-              <data key="dName">Получить целую часть температуры</data>
-              <data key="dData">exit/
-Counter12.set(ArduinoAdapter1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="89.83499999999977" y="829.8300000000005" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="lsntfxvkaptudizfecmd">
-              <data key="dName">Получить дробную часть температуры</data>
-              <data key="dData">exit/
-Counter13.set(ArduinoAdapter1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="97.62001129150393" y="1026.7882765078532" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="fehkqvxaykepuiosemvp">
-              <data key="dName">Конец</data>
-              <data key="dData"></data>
-              <data key="dGeometry">
-                <rect x="101.49501129150384" y="1657.3682765078513" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="tzvhnvzmffnwaepjcaff">
-              <data key="dName">Получить данные с датчика Холла</data>
-              <data key="dData">exit/
-Counter16.set(ArduinoAdapter1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="102.14715667724711" y="258.46568877935374" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="dtklhxawmmsyugllzygj">
-              <data key="dName">Получить данные с Геркона</data>
-              <data key="dData">exit/
-Counter17.set(ArduinoAdapter1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="120.43715667724663" y="460.34568877935357" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="xjtiwwkfnvaydxhsdbeo">
-              <data key="dName">Получить целую часть температуры с улицы</data>
-              <data key="dData">exit/
-Counter32.set(ArduinoAdapter1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="96.52800933837938" y="1241.8082736086847" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="bbwkylixlxdeaxdqswde">
-              <data key="dName">Получить дробную часть температуры с улицы</data>
-              <data key="dData">exit/
-Counter33.set(ArduinoAdapter1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="105.13999999999993" y="1446.9182736086846" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="xwetetpshnuezxvumzfh">
-              <data key="dName">Получение данных с геркона 3</data>
-              <data key="dData">exit/
-Counter55.set(ArduinoAdapter1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="691.7400000000001" y="848.768273608685" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="qqljxckjxnmctmegfedk">
-              <data key="dName">Получить данные с Геркона 2</data>
-              <data key="dData">exit/
-Counter54.set(ArduinoAdapter1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="121.9480093383773" y="669.5582736086855" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="zucycqzqhxkphazeybge">
-              <data key="dVertex">initial</data>
-              <data key="dGeometry">
-                <rect x="61.367156677247124" y="184.88568877935379" width="-1" height="-1"></rect>
-              </data>
-            </node>
-          </graph>
-        </node>
-        <node id="wlpmdvbomkedgebdovyv">
-          <data key="dName">Отправка</data>
-          <data key="dData">exit/
-SimpleBus2.sendPacket(12, Counter4.value);
-LED2.toggle();
-
-</data>
-          <data key="dGeometry">
-            <rect x="1375.855008239745" y="535.392272670269" width="450" height="100"></rect>
-          </data>
-          <data key="dColor">#FFFFFF</data>
-          <graph id="wlpmdvbomkedgebdovyv">
-            <node id="hpwikmhsswcycvqiuftn">
-              <data key="dName">Отправка данных...</data>
-              <data key="dData">entry/
-UserSignal1.call();
-SimpleBus2.sendPacket(12, Counter16.value);
-SimpleBus2.sendPacket(12, Counter17.value);
-SimpleBus2.sendPacket(12, Counter54.value);
-SimpleBus2.sendPacket(12, Counter55.value);
-SimpleBus2.sendPacket(12, Counter12.value);
-SimpleBus2.sendPacket(12, Counter13.value);
-SimpleBus2.sendPacket(12, Counter32.value);
-SimpleBus2.sendPacket(12, Counter33.value);
-
-</data>
-              <data key="dGeometry">
-                <rect x="115" y="135" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="kwzqhzvzixkecxekzpbv">
-              <data key="dVertex">initial</data>
-              <data key="dGeometry">
-                <rect x="15" y="115" width="-1" height="-1"></rect>
-              </data>
-            </node>
-          </graph>
-        </node>
-        <node id="bgzutyuyknmdyuvfxzhe">
-          <data key="dName">Снять показания с датчиков</data>
-          <data key="dData">entry/
-ArduinoAdapter1.sendPacket(Counter5.value);
-
-</data>
-          <data key="dGeometry">
-            <rect x="161.16" y="165.9805513143529" width="450" height="100"></rect>
-          </data>
-          <data key="dColor">#FFFFFF</data>
-        </node>
-        <node id="eymhzqyyvqhqaqnwdyyq">
-          <data key="dVertex">initial</data>
-          <data key="dGeometry">
-            <rect x="38.760000000000005" y="153.1805513143529" width="-1" height="-1"></rect>
-          </data>
-        </node>
-      </graph>
     </node>
-    <node id="ctnyjzuoxhblfovpguxh">
+    <node id="sensor_read_wait">
+      <data key="dName">Приём READ_SENSORS по позиции</data>
+      <data key="dData"></data>
+      <data key="dGeometry"><rect x="840" y="0" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="sensor_first_choice">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="1250" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="sensor_status_choice">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="1410" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="sensor_count_choice">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="1570" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="sensor_send_error">
+      <data key="dName">Передача ошибки центральной плате</data>
+      <data key="dData">entry/
+SensorBus.sendPacket(12, SensorArduino.lastData);
+SensorStep.call();</data>
+      <data key="dGeometry"><rect x="1260" y="170" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="sensor_send_start">
+      <data key="dName">Начало позиционной передачи</data>
+      <data key="dData">entry/
+SensorIndex.reset();
+SensorStep.call();</data>
+      <data key="dGeometry"><rect x="1680" y="170" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="sensor_send_byte">
+      <data key="dName">Передача следующего байта</data>
+      <data key="dData">entry/
+SensorResponse.peek(SensorIndex.value);
+SensorBus.sendPacket(12, SensorResponse.value);
+SensorIndex.add(1);
+SensorStep.call();</data>
+      <data key="dGeometry"><rect x="1680" y="310" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="sensor_send_choice">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="2090" y="330" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="sensor_initial">
       <data key="dVertex">initial</data>
-      <data key="dGeometry">
-        <rect x="-132.60003662109375" y="307.4000015258789" width="-1" height="-1"></rect>
-      </data>
+      <data key="dGeometry"><rect x="-80" y="20" width="-1" height="-1"></rect></data>
     </node>
-    <node id="cArduinoAdapter1">
+    <node id="sensor_note">
+      <data key="dGeometry"><rect x="420" y="470" width="420" height="80"></rect></data>
+      <data key="dNote">informal</data>
+      <data key="dData">POLL_SENSORS=0x01, затем READ_SENSORS=0x04. Успех READ: ровно 9 полей и OK. Значения полей не проверяются как маркеры.</data>
+    </node>
+    <node id="component_SensorBus">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ ArduinoAdapter1
-
-type/ ArduinoAdapter
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cTimer2">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Timer2
-
-type/ Timer
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cLED2">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ LED2
-
-type/ LED
-
-pin/ 1
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cSimpleBus2">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ SimpleBus2
+      <data key="dData">id/ SensorBus
 
 type/ SimpleBus
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter2">
+    <node id="component_SensorArduino">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter2
+      <data key="dData">id/ SensorArduino
 
-type/ Counter
-
-label/ ACT
-
-name/ ACTUATOR_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+type/ ArduinoAdapter
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter3">
+    <node id="component_SensorTimeout">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter3
+      <data key="dData">id/ SensorTimeout
 
-type/ Counter
-
-label/ sen
-
-name/ SEND_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+type/ Timer
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter4">
+    <node id="component_SensorStep">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter4
-
-type/ Counter
-
-label/ OK
-
-name/ OK_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter5">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter5
-
-type/ Counter
-
-label/ POL
-
-name/ POLLING_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cUserSignal1">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ UserSignal1
+      <data key="dData">id/ SensorStep
 
 type/ UserSignal
-
-name/ Передача закончена
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter12">
+    <node id="component_SensorIndex">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter12
+      <data key="dData">id/ SensorIndex
 
 type/ Counter
 
-label/ ТЦЛ
-
-name/ Температура (цел)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+name/ Индекс байта READ_SENSORS
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter13">
+    <node id="component_SensorResponse">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter13
+      <data key="dData">id/ SensorResponse
 
-type/ Counter
+type/ Array
 
-label/ ТДР
+size/ 10
 
-name/ Температура (дробн)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+name/ Ответ READ_SENSORS
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter16">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter16
-
-type/ Counter
-
-label/ ХОЛ
-
-name/ Датчик Холла
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter17">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter17
-
-type/ Counter
-
-label/ ГЕР
-
-name/ Геркон
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter32">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter32
-
-type/ Counter
-
-label/ ТУЦ
-
-name/ Темп с улицы (цел)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter33">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter33
-
-type/ Counter
-
-label/ ТУБ
-
-name/ Темп с улицы (дроб)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter54">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter54
-
-type/ Counter
-
-label/ ГЕ2
-
-name/ Геркон 2
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter55">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter55
-
-type/ Counter
-
-label/ ГЕ3
-
-name/ Геркон 3
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cLED8">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ LED8
-
-type/ LED
-
-pin/ 2
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="jdwqulvwejcistvcjcdd">
-      <data key="dGeometry">
-        <point x="581.424945068359" y="185.67500076293942"></point>
-      </data>
-      <data key="dNote">informal</data>
-      <data key="dData">Актуатор идет на другую плату...</data>
-    </node>
-    <node id="wcvcniamdmtoyuzcajoa">
-      <data key="dGeometry">
-        <point x="776.3899462890623" y="906.5050001525882"></point>
-      </data>
-      <data key="dNote">informal</data>
-      <data key="dData">Сюда вставляем другие датчики...</data>
-    </node>
-    <node id="luvtloclwyxpknpzpppp">
-      <data key="dGeometry">
-        <point x="1120.1504309082034" y="62.933029876947316"></point>
-      </data>
-      <data key="dNote">informal</data>
-      <data key="dData">Если за две секунды не смогли забрать показания датчиков, переходим в начальное состояние</data>
-    </node>
-    <edge id="eigupfpxhaxhtgkxeyxq" source="ctnyjzuoxhblfovpguxh" target="wlvfixbyxbxbuafpgxfa"></edge>
-    <edge id="jajspatuqufcvmktmamx" source="wlvfixbyxbxbuafpgxfa" target="bgzutyuyknmdyuvfxzhe">
-      <data key="dData">SimpleBus2.packetReceived[SimpleBus2.lastData == Counter5.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="493.68745422363247" y="393.3050019073492"></point>
-      </data>
+    <edge id="edge_2" source="sensor_initial" target="sensor_idle"></edge>
+    <edge id="edge_3" source="sensor_idle" target="sensor_poll_wait">
+      <data key="dData">SensorBus.packetReceived[SensorBus.lastData == 1]/
+SensorArduino.sendPacket(1);
+SensorTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="qleitpmnhiobwaqycdjp" source="bgzutyuyknmdyuvfxzhe" target="yfddeqwghbceqxtjnzvz">
-      <data key="dData">ArduinoAdapter1.packetReceived[ArduinoAdapter1.lastData == Counter4.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1133.5224441528337" y="478.5958629667758"></point>
-      </data>
+    <edge id="edge_4" source="sensor_poll_wait" target="sensor_read_wait">
+      <data key="dData">SensorArduino.packetReceived[SensorArduino.lastData == 3]/
+SensorArduino.sendPacket(4);
+SensorIndex.reset();
+SensorTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="wssissxgcqvuugtkvopd" source="zucycqzqhxkphazeybge" target="tzvhnvzmffnwaepjcaff"></edge>
-    <edge id="yggjlmyckgdamycinjmh" source="yfddeqwghbceqxtjnzvz" target="wlpmdvbomkedgebdovyv">
-      <data key="dData">ArduinoAdapter1.packetReceived[Counter4.value == ArduinoAdapter1.lastData]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2225.5624432373056" y="1276.871723644734"></point>
-      </data>
+    <edge id="edge_5" source="sensor_poll_wait" target="sensor_send_error">
+      <data key="dData">SensorArduino.packetReceived[SensorArduino.lastData != 3]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="iuficqgteydjlzmcpaye" source="kwzqhzvzixkecxekzpbv" target="hpwikmhsswcycvqiuftn"></edge>
-    <edge id="wxcvqkiadjmhbasyycwe" source="eymhzqyyvqhqaqnwdyyq" target="bgzutyuyknmdyuvfxzhe"></edge>
-    <edge id="wntqyceyznblwguvfzpc" source="kcygaolatawvngndieud" target="wlvfixbyxbxbuafpgxfa">
-      <data key="dData">Timer2.timeout/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="131.78494918823225" y="724.654726250172"></point>
-      </data>
+    <edge id="edge_6" source="sensor_read_wait" target="sensor_first_choice">
+      <data key="dData">SensorArduino.packetReceived/
+SensorResponse.set(SensorIndex.value, SensorArduino.lastData);
+SensorIndex.add(1);
+SensorTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="zodeicstltffpfjayezi" source="mpgmwjickosjjcjsnxhf" target="lsntfxvkaptudizfecmd">
-      <data key="dData">ArduinoAdapter1.packetReceived[ArduinoAdapter1.lastData != Counter4.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1169.9074406433112" y="1550.4708618986576"></point>
-      </data>
+    <edge id="edge_7" source="sensor_first_choice" target="sensor_status_choice">
+      <data key="dData">[SensorIndex.value == 1]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="edckgkfhnwkaggzotlgo" source="lsntfxvkaptudizfecmd" target="xjtiwwkfnvaydxhsdbeo">
-      <data key="dData">ArduinoAdapter1.packetReceived[ArduinoAdapter1.lastData != Counter4.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1183.9474462890626" y="1768.5850001525862"></point>
-      </data>
+    <edge id="edge_8" source="sensor_first_choice" target="sensor_count_choice">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="mzvxpqsnxkjcjzmjxnii" source="kcygaolatawvngndieud" target="wlvfixbyxbxbuafpgxfa">
-      <data key="dData">UserSignal1.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="416.75494918823244" y="238.434726250172"></point>
-      </data>
+    <edge id="edge_9" source="sensor_status_choice" target="sensor_send_error">
+      <data key="dData">[SensorArduino.lastData == 224]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="hjskgziilhibytuanaqz" source="tzvhnvzmffnwaepjcaff" target="dtklhxawmmsyugllzygj">
-      <data key="dData">ArduinoAdapter1.packetReceived[ArduinoAdapter1.lastData != Counter4.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1165.5170916748048" y="992.1574124240875"></point>
-      </data>
+    <edge id="edge_10" source="sensor_status_choice" target="sensor_send_error">
+      <data key="dData">[SensorArduino.lastData == 225]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="fnymthypmbiaetlwyeet" source="dtklhxawmmsyugllzygj" target="qqljxckjxnmctmegfedk">
-      <data key="dData">ArduinoAdapter1.packetReceived[ArduinoAdapter1.lastData != Counter4.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1187.986013336182" y="1201.2795680344104"></point>
-      </data>
+    <edge id="edge_11" source="sensor_status_choice" target="sensor_send_error">
+      <data key="dData">[SensorArduino.lastData == 226]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="cteubkdmzkmxpfdqyfch" source="xjtiwwkfnvaydxhsdbeo" target="bbwkylixlxdeaxdqswde">
-      <data key="dData">ArduinoAdapter1.packetReceived[ArduinoAdapter1.lastData != Counter4.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1195.263939666749" y="1968.1449972534178"></point>
-      </data>
+    <edge id="edge_12" source="sensor_status_choice" target="sensor_send_error">
+      <data key="dData">[SensorArduino.lastData == 227]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="gtuhhgmxjmhbkytiwlci" source="bbwkylixlxdeaxdqswde" target="fehkqvxaykepuiosemvp">
-      <data key="dData">ArduinoAdapter1.packetReceived[ArduinoAdapter1.lastData != Counter4.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1207.547440643311" y="2170.4849987030016"></point>
-      </data>
+    <edge id="edge_13" source="sensor_status_choice" target="sensor_count_choice">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="xhtqlltwaaxyezagxqln" source="qqljxckjxnmctmegfedk" target="xwetetpshnuezxvumzfh">
-      <data key="dData">ArduinoAdapter1.packetReceived[ArduinoAdapter1.lastData != Counter4.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1625.8889396667475" y="1345.829997253419"></point>
-      </data>
+    <edge id="edge_14" source="sensor_count_choice" target="sensor_send_start">
+      <data key="dData">[SensorIndex.value == 10]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="uhxtibsnjqfczsaavabp" source="xwetetpshnuezxvumzfh" target="mpgmwjickosjjcjsnxhf">
-      <data key="dData">ArduinoAdapter1.packetReceived[ArduinoAdapter1.lastData != Counter4.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1538.1474349975583" y="1602.9508604490766"></point>
-      </data>
+    <edge id="edge_15" source="sensor_count_choice" target="sensor_read_wait">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_16" source="sensor_send_error" target="sensor_idle">
+      <data key="dData">SensorStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_17" source="sensor_send_start" target="sensor_send_byte">
+      <data key="dData">SensorStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_18" source="sensor_send_byte" target="sensor_send_choice">
+      <data key="dData">SensorStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_19" source="sensor_send_choice" target="sensor_idle">
+      <data key="dData">[SensorIndex.value == 10]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_20" source="sensor_send_choice" target="sensor_send_byte">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_21" source="sensor_poll_wait" target="sensor_idle">
+      <data key="dData">SensorTimeout.timeout/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_22" source="sensor_read_wait" target="sensor_idle">
+      <data key="dData">SensorTimeout.timeout/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
   </graph>
-  <graph id="MS1Main1">
+  <graph id="MS1MainProtocol">
     <data key="dStateMachine"></data>
-    <data key="dGeometry">
-      <rect x="0" y="0" width="450" height="100"></rect>
-    </data>
+    <data key="dName">Центральная плата — маршрутизатор протокола</data>
+    <data key="dGeometry"><rect x="0" y="0" width="450" height="100"></rect></data>
     <node id="coreMeta">
       <data key="dNote">formal</data>
       <data key="dName">CGML_META</data>
@@ -753,1533 +333,924 @@ standardVersion/ 1.0
 platformVersion/ 1.0
 
 lapkiVisual/ true
-
-</data>
+    </data>
     </node>
-    <node id="wowamdwmlbciuhygevez">
-      <data key="dName">Ждем таймер опроса</data>
+    <node id="main_idle">
+      <data key="dName">Idle: управление или периодический цикл</data>
       <data key="dData">entry/
-Timer3.start(50);
-SimpleBus1.setAddress(12);
-Counter7.set(1);
-Counter9.set(2);
-Counter8.set(3);
-Counter10.set(99);
-Counter11.set(12);
-Counter24.set(6);
-Counter56.set(10);
-
-Timer5.timeout/
-Counter6.add(Counter1.value);
-UserSignal7.call();
-
-UserSignal7.isCalled[Counter6.value == 0]/
-Counter6.set(1);
-
-UserSignal7.isCalled[Counter6.value == 255]/
-Counter6.set(254);
-
-</data>
-      <data key="dGeometry">
-        <rect x="60.199981689453125" y="136.58000076293945" width="450" height="100"></rect>
-      </data>
+MainBus.setAddress(12);
+MainPeriodic.start(2000);</data>
+      <data key="dGeometry"><rect x="0" y="0" width="360" height="90"></rect></data>
       <data key="dColor">#FFFFFF</data>
     </node>
-    <node id="dxauwqidncgxacufeqpo">
-      <data key="dName">Коммуникация</data>
-      <data key="dData">entry/
-Timer4.start(2000);
-
-Timer5.timeout/
-Counter6.add(Counter1.value);
-UserSignal7.call();
-
-UserSignal7.isCalled[Counter6.value == 0]/
-Counter6.set(1);
-
-UserSignal7.isCalled[Counter6.value == 255]/
-Counter6.set(254);
-
-Timer7.timeout/
-Counter57.set(1);
-
-</data>
-      <data key="dGeometry">
-        <rect x="679.7439474487294" y="163.07570097595914" width="450" height="100"></rect>
-      </data>
-      <data key="dColor">#FFFFFF</data>
-      <graph id="dxauwqidncgxacufeqpo">
-        <node id="kcvmhtkvldjvvqbcbxjc">
-          <data key="dName">Опрос</data>
-          <data key="dData">entry/
-SimpleBus1.sendPacket(13, Counter7.value);
-LED3.toggle();
-
-SimpleBus1.packetReceived[else]/
-UserSignal5.call();
-
-</data>
-          <data key="dGeometry">
-            <rect x="144.58000000000007" y="486.11999999999966" width="450" height="100"></rect>
-          </data>
-          <data key="dColor">#FFFFFF</data>
-          <graph id="kcvmhtkvldjvvqbcbxjc">
-            <node id="puzijjqhzsjnkgalwoof">
-              <data key="dName">Получить целую часть температуры</data>
-              <data key="dData">exit/
-Counter14.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="82.28101715088003" y="1018.3592991766277" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="iqyakvjmimggptluotwo">
-              <data key="dName">Получить дробную часть температуры</data>
-              <data key="dData">exit/
-Counter15.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="110.26101715088001" y="1243.0642991766292" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="xnvofmwhlcilouhetgay">
-              <data key="dName">Получить данные с Холла</data>
-              <data key="dData">exit/
-Counter19.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="84.25840484619262" y="270.4208077773402" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="ozlzqsozjmozhtmodcuz">
-              <data key="dName">Получить данные с Геркона3</data>
-              <data key="dData">exit/
-Counter53.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="105.44501373291104" y="803.234007697997" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="xkghzwxyxjxhdvfxxznq">
-              <data key="dName">Ждем окончания передачи...</data>
-              <data key="dData"></data>
-              <data key="dGeometry">
-                <rect x="107.59501373291094" y="1967.894007697996" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="tjmhjjgeouhdhsjwemwx">
-              <data key="dName">Получить температуру с улицы (цел)</data>
-              <data key="dData">exit/
-Counter29.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="93.5700000000001" y="1465.3099999999997" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="qquzphedvwjevjyzwlis">
-              <data key="dName">Получить температуру с улицы (дроб)</data>
-              <data key="dData">exit/
-Counter30.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="97.58759674072084" y="1701.7006599393424" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="gfysljphpzbqjeinibtj">
-              <data key="dName">Получить данные с Геркона</data>
-              <data key="dData">exit/
-Counter18.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="89.66501373291108" y="494.2040076979968" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="aeniwnsdganbulzbppwv">
-              <data key="dName">Получить данные с Геркона2</data>
-              <data key="dData">exit/
-Counter52.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="95.54501373291099" y="655.4340076979969" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="mjnesupnyigfidmjnyjd">
-              <data key="dVertex">initial</data>
-              <data key="dGeometry">
-                <rect x="14.56" y="271.5908077773402" width="-1" height="-1"></rect>
-              </data>
-            </node>
-          </graph>
-        </node>
-        <node id="hvzfyebqneanfqmlxlyn">
-          <data key="dName">Решение</data>
-          <data key="dData"></data>
-          <data key="dGeometry">
-            <rect x="916.9610159301787" y="262.4977177032781" width="450" height="100"></rect>
-          </data>
-          <data key="dColor">#FFFFFF</data>
-          <graph id="hvzfyebqneanfqmlxlyn">
-            <node id="ffcxkkiaditkhxiahnvx">
-              <data key="dName">Проверка</data>
-              <data key="dData">entry/
-UserSignal3.call();
-CalcInt1.set(0);
-CalcInt1.add(Counter18.value);
-CalcInt1.add(Counter52.value);
-CalcInt1.add(Counter53.value);
-
-</data>
-              <data key="dGeometry">
-                <rect x="115" y="135" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="lpsiawzyyydmhksqlstl">
-              <data key="dName">Температура слишком высокая!</data>
-              <data key="dData">entry/
-SimpleBus1.sendPacket(14, Counter9.value);
-SimpleBus1.sendPacket(14, Counter26.value);
-UserSignal3.call();
-LED4.toggle();
-
-</data>
-              <data key="dGeometry">
-                <rect x="19.230001831054164" y="571.3149868762492" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="vjnsfgcgxgmwyplvviyq">
-              <data key="dName">Отправляем</data>
-              <data key="dData">exit/
-SimpleBus1.sendPacket(Counter10.value, Counter6.value);
-SimpleBus1.sendPacket(Counter10.value, Counter11.value);
-
-</data>
-              <data key="dGeometry">
-                <rect x="1239.072942504882" y="203.9466112208375" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-              <graph id="vjnsfgcgxgmwyplvviyq">
-                <node id="icyqlnapkqadsymulvgn">
-                  <data key="dName">Дверь только открылась, запускаем таймер!</data>
-                  <data key="dData">entry/
-Counter6.set(2);
-Timer5.start(5000);
-UserSignal2.call();
-Counter1.set(1);
-
-</data>
-                  <data key="dGeometry">
-                    <rect x="112.84" y="135.43999999999994" width="450" height="100"></rect>
-                  </data>
-                  <data key="dColor">#FFFFFF</data>
-                </node>
-                <node id="mdwgqcqstaljvhfejulm">
-                  <data key="dName">Дверь закрыта!</data>
-                  <data key="dData">entry/
-UserSignal2.call();
-Counter1.set(0);
-Counter6.set(1);
-
-</data>
-                  <data key="dGeometry">
-                    <rect x="125.95000000000002" y="545.83" width="450" height="100"></rect>
-                  </data>
-                  <data key="dColor">#FFFFFF</data>
-                </node>
-                <node id="olntxcnyfbbzpugaylvk">
-                  <data key="dName">Дверь открыта уже какое-то время...</data>
-                  <data key="dData">entry/
-UserSignal2.call();
-
-</data>
-                  <data key="dGeometry">
-                    <rect x="123.8200000000002" y="357.87" width="450" height="100"></rect>
-                  </data>
-                  <data key="dColor">#FFFFFF</data>
-                </node>
-                <node id="avlvncxlzyzfotmbcmyi">
-                  <data key="dVertex">initial</data>
-                  <data key="dGeometry">
-                    <rect x="30" y="134.11999999999998" width="-1" height="-1"></rect>
-                  </data>
-                </node>
-              </graph>
-            </node>
-            <node id="tgopsagvjzwgkogiblbm">
-              <data key="dVertex">initial</data>
-              <data key="dGeometry">
-                <rect x="15" y="115" width="-1" height="-1"></rect>
-              </data>
-            </node>
-            <node id="mwssxdhpjmwfstnjnmjh">
-              <data key="dVertex">choice</data>
-              <data key="dGeometry">
-                <rect x="1988.9700000000012" y="791.3249868762501" width="-1" height="-1"></rect>
-              </data>
-            </node>
-            <node id="xbjpqbbjluswkoqpetmb">
-              <data key="dVertex">choice</data>
-              <data key="dGeometry">
-                <rect x="2183.610952758788" y="1030.200189950467" width="-1" height="-1"></rect>
-              </data>
-            </node>
-            <node id="kxqkggujhuyjginzkpiy">
-              <data key="dVertex">choice</data>
-              <data key="dGeometry">
-                <rect x="2481.810952758787" y="918.2801899504668" width="-1" height="-1"></rect>
-              </data>
-            </node>
-          </graph>
-        </node>
-        <node id="yqxmgcqwievthlilotqg">
-          <data key="dName">Отправка на компьютер</data>
-          <data key="dData">entry/
-SimpleBus1.sendPacket(Counter10.value, Counter11.value);
-
-</data>
-          <data key="dGeometry">
-            <rect x="1022.1620162963881" y="1342.0487046405617" width="450" height="100"></rect>
-          </data>
-          <data key="dColor">#FFFFFF</data>
-          <graph id="yqxmgcqwievthlilotqg">
-            <node id="ofsipulfgqvijctfumsz">
-              <data key="dName">Отправить показания...</data>
-              <data key="dData">entry/
-UserSignal4.call();
-SimpleBus1.sendPacket(Counter10.value, Counter19.value);
-SimpleBus1.sendPacket(Counter10.value, Counter18.value);
-SimpleBus1.sendPacket(Counter10.value, Counter14.value);
-SimpleBus1.sendPacket(Counter10.value, Counter15.value);
-SimpleBus1.sendPacket(Counter10.value, Counter29.value);
-SimpleBus1.sendPacket(Counter10.value, Counter30.value);
-SimpleBus1.sendPacket(Counter10.value, Counter34.value);
-SimpleBus1.sendPacket(Counter10.value, Counter37.value);
-SimpleBus1.sendPacket(Counter10.value, Counter35.value);
-SimpleBus1.sendPacket(Counter10.value, Counter38.value);
-SimpleBus1.sendPacket(Counter10.value, Counter36.value);
-SimpleBus1.sendPacket(Counter10.value, Counter39.value);
-SimpleBus1.sendPacket(Counter10.value, Counter47.value);
-SimpleBus1.sendPacket(Counter10.value, Counter48.value);
-SimpleBus1.sendPacket(Counter10.value, Counter26.value);
-
-</data>
-              <data key="dGeometry">
-                <rect x="114.33000000000004" y="141.43000000000018" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="qzblxiqfnmtydjejeuwg">
-              <data key="dVertex">initial</data>
-              <data key="dGeometry">
-                <rect x="15.350000000000037" y="121.43000000000018" width="-1" height="-1"></rect>
-              </data>
-            </node>
-          </graph>
-        </node>
-        <node id="pdjpfjgteltflagzsjbb">
-          <data key="dName">Опрос актуаторов</data>
-          <data key="dData">entry/
-SimpleBus1.sendPacket(14, Counter7.value);
-
-SimpleBus1.packetReceived[else]/
-UserSignal5.call();
-
-</data>
-          <data key="dGeometry">
-            <rect x="891.5800000000004" y="2151.285659939343" width="450" height="100"></rect>
-          </data>
-          <data key="dColor">#FFFFFF</data>
-          <graph id="pdjpfjgteltflagzsjbb">
-            <node id="dgunjjcqqqpnjzoygaai">
-              <data key="dName">Получить RPM1</data>
-              <data key="dData">exit/
-Counter34.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="102.51999999999998" y="253.72" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="jywxcynnalzbjmmkywdk">
-              <data key="dName">Получить RPM3</data>
-              <data key="dData">exit/
-Counter36.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="87.85247314453228" y="680.81679901123" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="xvxtpkhlqatloitbdxfh">
-              <data key="dName">Получить RPM2</data>
-              <data key="dData">exit/
-Counter35.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="94.79000000000005" y="464.2867990112312" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="aqdjacjfvdlnquncysom">
-              <data key="dName">Ждем окончания передачи</data>
-              <data key="dData"></data>
-              <data key="dGeometry">
-                <rect x="796.160069885254" y="1089.8967990112287" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="anxpoiekgqwtftxmossq">
-              <data key="dName">Получить RPM1 (дробная)</data>
-              <data key="dData">exit/
-Counter37.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="733.44" y="262.3600000000001" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="plefctzkkgeyoyhkyiuc">
-              <data key="dName">Получить RPM3 (дробная)</data>
-              <data key="dData">exit/
-Counter39.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="740.1999999999997" y="690.2400000000001" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="geamodqtxeugyzsuuhsl">
-              <data key="dName">Получить RPM2 (дробная)</data>
-              <data key="dData">exit/
-Counter38.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="734.7400000000002" y="467.64" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="iphoqqhsouxihsqmjlhu">
-              <data key="dName">Получить RPM4 (дробная)</data>
-              <data key="dData">exit/
-Counter48.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="793.4399999999999" y="871.4599999999998" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="xzonqsoykamgamtsvven">
-              <data key="dName">Получить RPM4</data>
-              <data key="dData">exit/
-Counter47.set(SimpleBus1.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="107.88247314453221" y="865.27679901123" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="slqqhjiemkflpegqtsdz">
-              <data key="dVertex">initial</data>
-              <data key="dGeometry">
-                <rect x="20.229999999999997" y="254.57000000000005" width="-1" height="-1"></rect>
-              </data>
-            </node>
-          </graph>
-        </node>
-        <node id="klyuxleanmqncyttcmfm">
-          <data key="dVertex">initial</data>
-          <data key="dGeometry">
-            <rect x="44.58000000000007" y="466.11999999999966" width="-1" height="-1"></rect>
-          </data>
-        </node>
-      </graph>
-    </node>
-    <node id="uwyczmmnptdaghtpowfv">
-      <data key="dName">Инициализация</data>
-      <data key="dData">entry/
-Counter6.set(1);
-UserSignal2.call();
-Counter26.set(25);
-Timer7.start(3000);
-
-</data>
-      <data key="dGeometry">
-        <rect x="45.05856323242014" y="-174.63893679797576" width="450" height="100"></rect>
-      </data>
-      <data key="dColor">#FFFFFF</data>
-    </node>
-    <node id="swslyqwdtqamoufuodqs">
-      <data key="dName">Отправка нужной информации актуатору</data>
-      <data key="dData">exit/
-SimpleBus1.sendPacket(14, Counter8.value);
-
-</data>
-      <data key="dGeometry">
-        <rect x="2494.49654418945" y="1555.0210604554425" width="450" height="100"></rect>
-      </data>
-      <data key="dColor">#FFFFFF</data>
-      <graph id="swslyqwdtqamoufuodqs">
-        <node id="cgboometplfpztglfqjw">
-          <data key="dName">Отправка температуры</data>
-          <data key="dData">entry/
-SimpleBus1.sendPacket(14, Counter24.value);
-SimpleBus1.sendPacket(14, Counter14.value);
-SimpleBus1.sendPacket(14, Counter15.value);
-UserSignal4.call();
-
-</data>
-          <data key="dGeometry">
-            <rect x="114.04" y="135" width="450" height="100"></rect>
-          </data>
-          <data key="dColor">#FFFFFF</data>
-        </node>
-        <node id="xeldqdmdmowibxyefdqt">
-          <data key="dVertex">initial</data>
-          <data key="dGeometry">
-            <rect x="15" y="115" width="-1" height="-1"></rect>
-          </data>
-        </node>
-      </graph>
-    </node>
-    <node id="myhdbkbabfhkjjbmhexc">
-      <data key="dName">Изменилась ли эталонная температура</data>
-      <data key="dData">entry/
-SimpleBus1.sendPacket(Counter10.value, Counter11.value);
-SimpleBus1.sendPacket(Counter10.value, Counter56.value);
-SimpleBus1.sendPacket(Counter10.value, Counter11.value);
-Timer3.start(60);
-Counter57.reset();
-
-</data>
-      <data key="dGeometry">
-        <rect x="886.9206182861356" y="-358.5597362989278" width="450" height="100"></rect>
-      </data>
-      <data key="dColor">#FFFFFF</data>
-    </node>
-    <node id="jnnidjnzwekaxablyshp">
-      <data key="dName">Состояние</data>
+    <node id="main_control_command">
+      <data key="dName">Ожидание кода команды ПК</data>
       <data key="dData"></data>
-      <data key="dGeometry">
-        <rect x="1454.615618286135" y="-134.58375051976128" width="450" height="100"></rect>
-      </data>
+      <data key="dGeometry"><rect x="420" y="0" width="360" height="90"></rect></data>
       <data key="dColor">#FFFFFF</data>
     </node>
-    <node id="bqidfohenagynqmbbfct">
-      <data key="dVertex">initial</data>
-      <data key="dGeometry">
-        <rect x="-56.94143676757986" y="-95.63893679797577" width="-1" height="-1"></rect>
-      </data>
-    </node>
-    <node id="oycnbiqhwnjlfnsicsxo">
+    <node id="main_command_choice">
       <data key="dVertex">choice</data>
-      <data key="dGeometry">
-        <rect x="1061.990618286135" y="-33.83375051976128" width="-1" height="-1"></rect>
-      </data>
+      <data key="dGeometry"><rect x="820" y="20" width="-1" height="-1"></rect></data>
     </node>
-    <node id="cSimpleBus1">
+    <node id="main_receive_payload">
+      <data key="dName">Приём payload ПК по позиции</data>
+      <data key="dData"></data>
+      <data key="dGeometry"><rect x="980" y="0" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_payload_choice">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="1380" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_forward_start">
+      <data key="dName">Пересылка актуатору: код</data>
+      <data key="dData">entry/
+MainBus.sendPacket(14, MainCommand.value);
+MainIndex.reset();
+MainFlow.set(1);
+MainTimeout.start(2000);
+MainStep.call();</data>
+      <data key="dGeometry"><rect x="1540" y="0" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_forward_choice">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="1940" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_forward_byte">
+      <data key="dName">Пересылка актуатору: payload</data>
+      <data key="dData">entry/
+MainRequest.peek(MainIndex.value);
+MainBus.sendPacket(14, MainRequest.value);
+MainIndex.add(1);
+MainStep.call();</data>
+      <data key="dGeometry"><rect x="2100" y="0" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_forward_count">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="2500" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_response_length">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="2660" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_wait_actuator">
+      <data key="dName">Приём ответа актуатора по позиции</data>
+      <data key="dData"></data>
+      <data key="dGeometry"><rect x="2820" y="0" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_response_first">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="3220" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_response_status">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="3380" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_response_count">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="3540" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_flow_choice">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="3700" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_send_response_start">
+      <data key="dName">CONTROL_RESPONSE: заголовок</data>
+      <data key="dData">entry/
+MainBus.sendPacket(99, 18);
+MainBus.sendPacket(99, MainCommand.value);
+MainIndex.reset();
+MainStep.call();</data>
+      <data key="dGeometry"><rect x="3860" y="0" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_send_response_byte">
+      <data key="dName">CONTROL_RESPONSE: тело</data>
+      <data key="dData">entry/
+MainResponse.peek(MainIndex.value);
+MainBus.sendPacket(99, MainResponse.value);
+MainIndex.add(1);
+MainStep.call();</data>
+      <data key="dGeometry"><rect x="4260" y="0" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_send_response_choice">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="4660" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_invalid">
+      <data key="dName">Ответ на неизвестную команду</data>
+      <data key="dData">entry/
+MainBus.sendPacket(99, 18);
+MainBus.sendPacket(99, MainCommand.value);
+MainBus.sendPacket(99, 224);
+MainStep.call();</data>
+      <data key="dGeometry"><rect x="980" y="170" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_wait_sensors">
+      <data key="dName">Приём READ_SENSORS по позиции</data>
+      <data key="dData"></data>
+      <data key="dGeometry"><rect x="420" y="340" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_sensor_first">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="820" y="360" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_sensor_status">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="980" y="360" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_sensor_count">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="1140" y="360" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_sensor_final">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="1300" y="360" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_calculate_door">
+      <data key="dName">Вычисление состояния двери</data>
+      <data key="dData">entry/
+MainDoorSum.set(0);
+MainSensors.peek(1);
+MainDoorSum.add(MainSensors.value);
+MainSensors.peek(2);
+MainDoorSum.add(MainSensors.value);
+MainSensors.peek(3);
+MainDoorSum.add(MainSensors.value);
+MainStep.call();</data>
+      <data key="dGeometry"><rect x="1460" y="340" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_door_choice">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="1860" y="360" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_door_closed">
+      <data key="dName">Дверь закрыта</data>
+      <data key="dData">entry/
+MainDoorOpen.reset();
+MainDoorStage.reset();
+MainStep.call();</data>
+      <data key="dGeometry"><rect x="2020" y="300" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_door_open">
+      <data key="dName">Дверь открыта</data>
+      <data key="dData">entry/
+MainDoorOpen.set(1);
+MainDoorStage.set(1);
+MainStep.call();</data>
+      <data key="dGeometry"><rect x="2020" y="420" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_send_environment">
+      <data key="dName">UPDATE_ENVIRONMENT</data>
+      <data key="dData">entry/
+MainBus.sendPacket(14, 6);
+MainSensors.peek(4);
+MainBus.sendPacket(14, MainSensors.value);
+MainSensors.peek(5);
+MainBus.sendPacket(14, MainSensors.value);
+MainSensors.peek(8);
+MainBus.sendPacket(14, MainSensors.value);
+MainBus.sendPacket(14, MainDoorOpen.value);
+MainBus.sendPacket(14, MainDoorStage.value);
+MainFlow.set(2);
+MainResponseExpected.set(1);
+MainIndex.reset();
+MainTimeout.start(2000);
+MainStep.call();</data>
+      <data key="dGeometry"><rect x="2420" y="340" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_environment_status">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="3860" y="360" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_get_state">
+      <data key="dName">GET_ACTUATOR_STATE</data>
+      <data key="dData">entry/
+MainBus.sendPacket(14, 1);
+MainFlow.set(3);
+MainResponseExpected.set(21);
+MainIndex.reset();
+MainTimeout.start(2000);
+MainStep.call();</data>
+      <data key="dGeometry"><rect x="4020" y="340" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_state_final">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="3860" y="500" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_prepare_telemetry">
+      <data key="dName">Сборка 29-байтовой телеметрии</data>
+      <data key="dData">entry/
+MainTelemetry.set(0, 1);
+MainSensors.peek(0);
+MainTelemetry.set(1, MainSensors.value);
+MainSensors.peek(4);
+MainTelemetry.set(2, MainSensors.value);
+MainSensors.peek(5);
+MainTelemetry.set(3, MainSensors.value);
+MainSensors.peek(6);
+MainTelemetry.set(4, MainSensors.value);
+MainSensors.peek(7);
+MainTelemetry.set(5, MainSensors.value);
+MainSensors.peek(8);
+MainTelemetry.set(6, MainSensors.value);
+MainResponse.peek(0);
+MainTelemetry.set(7, MainResponse.value);
+MainTelemetry.set(8, MainDoorOpen.value);
+MainTelemetry.set(9, MainDoorStage.value);
+MainResponse.peek(1);
+MainTelemetry.set(10, MainResponse.value);
+MainResponse.peek(2);
+MainTelemetry.set(11, MainResponse.value);
+MainResponse.peek(3);
+MainTelemetry.set(12, MainResponse.value);
+MainResponse.peek(4);
+MainTelemetry.set(13, MainResponse.value);
+MainResponse.peek(5);
+MainTelemetry.set(14, MainResponse.value);
+MainResponse.peek(6);
+MainTelemetry.set(15, MainResponse.value);
+MainResponse.peek(7);
+MainTelemetry.set(16, MainResponse.value);
+MainResponse.peek(8);
+MainTelemetry.set(17, MainResponse.value);
+MainResponse.peek(9);
+MainTelemetry.set(18, MainResponse.value);
+MainResponse.peek(10);
+MainTelemetry.set(19, MainResponse.value);
+MainResponse.peek(11);
+MainTelemetry.set(20, MainResponse.value);
+MainResponse.peek(12);
+MainTelemetry.set(21, MainResponse.value);
+MainResponse.peek(13);
+MainTelemetry.set(22, MainResponse.value);
+MainResponse.peek(14);
+MainTelemetry.set(23, MainResponse.value);
+MainResponse.peek(15);
+MainTelemetry.set(24, MainResponse.value);
+MainResponse.peek(16);
+MainTelemetry.set(25, MainResponse.value);
+MainResponse.peek(17);
+MainTelemetry.set(26, MainResponse.value);
+MainResponse.peek(18);
+MainTelemetry.set(27, MainResponse.value);
+MainResponse.peek(19);
+MainTelemetry.set(28, MainResponse.value);
+MainBus.sendPacket(99, 12);
+MainIndex.reset();
+MainStep.call();</data>
+      <data key="dGeometry"><rect x="4180" y="500" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_send_telemetry_byte">
+      <data key="dName">Передача байта телеметрии</data>
+      <data key="dData">entry/
+MainTelemetry.peek(MainIndex.value);
+MainBus.sendPacket(99, MainTelemetry.value);
+MainIndex.add(1);
+MainStep.call();</data>
+      <data key="dGeometry"><rect x="4580" y="500" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_telemetry_choice">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="4980" y="520" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_end_telemetry">
+      <data key="dName">Завершение телеметрии</data>
+      <data key="dData">entry/
+MainBus.sendPacket(99, 12);
+MainStep.call();</data>
+      <data key="dGeometry"><rect x="5140" y="500" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="main_initial">
+      <data key="dVertex">initial</data>
+      <data key="dGeometry"><rect x="-80" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="main_note">
+      <data key="dGeometry"><rect x="0" y="650" width="420" height="80"></rect></data>
+      <data key="dNote">informal</data>
+      <data key="dData">Idle принимает только CONTROL_REQUEST=0x11. Во время запроса и телеметрии новые запросы не принимаются. Любой неполный обмен отбрасывается через 2 секунды.</data>
+    </node>
+    <node id="main_door_note">
+      <data key="dGeometry"><rect x="440" y="650" width="420" height="80"></rect></data>
+      <data key="dNote">informal</data>
+      <data key="dData">doorOpen=0 и doorStage=0, если все три концевика равны 1; иначе doorOpen=1 и doorStage=1.</data>
+    </node>
+    <node id="component_MainBus">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ SimpleBus1
+      <data key="dData">id/ MainBus
 
 type/ SimpleBus
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cTimer3">
+    <node id="component_MainTimeout">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Timer3
+      <data key="dData">id/ MainTimeout
 
 type/ Timer
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cLED3">
+    <node id="component_MainPeriodic">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ LED3
-
-type/ LED
-
-pin/ 1
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter7">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter7
-
-type/ Counter
-
-label/ POL
-
-name/ POLLING_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter8">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter8
-
-type/ Counter
-
-label/ OK
-
-name/ OK_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter9">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter9
-
-type/ Counter
-
-label/ ACT
-
-name/ ACTUATOR_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter10">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter10
-
-type/ Counter
-
-label/ PC
-
-name/ COMPUTER_ADDR
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cUserSignal2">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ UserSignal2
-
-type/ UserSignal
-
-name/ Принято решение
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cUserSignal3">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ UserSignal3
-
-type/ UserSignal
-
-label/ ПРВ
-
-name/ Проверка
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cUserSignal4">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ UserSignal4
-
-type/ UserSignal
-
-name/ Отправка завершена
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter11">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter11
-
-type/ Counter
-
-label/ SES
-
-name/ START_END_SYMBOL
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cTimer4">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Timer4
+      <data key="dData">id/ MainPeriodic
 
 type/ Timer
-
-name/ Тайм
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter14">
+    <node id="component_MainStep">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter14
-
-type/ Counter
-
-label/ ТЦЛ
-
-name/ Температура (цел)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter15">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter15
-
-type/ Counter
-
-label/ ТДР
-
-name/ Температура (дроб)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cUserSignal5">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ UserSignal5
+      <data key="dData">id/ MainStep
 
 type/ UserSignal
-
-label/ ДАН
-
-name/ ПришлиДанные
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter18">
+    <node id="component_MainCommand">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter18
+      <data key="dData">id/ MainCommand
 
 type/ Counter
 
-label/ ГЕР
-
-name/ Данные с Геркона
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+name/ Код управляющей команды
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter19">
+    <node id="component_MainExpected">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter19
+      <data key="dData">id/ MainExpected
 
 type/ Counter
 
-label/ ХОЛ
-
-name/ Данные с Холла
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+name/ Длина payload
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cTimer5">
+    <node id="component_MainIndex">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Timer5
-
-type/ Timer
-
-label/ ОТК
-
-name/ Таймер &quot;открытости&quot;
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter6">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter6
+      <data key="dData">id/ MainIndex
 
 type/ Counter
 
-label/ СТД
-
-name/ Стадия открытости
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+name/ Индекс байта
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter1">
+    <node id="component_MainResponseExpected">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter1
+      <data key="dData">id/ MainResponseExpected
 
 type/ Counter
 
-label/ ДИН
-
-name/ Динамика стадий
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+name/ Длина ответа
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cUserSignal6">
+    <node id="component_MainFlow">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ UserSignal6
-
-type/ UserSignal
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cUserSignal7">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ UserSignal7
-
-type/ UserSignal
-
-name/ ПроверитьГраницы
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter24">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter24
+      <data key="dData">id/ MainFlow
 
 type/ Counter
 
-label/ TMP
-
-name/ TEMP_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+name/ 1 control, 2 environment, 3 state
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter26">
+    <node id="component_MainSensorIndex">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter26
+      <data key="dData">id/ MainSensorIndex
 
 type/ Counter
 
-label/ ETM
-
-name/ ETALON_TEMPERATURE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+name/ Индекс ответа датчиков
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cLED4">
+    <node id="component_MainDoorOpen">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ LED4
-
-type/ LED
-
-pin/ 2
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter29">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter29
+      <data key="dData">id/ MainDoorOpen
 
 type/ Counter
 
-label/ ТЦУ
-
-name/ Темп с улицы (цел)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+name/ door open
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter30">
+    <node id="component_MainDoorStage">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter30
+      <data key="dData">id/ MainDoorStage
 
 type/ Counter
 
-label/ ТУД
-
-name/ Темп с улицы (дроб)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+name/ door stage
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter34">
+    <node id="component_MainDoorSum">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter34
-
-type/ Counter
-
-label/ R1W
-
-name/ RPM1 (цел)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter35">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter35
-
-type/ Counter
-
-label/ R2W
-
-name/ RPM2 (цел)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter36">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter36
-
-type/ Counter
-
-label/ R3W
-
-name/ RPM3 (цел)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter37">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter37
-
-type/ Counter
-
-label/ R1F
-
-name/ RPM 1 (дробная)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter38">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter38
-
-type/ Counter
-
-label/ R2F
-
-name/ RPM 2 (дробная)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter39">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter39
-
-type/ Counter
-
-label/ R3F
-
-name/ RPM3 (дробная)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cLED5">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ LED5
-
-type/ LED
-
-pin/ 3
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter47">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter47
-
-type/ Counter
-
-label/ R4W
-
-name/ RPM4 (цел)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter48">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter48
-
-type/ Counter
-
-label/ R4F
-
-name/ RPM4 (дроб)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter52">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter52
-
-type/ Counter
-
-label/ ГЕ2
-
-name/ Геркон2
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter53">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter53
-
-type/ Counter
-
-label/ ГЕ3
-
-name/ Геркон3
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCalcInt1">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ CalcInt1
+      <data key="dData">id/ MainDoorSum
 
 type/ CalcInt
 
-label/ ГЕР
-
-name/ Открыта дверь?
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+name/ Сумма концевиков
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter56">
+    <node id="component_MainRequest">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter56
+      <data key="dData">id/ MainRequest
 
-type/ Counter
+type/ Array
 
-label/ ETC
+size/ 8
 
-name/ ETALON_TEMP_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+name/ Payload ПК
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cTimer7">
+    <node id="component_MainResponse">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Timer7
+      <data key="dData">id/ MainResponse
 
-type/ Timer
+type/ Array
 
-label/ КМП
+size/ 21
 
-name/ Таймер опроса компа
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+name/ Ответ актуатора
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="cCounter57">
+    <node id="component_MainSensors">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter57
+      <data key="dData">id/ MainSensors
 
-type/ Counter
+type/ Array
 
-label/ ОПР
+size/ 10
 
-name/ Пришло время опроса
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+name/ Ответ READ_SENSORS
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="imcfhfcbcsnwcmitgbhx">
-      <data key="dGeometry">
-        <point x="1436.5723522949222" y="1477.3715087533005"></point>
-      </data>
-      <data key="dNote">informal</data>
-      <data key="dData">Здесь отправляем на компьютер, протокол:
-START_END_SYM, 
-датчик Холла, геркон, температура (цел), температура (дробная), RPM1 WHOLE, RPM1 FRAC, RPM2 WHOLE, RPM2 FRAC, RPM3 WHOLE, RPM3 FRAC, стадия открытости двери, START_END_SYM</data>
+    <node id="component_MainTelemetry">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ MainTelemetry
+
+type/ Array
+
+size/ 29
+
+name/ Payload телеметрии
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="elstgypcvndtulbjpltk">
-      <data key="dGeometry">
-        <point x="722.1135632324205" y="-242.37893679797597"></point>
-      </data>
-      <data key="dNote">informal</data>
-      <data key="dData">TODO: Глобальное состояние, которое границы проверяет</data>
-    </node>
-    <node id="eohpjqqaazgwymoztqii">
-      <data key="dGeometry">
-        <point x="700.5515441894538" y="1284.0963609152936"></point>
-      </data>
-      <data key="dNote">informal</data>
-      <data key="dData">TODO: Использовать массив и интерпретировать при отправке</data>
-    </node>
-    <edge id="defekbomexbpcwmtlysl" source="bqidfohenagynqmbbfct" target="uwyczmmnptdaghtpowfv"></edge>
-    <edge id="uxfzvhutifykowwpocvx" source="wowamdwmlbciuhygevez" target="dxauwqidncgxacufeqpo">
-      <data key="dData">Timer3.timeout/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="528.4299725341795" y="440.96000114440903"></point>
-      </data>
+    <edge id="edge_23" source="main_initial" target="main_idle"></edge>
+    <edge id="edge_24" source="main_idle" target="main_control_command">
+      <data key="dData">MainBus.packetReceived[MainBus.lastData == 17]/
+MainTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="nuuzmseqpttghqsvbjqo" source="mjnesupnyigfidmjnyjd" target="xnvofmwhlcilouhetgay"></edge>
-    <edge id="mubqilgedhkwylhjtngg" source="kcvmhtkvldjvvqbcbxjc" target="pdjpfjgteltflagzsjbb">
-      <data key="dData">SimpleBus1.packetReceived[SimpleBus1.lastData == Counter8.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1111.1674633789078" y="2802.706710102559"></point>
-      </data>
+    <edge id="edge_25" source="main_idle" target="main_wait_sensors">
+      <data key="dData">MainPeriodic.timeout/
+MainBus.sendPacket(13, 1);
+MainSensorIndex.reset();
+MainTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="dzbcnejpbotjhukfsieg" source="tgopsagvjzwgkogiblbm" target="ffcxkkiaditkhxiahnvx"></edge>
-    <edge id="fzsyjwslbhfcwedwzekn" source="ffcxkkiaditkhxiahnvx" target="mwssxdhpjmwfstnjnmjh">
-      <data key="dData">UserSignal3.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1766.624963378906" y="762.2159121173621"></point>
-      </data>
+    <edge id="edge_26" source="main_control_command" target="main_command_choice">
+      <data key="dData">MainBus.packetReceived/
+MainCommand.set(MainBus.lastData);
+MainTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="bkfhnggopycwcsjmibbm" source="mwssxdhpjmwfstnjnmjh" target="lpsiawzyyydmhksqlstl">
-      <data key="dData">[Counter14.value &gt; Counter26.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1641.5499642944378" y="845.8234055554868"></point>
-      </data>
+    <edge id="edge_27" source="main_command_choice" target="main_forward_start">
+      <data key="dData">[MainCommand.value == 1]/
+MainExpected.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="qlqclhwzwmscymtcvaum" source="yqxmgcqwievthlilotqg" target="swslyqwdtqamoufuodqs">
-      <data key="dData">UserSignal4.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2344.2904635620134" y="1572.22391214788"></point>
-      </data>
+    <edge id="edge_28" source="main_command_choice" target="main_receive_payload">
+      <data key="dData">[MainCommand.value == 6]/
+MainExpected.set(5);
+MainIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="kmewfymxtpyxtyiiuxai" source="klyuxleanmqncyttcmfm" target="kcvmhtkvldjvvqbcbxjc"></edge>
-    <edge id="dsgkydumqkktvhnpvpgt" source="puzijjqhzsjnkgalwoof" target="iqyakvjmimggptluotwo">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1058.1499645996087" y="1804.9975001525884"></point>
-      </data>
+    <edge id="edge_29" source="main_command_choice" target="main_receive_payload">
+      <data key="dData">[MainCommand.value == 8]/
+MainExpected.set(1);
+MainIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="ekbbjnzganvacfbpumzw" source="iqyakvjmimggptluotwo" target="tjmhjjgeouhdhsjwemwx">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1069.1986584472668" y="2017.7732544529429"></point>
-      </data>
+    <edge id="edge_30" source="main_command_choice" target="main_receive_payload">
+      <data key="dData">[MainCommand.value == 9]/
+MainExpected.set(8);
+MainIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="oetspxpoxmsqjhmstydo" source="xnvofmwhlcilouhetgay" target="gfysljphpzbqjeinibtj">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1053.5156567382821" y="1053.6381087136288"></point>
-      </data>
+    <edge id="edge_31" source="main_command_choice" target="main_receive_payload">
+      <data key="dData">[MainCommand.value == 10]/
+MainExpected.set(6);
+MainIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="pmiisdszwnsxhyvgzgbi" source="ozlzqsozjmozhtmodcuz" target="puzijjqhzsjnkgalwoof">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1057.4339611816395" y="1578.6247086739559"></point>
-      </data>
+    <edge id="edge_32" source="main_command_choice" target="main_receive_payload">
+      <data key="dData">[MainCommand.value == 11]/
+MainExpected.set(2);
+MainIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="thaacoaniodezgeufnbm" source="lpsiawzyyydmhksqlstl" target="xbjpqbbjluswkoqpetmb">
-      <data key="dData">UserSignal3.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2048.235440673828" y="1190.8610070925965"></point>
-      </data>
+    <edge id="edge_33" source="main_command_choice" target="main_receive_payload">
+      <data key="dData">[MainCommand.value == 12]/
+MainExpected.set(2);
+MainIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="lleicdqdctkcgbokjpao" source="mwssxdhpjmwfstnjnmjh" target="xbjpqbbjluswkoqpetmb">
+    <edge id="edge_34" source="main_command_choice" target="main_receive_payload">
+      <data key="dData">[MainCommand.value == 13]/
+MainExpected.set(4);
+MainIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_35" source="main_command_choice" target="main_receive_payload">
+      <data key="dData">[MainCommand.value == 14]/
+MainExpected.set(1);
+MainIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_36" source="main_command_choice" target="main_forward_start">
+      <data key="dData">[MainCommand.value == 15]/
+MainExpected.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_37" source="main_command_choice" target="main_forward_start">
+      <data key="dData">[MainCommand.value == 16]/
+MainExpected.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_38" source="main_command_choice" target="main_invalid">
       <data key="dData">[else]/
-LED5.toggle();
-SimpleBus1.sendPacket(14, Counter9.value);
-SimpleBus1.sendPacket(14, Counter26.value);
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2081.5454397583035" y="855.1560070925954"></point>
-      </data>
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="osvkyoeasldsnsyiczbl" source="xbjpqbbjluswkoqpetmb" target="kxqkggujhuyjginzkpiy">
+    <edge id="edge_39" source="main_receive_payload" target="main_payload_choice">
+      <data key="dData">MainBus.packetReceived/
+MainRequest.set(MainIndex.value, MainBus.lastData);
+MainIndex.add(1);
+MainTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_40" source="main_payload_choice" target="main_forward_start">
+      <data key="dData">[MainIndex.value == MainExpected.value]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_41" source="main_payload_choice" target="main_receive_payload">
       <data key="dData">[else]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2264.205916137698" y="776.2536086297048"></point>
-      </data>
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="hsyyqshmbvtclwlmffvw" source="xbjpqbbjluswkoqpetmb" target="mdwgqcqstaljvhfejulm">
-      <data key="dData">[CalcInt1.value == 3]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2332.003416137698" y="1131.8611086297049"></point>
-      </data>
+    <edge id="edge_42" source="main_forward_start" target="main_forward_choice">
+      <data key="dData">MainStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="wfisvfnkdcgoomjzxwoc" source="kxqkggujhuyjginzkpiy" target="icyqlnapkqadsymulvgn">
-      <data key="dData">[Counter6.value == 1]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2557.8134161376956" y="720.796108629704"></point>
-      </data>
+    <edge id="edge_43" source="main_forward_choice" target="main_response_length">
+      <data key="dData">[MainExpected.value == 0]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="ozdmhktysmaphbtnoecg" source="kxqkggujhuyjginzkpiy" target="olntxcnyfbbzpugaylvk">
+    <edge id="edge_44" source="main_forward_choice" target="main_forward_byte">
       <data key="dData">[else]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2724.343416137695" y="922.5285136544704"></point>
-      </data>
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="bdvgjsjyycylasimiwew" source="avlvncxlzyzfotmbcmyi" target="icyqlnapkqadsymulvgn"></edge>
-    <edge id="oqujvbxjuuysadwvjypt" source="uwyczmmnptdaghtpowfv" target="wowamdwmlbciuhygevez">
-      <data key="dData">UserSignal2.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="58.52927246093663" y="41.36053198248183"></point>
-      </data>
+    <edge id="edge_45" source="main_forward_byte" target="main_forward_count">
+      <data key="dData">MainStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="opcpzsqjkhazmjvlscki" source="xeldqdmdmowibxyefdqt" target="cgboometplfpztglfqjw"></edge>
-    <edge id="wbuogquafffhhgwnnmzj" source="swslyqwdtqamoufuodqs" target="hvzfyebqneanfqmlxlyn">
-      <data key="dData">UserSignal4.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2730.750245819089" y="1381.7383807157"></point>
-      </data>
+    <edge id="edge_46" source="main_forward_count" target="main_response_length">
+      <data key="dData">[MainIndex.value == MainExpected.value]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="acgvjloxblxjnopogtez" source="tjmhjjgeouhdhsjwemwx" target="qquzphedvwjevjyzwlis">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1071.5077458190897" y="2242.7860309456287"></point>
-      </data>
-    </edge>
-    <edge id="gvqewwzdfegnilwnnipm" source="qquzphedvwjevjyzwlis" target="xkghzwxyxjxhdvfxxznq">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1081.5952526855453" y="2512.9780347946266"></point>
-      </data>
-    </edge>
-    <edge id="cdmuwcofnwgjxbcfesms" source="slqqhjiemkflpegqtsdz" target="dgunjjcqqqpnjzoygaai"></edge>
-    <edge id="zuzpebxbmezxtjsqlovf" source="pdjpfjgteltflagzsjbb" target="yqxmgcqwievthlilotqg">
-      <data key="dData">SimpleBus1.packetReceived[SimpleBus1.lastData == Counter8.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2476.8949555969234" y="2013.8128832659127"></point>
-      </data>
-    </edge>
-    <edge id="fkxvanoulfdojidzfajt" source="dgunjjcqqqpnjzoygaai" target="anxpoiekgqwtftxmossq">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2139.09894744873" y="2574.5147604209174"></point>
-      </data>
-    </edge>
-    <edge id="yxxsxktejhqyusqtjzww" source="geamodqtxeugyzsuuhsl" target="jywxcynnalzbjmmkywdk">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2154.670184020995" y="2895.0131599265346"></point>
-      </data>
-    </edge>
-    <edge id="tqhvngvstwhhjsbkbaai" source="plefctzkkgeyoyhkyiuc" target="xzonqsoykamgamtsvven">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2141.8002189636236" y="3123.7831599265364"></point>
-      </data>
-    </edge>
-    <edge id="sqepbqopotzlkwhthgtn" source="anxpoiekgqwtftxmossq" target="xvxtpkhlqatloitbdxfh">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2151.3839474487304" y="2688.9013609153026"></point>
-      </data>
-    </edge>
-    <edge id="jyksuajqfmlczbbkyvah" source="xvxtpkhlqatloitbdxfh" target="geamodqtxeugyzsuuhsl">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2145.7089474487325" y="2800.8247604209187"></point>
-      </data>
-    </edge>
-    <edge id="hipvwftzumepmdosupoo" source="jywxcynnalzbjmmkywdk" target="plefctzkkgeyoyhkyiuc">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2161.4451840209963" y="3016.719760420919"></point>
-      </data>
-    </edge>
-    <edge id="csviuuqafxwgpsbdqyut" source="imcfhfcbcsnwcmitgbhx" target="yqxmgcqwievthlilotqg"></edge>
-    <edge id="leiuhdwbenqwzknaeqpo" source="qzblxiqfnmtydjejeuwg" target="ofsipulfgqvijctfumsz"></edge>
-    <edge id="wdmumoyxwxntlmjglexc" source="xzonqsoykamgamtsvven" target="iphoqqhsouxihsqmjlhu">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2205.6851840209965" y="3268.9797604209207"></point>
-      </data>
-    </edge>
-    <edge id="ewtpwdgtfaygopnggqhv" source="iphoqqhsouxihsqmjlhu" target="aqdjacjfvdlnquncysom">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2488.3639823913572" y="3318.6597604209146"></point>
-      </data>
-    </edge>
-    <edge id="zgabscwjoveetzlbkfeu" source="gfysljphpzbqjeinibtj" target="aeniwnsdganbulzbppwv">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1361.3289611816404" y="1234.4147086739556"></point>
-      </data>
-    </edge>
-    <edge id="zhbqienzzwfsjsnqfwqo" source="aeniwnsdganbulzbppwv" target="ozlzqsozjmozhtmodcuz">
-      <data key="dData">UserSignal5.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="749.2189611816405" y="1400.1297086739555"></point>
-      </data>
-    </edge>
-    <edge id="fwumkvhtqieaezqovyal" source="myhdbkbabfhkjjbmhexc" target="wowamdwmlbciuhygevez">
-      <data key="dData">SimpleBus1.packetReceived/
-Counter26.set(SimpleBus1.lastData);
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="471.20029998779466" y="-277.9698677679942"></point>
-      </data>
-    </edge>
-    <edge id="tqnucwpjakbvusumbgcy" source="myhdbkbabfhkjjbmhexc" target="wowamdwmlbciuhygevez">
-      <data key="dData">Timer3.timeout/
-LED3.toggle();
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="538.6602999877941" y="-106.06986776799417"></point>
-      </data>
-    </edge>
-    <edge id="vyfvxjcxdfmcxmcmsykj" source="dxauwqidncgxacufeqpo" target="oycnbiqhwnjlfnsicsxo">
-      <data key="dData">Timer4.timeout/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="944.3672828674322" y="59.62097522809893"></point>
-      </data>
-    </edge>
-    <edge id="vmwyxcysdvlnyswusytl" source="dxauwqidncgxacufeqpo" target="oycnbiqhwnjlfnsicsxo">
-      <data key="dData">UserSignal2.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1176.367282867432" y="53.62097522809893"></point>
-      </data>
-    </edge>
-    <edge id="xcvfygjpsynklgymeysn" source="oycnbiqhwnjlfnsicsxo" target="myhdbkbabfhkjjbmhexc">
-      <data key="dData">[Counter57.value == 1]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="897.9556182861352" y="-95.19674340934455"></point>
-      </data>
-    </edge>
-    <edge id="qqkjupcykxpklfgdyfxs" source="oycnbiqhwnjlfnsicsxo" target="wowamdwmlbciuhygevez">
+    <edge id="edge_47" source="main_forward_count" target="main_forward_byte">
       <data key="dData">[else]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="380.0952999877941" y="30.373125121589084"></point>
-      </data>
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_48" source="main_response_length" target="main_wait_actuator">
+      <data key="dData">[MainCommand.value == 1]/
+MainResponseExpected.set(21);
+MainIndex.reset();
+MainTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_49" source="main_response_length" target="main_wait_actuator">
+      <data key="dData">[MainCommand.value == 16]/
+MainResponseExpected.set(18);
+MainIndex.reset();
+MainTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_50" source="main_response_length" target="main_wait_actuator">
+      <data key="dData">[else]/
+MainResponseExpected.set(1);
+MainIndex.reset();
+MainTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_51" source="main_wait_actuator" target="main_response_first">
+      <data key="dData">MainBus.packetReceived/
+MainResponse.set(MainIndex.value, MainBus.lastData);
+MainIndex.add(1);
+MainTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_52" source="main_response_first" target="main_response_status">
+      <data key="dData">[MainIndex.value == 1]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_53" source="main_response_first" target="main_response_count">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_54" source="main_response_status" target="main_flow_choice">
+      <data key="dData">[MainBus.lastData == 224]/
+MainResponseExpected.set(1);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_55" source="main_response_status" target="main_flow_choice">
+      <data key="dData">[MainBus.lastData == 225]/
+MainResponseExpected.set(1);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_56" source="main_response_status" target="main_flow_choice">
+      <data key="dData">[MainBus.lastData == 226]/
+MainResponseExpected.set(1);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_57" source="main_response_status" target="main_flow_choice">
+      <data key="dData">[MainBus.lastData == 227]/
+MainResponseExpected.set(1);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_58" source="main_response_status" target="main_response_count">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_59" source="main_response_count" target="main_flow_choice">
+      <data key="dData">[MainIndex.value == MainResponseExpected.value]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_60" source="main_response_count" target="main_wait_actuator">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_61" source="main_flow_choice" target="main_send_response_start">
+      <data key="dData">[MainFlow.value == 1]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_62" source="main_flow_choice" target="main_environment_status">
+      <data key="dData">[MainFlow.value == 2]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_63" source="main_flow_choice" target="main_state_final">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_64" source="main_send_response_start" target="main_send_response_byte">
+      <data key="dData">MainStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_65" source="main_send_response_byte" target="main_send_response_choice">
+      <data key="dData">MainStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_66" source="main_send_response_choice" target="main_idle">
+      <data key="dData">[MainIndex.value == MainResponseExpected.value]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_67" source="main_send_response_choice" target="main_send_response_byte">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_68" source="main_invalid" target="main_idle">
+      <data key="dData">MainStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_69" source="main_wait_sensors" target="main_sensor_first">
+      <data key="dData">MainBus.packetReceived/
+MainSensors.set(MainSensorIndex.value, MainBus.lastData);
+MainSensorIndex.add(1);
+MainTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_70" source="main_sensor_first" target="main_sensor_status">
+      <data key="dData">[MainSensorIndex.value == 1]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_71" source="main_sensor_first" target="main_sensor_count">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_72" source="main_sensor_status" target="main_idle">
+      <data key="dData">[MainBus.lastData == 224]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_73" source="main_sensor_status" target="main_idle">
+      <data key="dData">[MainBus.lastData == 225]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_74" source="main_sensor_status" target="main_idle">
+      <data key="dData">[MainBus.lastData == 226]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_75" source="main_sensor_status" target="main_idle">
+      <data key="dData">[MainBus.lastData == 227]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_76" source="main_sensor_status" target="main_sensor_count">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_77" source="main_sensor_count" target="main_sensor_final">
+      <data key="dData">[MainSensorIndex.value == 10]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_78" source="main_sensor_count" target="main_wait_sensors">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_79" source="main_sensor_final" target="main_calculate_door">
+      <data key="dData">[MainBus.lastData == 3]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_80" source="main_sensor_final" target="main_idle">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_81" source="main_calculate_door" target="main_door_choice">
+      <data key="dData">MainStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_82" source="main_door_choice" target="main_door_closed">
+      <data key="dData">[MainDoorSum.value == 3]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_83" source="main_door_choice" target="main_door_open">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_84" source="main_door_closed" target="main_send_environment">
+      <data key="dData">MainStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_85" source="main_door_open" target="main_send_environment">
+      <data key="dData">MainStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_86" source="main_send_environment" target="main_wait_actuator">
+      <data key="dData">MainStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_87" source="main_environment_status" target="main_get_state">
+      <data key="dData">[MainBus.lastData == 3]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_88" source="main_environment_status" target="main_idle">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_89" source="main_get_state" target="main_wait_actuator">
+      <data key="dData">MainStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_90" source="main_state_final" target="main_prepare_telemetry">
+      <data key="dData">[MainBus.lastData == 3]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_91" source="main_state_final" target="main_idle">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_92" source="main_prepare_telemetry" target="main_send_telemetry_byte">
+      <data key="dData">MainStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_93" source="main_send_telemetry_byte" target="main_telemetry_choice">
+      <data key="dData">MainStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_94" source="main_telemetry_choice" target="main_end_telemetry">
+      <data key="dData">[MainIndex.value == 29]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_95" source="main_telemetry_choice" target="main_send_telemetry_byte">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_96" source="main_end_telemetry" target="main_idle">
+      <data key="dData">MainStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_97" source="main_control_command" target="main_idle">
+      <data key="dData">MainTimeout.timeout/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_98" source="main_receive_payload" target="main_idle">
+      <data key="dData">MainTimeout.timeout/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_99" source="main_wait_actuator" target="main_idle">
+      <data key="dData">MainTimeout.timeout/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_100" source="main_wait_sensors" target="main_idle">
+      <data key="dData">MainTimeout.timeout/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
   </graph>
-  <graph id="MS1Gate1_1">
+  <graph id="MS1GateActuator">
     <data key="dStateMachine"></data>
-    <data key="dName">Актуатор</data>
-    <data key="dGeometry">
-      <rect x="50" y="50" width="450" height="100"></rect>
-    </data>
+    <data key="dName">Актуатор — прозрачный мост</data>
+    <data key="dGeometry"><rect x="0" y="0" width="450" height="100"></rect></data>
     <node id="coreMeta">
       <data key="dNote">formal</data>
       <data key="dName">CGML_META</data>
@@ -2290,1053 +1261,453 @@ standardVersion/ 1.0
 platformVersion/ 1.0
 
 lapkiVisual/ true
-
-</data>
+    </data>
     </node>
-    <node id="wlvfixbyxbxbuafpgxfa">
-      <data key="dName">Ждем команду</data>
+    <node id="act_idle">
+      <data key="dName">Ожидание команды</data>
       <data key="dData">entry/
-SimpleBus21.setAddress(14);
-Counter51.set(1);
-Counter21.set(2);
-Counter41.set(3);
-Counter31.set(4);
-Counter20.set(5);
-Counter22.set(6);
-Counter23.set(7);
-Counter27.set(8);
-
-</data>
-      <data key="dGeometry">
-        <rect x="-35.22003662109375" y="327.4000015258789" width="450" height="100"></rect>
-      </data>
+ActBus.setAddress(14);</data>
+      <data key="dGeometry"><rect x="0" y="0" width="360" height="90"></rect></data>
       <data key="dColor">#FFFFFF</data>
     </node>
-    <node id="kcygaolatawvngndieud">
-      <data key="dName">Коммуникация</data>
-      <data key="dData">entry/
-Timer21.start(2000);
-
-SimpleBus21.packetReceived/
-UserSignal8.call();
-Counter28.set(1);
-
-</data>
-      <data key="dGeometry">
-        <rect x="867.1699349975586" y="148.40945097446507" width="450" height="100"></rect>
-      </data>
-      <data key="dColor">#FFFFFF</data>
-      <graph id="kcygaolatawvngndieud">
-        <node id="bgzutyuyknmdyuvfxzhe">
-          <data key="dName">Команда на Ардуино</data>
-          <data key="dData">entry/
-ArduinoAdapter11.sendPacket(Counter27.value);
-ArduinoAdapter11.sendPacket(Counter25.value);
-ArduinoAdapter11.sendPacket(Counter22.value);
-ArduinoAdapter11.sendPacket(Counter121.value);
-ArduinoAdapter11.sendPacket(Counter23.value);
-ArduinoAdapter11.sendPacket(Counter131.value);
-ArduinoAdapter11.sendPacket(Counter21.value);
-
-</data>
-          <data key="dGeometry">
-            <rect x="821.3300000000004" y="182.96055131435293" width="450" height="100"></rect>
-          </data>
-          <data key="dColor">#FFFFFF</data>
-        </node>
-        <node id="iqnnfsagpucottyybfzu">
-          <data key="dName">Режим отказа!</data>
-          <data key="dData">entry/
-ArduinoAdapter11.sendPacket(Counter20.value);
-
-</data>
-          <data key="dGeometry">
-            <rect x="169.62001129150323" y="362.5517440860712" width="450" height="100"></rect>
-          </data>
-          <data key="dColor">#FFFFFF</data>
-        </node>
-        <node id="qlhmtznnhfzztjphifxe">
-          <data key="dName">Получение температуры</data>
-          <data key="dData"></data>
-          <data key="dGeometry">
-            <rect x="156.83501129150386" y="539.4792292356485" width="450" height="100"></rect>
-          </data>
-          <data key="dColor">#FFFFFF</data>
-          <graph id="qlhmtznnhfzztjphifxe">
-            <node id="wevlulqvgphplbbscsfg">
-              <data key="dName">Целая</data>
-              <data key="dData">exit/
-Counter121.set(SimpleBus21.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="115" y="135" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="nkwnyplytptgnkustnbm">
-              <data key="dName">Дробная</data>
-              <data key="dData">exit/
-Counter131.set(SimpleBus21.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="121.125" y="365.375" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="bfetadvzfazcmafftopd">
-              <data key="dName">Ждем конец передачи</data>
-              <data key="dData"></data>
-              <data key="dGeometry">
-                <rect x="122.34799804687385" y="575.0999999999998" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="laaueqbmmeonfeajsqaw">
-              <data key="dVertex">initial</data>
-              <data key="dGeometry">
-                <rect x="15" y="115" width="-1" height="-1"></rect>
-              </data>
-            </node>
-          </graph>
-        </node>
-        <node id="sofbdcapbdqznavfddoa">
-          <data key="dName">Запрос RPM</data>
-          <data key="dData">entry/
-ArduinoAdapter11.sendPacket(Counter51.value);
-
-ArduinoAdapter11.packetReceived/
-UserSignal8.call();
-
-</data>
-          <data key="dGeometry">
-            <rect x="126.34300933837883" y="1300.574226336479" width="450" height="100"></rect>
-          </data>
-          <data key="dColor">#FFFFFF</data>
-          <graph id="sofbdcapbdqznavfddoa">
-            <node id="hoppqinffvbzuysncwbd">
-              <data key="dName">RPM1 (цел)</data>
-              <data key="dData">exit/
-Counter40.set(ArduinoAdapter11.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="91.50000000000004" y="307.95999999999987" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="pgdacwhstutamjtsiozb">
-              <data key="dName">RPM1 (дроб)</data>
-              <data key="dData">exit/
-Counter42.set(ArduinoAdapter11.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="764.4249999999977" y="302.76276266954835" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="ucwujcmtmiohvojeytdn">
-              <data key="dName">RPM2 (цел)</data>
-              <data key="dData">exit/
-Counter43.set(ArduinoAdapter11.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="96.38000000000012" y="510.23999999999927" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="ikhaghieueekekjjacfq">
-              <data key="dName">RPM2 (дробная)</data>
-              <data key="dData">exit/
-Counter44.set(ArduinoAdapter11.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="759.9049999999982" y="514.9427626695482" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="lvexuwviihofzombcddu">
-              <data key="dName">RPM3 (целая)</data>
-              <data key="dData">exit/
-Counter45.set(ArduinoAdapter11.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="91.86000000000018" y="726.6200000000008" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="vaxlpbmxdsnhpdijaqlc">
-              <data key="dName">RPM3 (дробная)</data>
-              <data key="dData">exit/
-Counter46.set(ArduinoAdapter11.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="768.84" y="729.6200000000005" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="lpaylfodhsqqbjdimyog">
-              <data key="dName">Ждем ОК</data>
-              <data key="dData"></data>
-              <data key="dGeometry">
-                <rect x="785.4649999999971" y="1133.412762669548" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="bioaohfyfaanbvadtqay">
-              <data key="dName">RPM4 (целая)</data>
-              <data key="dData">exit/
-Counter49.set(ArduinoAdapter11.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="92.80499999999329" y="940.7327626695524" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="zjkxmcbyohpodcehoijq">
-              <data key="dName">RPM4 (дробная)</data>
-              <data key="dData">exit/
-Counter50.set(ArduinoAdapter11.lastData);
-
-</data>
-              <data key="dGeometry">
-                <rect x="766.8949999999932" y="915.6927626695533" width="450" height="100"></rect>
-              </data>
-              <data key="dColor">#FFFFFF</data>
-            </node>
-            <node id="lpffxpjsntujcqfclehm">
-              <data key="dVertex">initial</data>
-              <data key="dGeometry">
-                <rect x="15" y="247.53999999999994" width="-1" height="-1"></rect>
-              </data>
-            </node>
-          </graph>
-        </node>
-        <node id="iwncuxwgxxbkzwfxeqhs">
-          <data key="dName">Ждем эталонную температуру</data>
-          <data key="dData">exit/
-Counter25.set(SimpleBus21.lastData);
-LED21.toggle();
-
-</data>
-          <data key="dGeometry">
-            <rect x="163.75800933837772" y="185.93698900602695" width="450" height="100"></rect>
-          </data>
-          <data key="dColor">#FFFFFF</data>
-        </node>
-        <node id="agiwiapiuvymtxtqmhkd">
-          <data key="dName">Отправка на Центральную плату</data>
-          <data key="dData">entry/
-SimpleBus21.sendPacket(12, Counter40.value);
-SimpleBus21.sendPacket(12, Counter42.value);
-SimpleBus21.sendPacket(12, Counter43.value);
-SimpleBus21.sendPacket(12, Counter44.value);
-SimpleBus21.sendPacket(12, Counter45.value);
-SimpleBus21.sendPacket(12, Counter46.value);
-UserSignal11.call();
-SimpleBus21.sendPacket(12, Counter49.value);
-SimpleBus21.sendPacket(12, Counter50.value);
-SimpleBus21.sendPacket(12, Counter41.value);
-
-</data>
-          <data key="dGeometry">
-            <rect x="1540.5880093383755" y="1309.296989006029" width="450" height="100"></rect>
-          </data>
-          <data key="dColor">#FFFFFF</data>
-        </node>
-        <node id="eymhzqyyvqhqaqnwdyyq">
-          <data key="dVertex">initial</data>
-          <data key="dGeometry">
-            <rect x="60.18800933837774" y="182.07698900602696" width="-1" height="-1"></rect>
-          </data>
-        </node>
-      </graph>
+    <node id="act_command_choice">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="400" y="20" width="-1" height="-1"></rect></data>
     </node>
-    <node id="ctnyjzuoxhblfovpguxh">
+    <node id="act_receive_payload">
+      <data key="dName">Приём payload по позиции</data>
+      <data key="dData"></data>
+      <data key="dGeometry"><rect x="560" y="0" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="act_payload_choice">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="960" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="act_forward_start">
+      <data key="dName">Передача к Arduino: код</data>
+      <data key="dData">entry/
+ActArduino.sendPacket(ActCommand.value);
+ActIndex.reset();
+ActTimeout.start(2000);
+ActStep.call();</data>
+      <data key="dGeometry"><rect x="1120" y="0" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="act_forward_choice">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="1520" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="act_forward_byte">
+      <data key="dName">Передача к Arduino: payload</data>
+      <data key="dData">entry/
+ActRequest.peek(ActIndex.value);
+ActArduino.sendPacket(ActRequest.value);
+ActIndex.add(1);
+ActStep.call();</data>
+      <data key="dGeometry"><rect x="1680" y="0" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="act_forward_count">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="2080" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="act_response_length">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="2240" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="act_wait_response">
+      <data key="dName">Приём ответа Arduino по позиции</data>
+      <data key="dData"></data>
+      <data key="dGeometry"><rect x="2400" y="0" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="act_response_first">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="2800" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="act_response_status">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="2960" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="act_response_count">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="3120" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="act_send_start">
+      <data key="dName">Начало ответа центральной плате</data>
+      <data key="dData">entry/
+ActIndex.reset();
+ActStep.call();</data>
+      <data key="dGeometry"><rect x="3280" y="0" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="act_send_byte">
+      <data key="dName">Передача байта ответа</data>
+      <data key="dData">entry/
+ActResponse.peek(ActIndex.value);
+ActBus.sendPacket(12, ActResponse.value);
+ActIndex.add(1);
+ActStep.call();</data>
+      <data key="dGeometry"><rect x="3440" y="0" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="act_send_choice">
+      <data key="dVertex">choice</data>
+      <data key="dGeometry"><rect x="3840" y="20" width="-1" height="-1"></rect></data>
+    </node>
+    <node id="act_invalid">
+      <data key="dName">Неизвестная команда</data>
+      <data key="dData">entry/
+ActBus.sendPacket(12, 224);
+ActStep.call();</data>
+      <data key="dGeometry"><rect x="560" y="170" width="360" height="90"></rect></data>
+      <data key="dColor">#FFFFFF</data>
+    </node>
+    <node id="act_initial">
       <data key="dVertex">initial</data>
-      <data key="dGeometry">
-        <rect x="-132.60003662109375" y="307.4000015258789" width="-1" height="-1"></rect>
-      </data>
+      <data key="dGeometry"><rect x="-80" y="20" width="-1" height="-1"></rect></data>
     </node>
-    <node id="cArduinoAdapter11">
+    <node id="act_note">
+      <data key="dGeometry"><rect x="1120" y="300" width="420" height="80"></rect></data>
+      <data key="dNote">informal</data>
+      <data key="dData">Команда и payload пересылаются Arduino без изменений. Ответ читается как 1, 18 или 21 байт. Ошибка E0..E3 состоит из одного байта.</data>
+    </node>
+    <node id="component_ActBus">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ ArduinoAdapter11
+      <data key="dData">id/ ActBus
+
+type/ SimpleBus
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
+    </node>
+    <node id="component_ActArduino">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ ActArduino
 
 type/ ArduinoAdapter
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cTimer21">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Timer21
-
-type/ Timer
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cLED21">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ LED21
-
-type/ LED
-
-pin/ 1
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cSimpleBus21">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ SimpleBus21
-
-type/ SimpleBus
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter21">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter21
-
-type/ Counter
-
-label/ ACT
-
-name/ ACTUATOR_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter31">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter31
-
-type/ Counter
-
-label/ sen
-
-name/ SEND_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter41">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter41
-
-type/ Counter
-
-label/ OK
-
-name/ OK_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter51">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter51
-
-type/ Counter
-
-label/ POL
-
-name/ POLLING_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cUserSignal11">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ UserSignal11
-
-type/ UserSignal
-
-name/ Передача закончена
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter121">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter121
-
-type/ Counter
-
-label/ ТЦЛ
-
-name/ Температура (цел)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter131">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter131
-
-type/ Counter
-
-label/ ТДР
-
-name/ Температура (дробн)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter161">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter161
-
-type/ Counter
-
-label/ ХОЛ
-
-name/ Датчик Холла
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter171">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter171
-
-type/ Counter
-
-label/ ГЕР
-
-name/ Геркон
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter20">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter20
-
-type/ Counter
-
-label/ CRH
-
-name/ CRUSH_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter22">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter22
-
-type/ Counter
-
-label/ TMP
-
-name/ TEMP_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter23">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter23
-
-type/ Counter
-
-label/ TDR
-
-name/ TMP_DROB_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter25">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter25
-
-type/ Counter
-
-label/ ЭТЛ
-
-name/ Эталонная температур
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter27">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter27
-
-type/ Counter
-
-label/ ETL
-
-name/ ETALON_CODE
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cUserSignal8">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ UserSignal8
-
-type/ UserSignal
-
-label/ ДАН
-
-name/ Данные получены!
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter28">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter28
-
-type/ Counter
-
-name/ Было сообщение
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter40">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter40
-
-type/ Counter
-
-label/ R1W
-
-name/ RPM1 (цел)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter42">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter42
-
-type/ Counter
-
-label/ R1F
-
-name/ RPM1 (дроб)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter43">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter43
-
-type/ Counter
-
-label/ R2W
-
-name/ RPM2 (цел)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter44">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter44
-
-type/ Counter
-
-label/ R2F
-
-name/ RPM2 (дроб)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter45">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter45
-
-type/ Counter
-
-label/ R3W
-
-name/ RPM3 (цел)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter46">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter46
-
-type/ Counter
-
-label/ R3F
-
-name/ RPM3 (дробная)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter49">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter49
-
-type/ Counter
-
-label/ R4W
-
-name/ RPM4 (цел)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cCounter50">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Counter50
-
-type/ Counter
-
-label/ R4F
-
-name/ RPM4 (дробная)
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <edge id="eigupfpxhaxhtgkxeyxq" source="ctnyjzuoxhblfovpguxh" target="wlvfixbyxbxbuafpgxfa"></edge>
-    <edge id="jajspatuqufcvmktmamx" source="wlvfixbyxbxbuafpgxfa" target="iwncuxwgxxbkzwfxeqhs">
-      <data key="dData">SimpleBus21.packetReceived[SimpleBus21.lastData == Counter21.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="534.7274542236325" y="353.68500190734915"></point>
-      </data>
-    </edge>
-    <edge id="wxcvqkiadjmhbasyycwe" source="eymhzqyyvqhqaqnwdyyq" target="iwncuxwgxxbkzwfxeqhs"></edge>
-    <edge id="wntqyceyznblwguvfzpc" source="kcygaolatawvngndieud" target="wlvfixbyxbxbuafpgxfa">
-      <data key="dData">Timer21.timeout/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="645.8849491882327" y="551.4747262501705"></point>
-      </data>
-    </edge>
-    <edge id="mzvxpqsnxkjcjzmjxnii" source="kcygaolatawvngndieud" target="wlvfixbyxbxbuafpgxfa">
-      <data key="dData">UserSignal11.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="249.75494918823244" y="145.434726250172"></point>
-      </data>
-    </edge>
-    <edge id="ysksybptleowdddyojwn" source="wlvfixbyxbxbuafpgxfa" target="iqnnfsagpucottyybfzu">
-      <data key="dData">SimpleBus21.packetReceived[SimpleBus21.lastData == Counter20.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="533.8499548339838" y="451.94559829320747"></point>
-      </data>
-    </edge>
-    <edge id="joowtwxpqotblmuycnmb" source="kcygaolatawvngndieud" target="wlvfixbyxbxbuafpgxfa">
-      <data key="dData">ArduinoAdapter11.packetReceived[ArduinoAdapter11.lastData == Counter41.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="491.75494918823244" y="238.434726250172"></point>
-      </data>
-    </edge>
-    <edge id="kohwjkllysgljsapsfzd" source="laaueqbmmeonfeajsqaw" target="wevlulqvgphplbbscsfg"></edge>
-    <edge id="lgfifnlavpjdfedhkzmi" source="wlvfixbyxbxbuafpgxfa" target="qlhmtznnhfzztjphifxe">
-      <data key="dData">SimpleBus21.packetReceived[Counter22.value == SimpleBus21.lastData]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="483.1724548339844" y="795.1743408679963"></point>
-      </data>
-    </edge>
-    <edge id="bydanayqkwxnhqwsimvf" source="wevlulqvgphplbbscsfg" target="nkwnyplytptgnkustnbm">
-      <data key="dData">SimpleBus21.packetReceived[SimpleBus21.lastData != Counter41.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1290.0074462890625" y="958.1361802101137"></point>
-      </data>
-    </edge>
-    <edge id="ozaculkjqoazyaldbjmw" source="qlhmtznnhfzztjphifxe" target="wlvfixbyxbxbuafpgxfa">
-      <data key="dData">SimpleBus21.packetReceived[SimpleBus21.lastData == Counter41.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="146.07245483398384" y="1074.3643408679955"></point>
-      </data>
-    </edge>
-    <edge id="jmpgbmekdonqithilhmc" source="nkwnyplytptgnkustnbm" target="bfetadvzfazcmafftopd">
-      <data key="dData">SimpleBus21.packetReceived[SimpleBus21.lastData != Counter41.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1294.5314453124995" y="1177.006180210113"></point>
-      </data>
-    </edge>
-    <edge id="kjadivbjwmtwisfpgugi" source="iwncuxwgxxbkzwfxeqhs" target="bgzutyuyknmdyuvfxzhe">
-      <data key="dData">SimpleBus21.packetReceived/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1520.5989396667478" y="356.54822113465497"></point>
-      </data>
-    </edge>
-    <edge id="qcfqppmkfttqfxvvkaxi" source="wlvfixbyxbxbuafpgxfa" target="sofbdcapbdqznavfddoa">
-      <data key="dData">SimpleBus21.packetReceived[SimpleBus21.lastData == Counter51.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="57.3264538574218" y="1472.4518394184115"></point>
-      </data>
-    </edge>
-    <edge id="wmidhhjkljtvdcmfueme" source="lpffxpjsntujcqfclehm" target="hoppqinffvbzuysncwbd"></edge>
-    <edge id="uvllonjpxzxfwfsnxkwg" source="hoppqinffvbzuysncwbd" target="pgdacwhstutamjtsiozb">
-      <data key="dData">UserSignal8.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1589.2454443359354" y="1764.8750586457181"></point>
-      </data>
-    </edge>
-    <edge id="geuaoxfjpvhgezqutvwt" source="pgdacwhstutamjtsiozb" target="ucwujcmtmiohvojeytdn">
-      <data key="dData">UserSignal8.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1558.2779443359357" y="1871.686439980492"></point>
-      </data>
-    </edge>
-    <edge id="yjtvaolyqcvykybhonnq" source="ucwujcmtmiohvojeytdn" target="ikhaghieueekekjjacfq">
-      <data key="dData">UserSignal8.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1596.4954443359368" y="1979.1850586457176"></point>
-      </data>
-    </edge>
-    <edge id="ofyhhsdmdpbdibyavlhq" source="ikhaghieueekekjjacfq" target="lvexuwviihofzombcddu">
-      <data key="dData">UserSignal8.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1531.2554443359372" y="2115.5750586457184"></point>
-      </data>
-    </edge>
-    <edge id="vsjtiqodqqyaeqoucmtk" source="lvexuwviihofzombcddu" target="vaxlpbmxdsnhpdijaqlc">
-      <data key="dData">UserSignal8.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1578.0229443359376" y="2210.0036773109455"></point>
-      </data>
-    </edge>
-    <edge id="lbfvvqksanjonotemjmv" source="vaxlpbmxdsnhpdijaqlc" target="bioaohfyfaanbvadtqay">
-      <data key="dData">UserSignal8.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1528.1304443359372" y="2324.255058645719"></point>
-      </data>
-    </edge>
-    <edge id="pkmfmevmcjfbenmolbyx" source="lpaylfodhsqqbjdimyog" target="agiwiapiuvymtxtqmhkd">
-      <data key="dData">ArduinoAdapter11.packetReceived[ArduinoAdapter11.lastData == Counter41.value]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="2414.663953857422" y="1853.9532207531859"></point>
-      </data>
-    </edge>
-    <edge id="iaojincymhbdglywczda" source="bioaohfyfaanbvadtqay" target="zjkxmcbyohpodcehoijq">
-      <data key="dData">UserSignal8.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1597.51294433593" y="2397.0414399804968"></point>
-      </data>
-    </edge>
-    <edge id="iuxcndweudojgmwdzszh" source="zjkxmcbyohpodcehoijq" target="lpaylfodhsqqbjdimyog">
-      <data key="dData">UserSignal8.isCalled/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="1923.9979443359325" y="2495.8114399804945"></point>
-      </data>
-    </edge>
-  </graph>
-  <graph id="MS1Main2">
-    <data key="dStateMachine"></data>
-    <data key="dName">Тест эталонной температуры с компьютера</data>
-    <data key="dGeometry">
-      <rect x="0" y="0" width="450" height="100"></rect>
     </data>
-    <node id="coreMeta">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_META</data>
-      <data key="dData">platform/ tjc-ms1-main-a4
-
-standardVersion/ 1.0
-
-platformVersion/ 1.0
-
-lapkiVisual/ true
-
-</data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <node id="pafcgnnyslyxjkqnxkwx">
-      <data key="dName">Состояние</data>
-      <data key="dData">Timer6.timeout/
-SimpleBus3.setAddress(12);
-SimpleBus3.sendPacket(99, 12);
-SimpleBus3.sendPacket(99, 10);
-SimpleBus3.sendPacket(99, 12);
-
-entry/
-Timer6.start(100);
-
-</data>
-      <data key="dGeometry">
-        <rect x="430.86798095703125" y="166.87999725341797" width="450" height="100"></rect>
-      </data>
-      <data key="dColor">#FFFFFF</data>
-    </node>
-    <node id="yblqnhxzeugacczxygwt">
-      <data key="dName">Состояние</data>
-      <data key="dData">entry/
-LED6.on();
-UserSignal9.call();
-
-</data>
-      <data key="dGeometry">
-        <rect x="413.7359619140625" y="583.7599945068359" width="450" height="100"></rect>
-      </data>
-      <data key="dColor">#FFFFFF</data>
-    </node>
-    <node id="pantkuhcdyzcxvdpftyz">
-      <data key="dName">Состояние</data>
-      <data key="dData">entry/
-LED7.on();
-
-</data>
-      <data key="dGeometry">
-        <rect x="1234.7359619140625" y="215.75999450683594" width="450" height="100"></rect>
-      </data>
-      <data key="dColor">#FFFFFF</data>
-    </node>
-    <node id="qjznlegxjawzfmyntnfs">
-      <data key="dName">Состояние</data>
-      <data key="dData"></data>
-      <data key="dGeometry">
-        <rect x="1162.7359619140625" y="614.7599945068359" width="450" height="100"></rect>
-      </data>
-      <data key="dColor">#FFFFFF</data>
-    </node>
-    <node id="gjstqbnmeakzvhgbntjb">
-      <data key="dVertex">initial</data>
-      <data key="dGeometry">
-        <rect x="330.86798095703125" y="146.87999725341797" width="-1" height="-1"></rect>
-      </data>
-    </node>
-    <node id="fecaqngypvavwhmnepxg">
-      <data key="dVertex">choice</data>
-      <data key="dGeometry">
-        <rect x="1059.7359619140625" y="361.75999450683594" width="-1" height="-1"></rect>
-      </data>
-    </node>
-    <node id="cSimpleBus3">
+    <node id="component_ActTimeout">
       <data key="dNote">formal</data>
       <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ SimpleBus3
-
-type/ SimpleBus
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cLED6">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ LED6
-
-type/ LED
-
-pin/ 1
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cUserSignal9">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ UserSignal9
-
-type/ UserSignal
-
-name/ Тест
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cLED7">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ LED7
-
-type/ LED
-
-pin/ 2
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
-    </node>
-    <node id="cTimer6">
-      <data key="dNote">formal</data>
-      <data key="dName">CGML_COMPONENT</data>
-      <data key="dData">id/ Timer6
+      <data key="dData">id/ ActTimeout
 
 type/ Timer
-
-</data>
-      <data key="dLapkiSchemePosition">
-        <point x="30" y="30"></point>
-      </data>
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
     </node>
-    <edge id="gfmiifccieaydjzqglll" source="gjstqbnmeakzvhgbntjb" target="pafcgnnyslyxjkqnxkwx"></edge>
-    <edge id="zddisxoqwghsejpysfkx" source="pafcgnnyslyxjkqnxkwx" target="yblqnhxzeugacczxygwt">
-      <data key="dData">SimpleBus3.packetReceived/
+    <node id="component_ActStep">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ ActStep
 
-</data>
-      <data key="dLabelGeometry">
-        <point x="543.8019714355469" y="448.81999588012695"></point>
-      </data>
-    </edge>
-    <edge id="usyqzqcekjakcnuepynt" source="yblqnhxzeugacczxygwt" target="fecaqngypvavwhmnepxg">
-      <data key="dData">UserSignal9.isCalled/
+type/ UserSignal
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
+    </node>
+    <node id="component_ActCommand">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ ActCommand
 
-</data>
-      <data key="dLabelGeometry">
-        <point x="839.2359619140625" y="376.25999450683594"></point>
-      </data>
-    </edge>
-    <edge id="paqdgmpttksuzkaxncea" source="fecaqngypvavwhmnepxg" target="pantkuhcdyzcxvdpftyz">
-      <data key="dData">[SimpleBus3.lastData == 35]/
+type/ Counter
 
-</data>
-      <data key="dLabelGeometry">
-        <point x="1341.2359619140625" y="364.75999450683594"></point>
-      </data>
+name/ Код команды актуатора
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
+    </node>
+    <node id="component_ActExpected">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ ActExpected
+
+type/ Counter
+
+name/ Длина payload
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
+    </node>
+    <node id="component_ActIndex">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ ActIndex
+
+type/ Counter
+
+name/ Индекс байта
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
+    </node>
+    <node id="component_ActResponseExpected">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ ActResponseExpected
+
+type/ Counter
+
+name/ Длина ответа
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
+    </node>
+    <node id="component_ActRequest">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ ActRequest
+
+type/ Array
+
+size/ 8
+
+name/ Payload команды
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
+    </node>
+    <node id="component_ActResponse">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_COMPONENT</data>
+      <data key="dData">id/ ActResponse
+
+type/ Array
+
+size/ 21
+
+name/ Ответ Arduino
+    </data>
+      <data key="dLapkiSchemePosition"><point x="30" y="30"></point></data>
+    </node>
+    <edge id="edge_101" source="act_initial" target="act_idle"></edge>
+    <edge id="edge_102" source="act_idle" target="act_command_choice">
+      <data key="dData">ActBus.packetReceived/
+ActCommand.set(ActBus.lastData);
+ActTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
-    <edge id="afyfjwvszcyynzddukfq" source="fecaqngypvavwhmnepxg" target="pafcgnnyslyxjkqnxkwx">
+    <edge id="edge_103" source="act_command_choice" target="act_forward_start">
+      <data key="dData">[ActCommand.value == 1]/
+ActExpected.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_104" source="act_command_choice" target="act_receive_payload">
+      <data key="dData">[ActCommand.value == 6]/
+ActExpected.set(5);
+ActIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_105" source="act_command_choice" target="act_receive_payload">
+      <data key="dData">[ActCommand.value == 8]/
+ActExpected.set(1);
+ActIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_106" source="act_command_choice" target="act_receive_payload">
+      <data key="dData">[ActCommand.value == 9]/
+ActExpected.set(8);
+ActIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_107" source="act_command_choice" target="act_receive_payload">
+      <data key="dData">[ActCommand.value == 10]/
+ActExpected.set(6);
+ActIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_108" source="act_command_choice" target="act_receive_payload">
+      <data key="dData">[ActCommand.value == 11]/
+ActExpected.set(2);
+ActIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_109" source="act_command_choice" target="act_receive_payload">
+      <data key="dData">[ActCommand.value == 12]/
+ActExpected.set(2);
+ActIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_110" source="act_command_choice" target="act_receive_payload">
+      <data key="dData">[ActCommand.value == 13]/
+ActExpected.set(4);
+ActIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_111" source="act_command_choice" target="act_receive_payload">
+      <data key="dData">[ActCommand.value == 14]/
+ActExpected.set(1);
+ActIndex.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_112" source="act_command_choice" target="act_forward_start">
+      <data key="dData">[ActCommand.value == 15]/
+ActExpected.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_113" source="act_command_choice" target="act_forward_start">
+      <data key="dData">[ActCommand.value == 16]/
+ActExpected.reset();</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_114" source="act_command_choice" target="act_invalid">
       <data key="dData">[else]/
-
-</data>
-      <data key="dLabelGeometry">
-        <point x="969.3019714355469" y="221.31999588012695"></point>
-      </data>
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_115" source="act_receive_payload" target="act_payload_choice">
+      <data key="dData">ActBus.packetReceived/
+ActRequest.set(ActIndex.value, ActBus.lastData);
+ActIndex.add(1);
+ActTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_116" source="act_payload_choice" target="act_forward_start">
+      <data key="dData">[ActIndex.value == ActExpected.value]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_117" source="act_payload_choice" target="act_receive_payload">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_118" source="act_forward_start" target="act_forward_choice">
+      <data key="dData">ActStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_119" source="act_forward_choice" target="act_response_length">
+      <data key="dData">[ActExpected.value == 0]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_120" source="act_forward_choice" target="act_forward_byte">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_121" source="act_forward_byte" target="act_forward_count">
+      <data key="dData">ActStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_122" source="act_forward_count" target="act_response_length">
+      <data key="dData">[ActIndex.value == ActExpected.value]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_123" source="act_forward_count" target="act_forward_byte">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_124" source="act_response_length" target="act_wait_response">
+      <data key="dData">[ActCommand.value == 1]/
+ActResponseExpected.set(21);
+ActIndex.reset();
+ActTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_125" source="act_response_length" target="act_wait_response">
+      <data key="dData">[ActCommand.value == 16]/
+ActResponseExpected.set(18);
+ActIndex.reset();
+ActTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_126" source="act_response_length" target="act_wait_response">
+      <data key="dData">[else]/
+ActResponseExpected.set(1);
+ActIndex.reset();
+ActTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_127" source="act_wait_response" target="act_response_first">
+      <data key="dData">ActArduino.packetReceived/
+ActResponse.set(ActIndex.value, ActArduino.lastData);
+ActIndex.add(1);
+ActTimeout.start(2000);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_128" source="act_response_first" target="act_response_status">
+      <data key="dData">[ActIndex.value == 1]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_129" source="act_response_first" target="act_response_count">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_130" source="act_response_status" target="act_send_start">
+      <data key="dData">[ActArduino.lastData == 224]/
+ActResponseExpected.set(1);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_131" source="act_response_status" target="act_send_start">
+      <data key="dData">[ActArduino.lastData == 225]/
+ActResponseExpected.set(1);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_132" source="act_response_status" target="act_send_start">
+      <data key="dData">[ActArduino.lastData == 226]/
+ActResponseExpected.set(1);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_133" source="act_response_status" target="act_send_start">
+      <data key="dData">[ActArduino.lastData == 227]/
+ActResponseExpected.set(1);</data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_134" source="act_response_status" target="act_response_count">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_135" source="act_response_count" target="act_send_start">
+      <data key="dData">[ActIndex.value == ActResponseExpected.value]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_136" source="act_response_count" target="act_wait_response">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_137" source="act_send_start" target="act_send_byte">
+      <data key="dData">ActStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_138" source="act_send_byte" target="act_send_choice">
+      <data key="dData">ActStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_139" source="act_send_choice" target="act_idle">
+      <data key="dData">[ActIndex.value == ActResponseExpected.value]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_140" source="act_send_choice" target="act_send_byte">
+      <data key="dData">[else]/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_141" source="act_invalid" target="act_idle">
+      <data key="dData">ActStep.isCalled/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_142" source="act_receive_payload" target="act_idle">
+      <data key="dData">ActTimeout.timeout/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
+    </edge>
+    <edge id="edge_143" source="act_wait_response" target="act_idle">
+      <data key="dData">ActTimeout.timeout/
+    </data>
+      <data key="dLabelGeometry"><point x="0" y="0"></point></data>
     </edge>
   </graph>
 </graphml>
