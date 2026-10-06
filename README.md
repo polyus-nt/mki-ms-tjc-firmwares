@@ -1,5 +1,11 @@
 # Скетч: фиксированный протокол управления охлаждением
 
+> Новое направление: прошивки центральной МС-ТЮК платы и двух Arduino-шлюзов
+> разрабатываются непосредственно на C++, вместо GraphML-диаграммы.
+> Целевая архитектура — [аппаратный API](../tjc-commutator/docs/HARDWARE-API-ARCHITECTURE.md),
+> сведения о сборке из platforms lapki-compiler — [TJC-FIRMWARE.md](../tjc-commutator/docs/TJC-FIRMWARE.md).
+> Описание ниже относится к прежней реализации; перенос на код ещё не выполнен.
+
 `Скетч.graphml` — Cyberiada-GraphML-модель трёх TJC-плат. Форматы сообщений,
 коды команд и тайм-ауты определены в [`docs/protocol.md`](docs/protocol.md).
 GraphML генерируется скриптом `scripts/generate_protocol_graphml.mjs`, поэтому
