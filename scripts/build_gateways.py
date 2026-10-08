@@ -78,9 +78,9 @@ def patch_uart(text):
     return text
 
 
-def prepare_runtime(source, dest):
+def prepare_runtime(source, dest, files=None):
     dest.mkdir(parents=True, exist_ok=True)
-    for filename, expected in FILES.items():
+    for filename, expected in (FILES if files is None else files).items():
         contents = (source / filename).read_bytes()
         if hashlib.sha256(contents).hexdigest() != expected:
             raise ValueError("Wrong upstream revision or modified file: " + filename)

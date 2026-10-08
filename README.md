@@ -1,10 +1,26 @@
-# Скетч: фиксированный протокол управления охлаждением
+# МС-ТЮК: рукописные прошивки аппаратного API
+
+Актуальный код без GraphML:
+
+- [Центральный хаб](docs/HUB-FIRMWARE.md): `firmware/hub/sketch.cpp`, плата
+  `tjc-ms1-main-a4/1.0`, адрес 12.
+- [Arduino-шлюзы](docs/GATEWAY-FIRMWARE.md): `firmware/gateway/sketch.cpp`,
+  `tjc-ms1-ard-a1/1.0`, адреса 13 и 14.
+- [Общий аппаратный протокол](../tjc-commutator/docs/HARDWARE-PROTOCOL.md).
+
+Сборка: `python3 scripts/build_hub.py --compiler-root /path/to/lapki-compiler`
+и `python3 scripts/build_gateways.py --compiler-root /path/to/lapki-compiler`.
+Ревизия upstream закреплена, подробности и ограничения — в документации выше.
+Старые GraphML и документы ниже сохранены как исторические материалы; они не
+описывают текущий v1 и не входят в сборку прошивок.
+
+## Историческая реализация: фиксированный протокол охлаждения
 
 > Новое направление: прошивки центральной МС-ТЮК платы и двух Arduino-шлюзов
 > разрабатываются непосредственно на C++, вместо GraphML-диаграммы.
 > Целевая архитектура — [аппаратный API](../tjc-commutator/docs/HARDWARE-API-ARCHITECTURE.md),
 > сведения о сборке из platforms lapki-compiler — [TJC-FIRMWARE.md](../tjc-commutator/docs/TJC-FIRMWARE.md).
-> Описание ниже относится к прежней реализации; перенос на код ещё не выполнен.
+> Описание ниже относится к прежней реализации и не является текущим контрактом.
 
 `Скетч.graphml` — Cyberiada-GraphML-модель трёх TJC-плат. Форматы сообщений,
 коды команд и тайм-ауты определены в [`docs/protocol.md`](docs/protocol.md).
