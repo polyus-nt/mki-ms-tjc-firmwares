@@ -9,20 +9,20 @@ using tjc_gateway::Gateway;
 
 static Frame request(uint8_t node = 14, uint16_t id = 5) {
   Frame f = {};
-  f.version = 1; f.kind = 1; f.node = node; f.tx_id = id;
+  f.version = hardware_api::kVersion; f.kind = 1; f.node = node; f.tx_id = id;
   f.command = node == 13 ? 0x20 : 0x32;
   f.idx = 0; f.data[0] = node == 14 ? 100 : 0;
   return f;
 }
 
 static void bus(Gateway& g, const Frame& f, uint32_t now) {
-  uint8_t bytes[20]; hardware_api::encode(f, bytes);
-  for (uint8_t i = 0; i < 20; ++i) g.receiveBus(bytes[i], now);
+  uint8_t bytes[hardware_api::kFrameSize]; hardware_api::encode(f, bytes);
+  for (uint8_t i = 0; i < hardware_api::kFrameSize; ++i) g.receiveBus(bytes[i], now);
 }
 
 static void arduino(Gateway& g, const Frame& f, uint32_t now) {
-  uint8_t bytes[20]; hardware_api::encode(f, bytes);
-  for (uint8_t i = 0; i < 20; ++i) g.receiveArduino(bytes[i], now);
+  uint8_t bytes[hardware_api::kFrameSize]; hardware_api::encode(f, bytes);
+  for (uint8_t i = 0; i < hardware_api::kFrameSize; ++i) g.receiveArduino(bytes[i], now);
 }
 
 static void ready(Gateway& g, uint32_t now = 250) {
@@ -31,18 +31,18 @@ static void ready(Gateway& g, uint32_t now = 250) {
 }
 
 static void vector_round_trip() {
-  // Frozen published temperature vector. Values are not computed by this test.
-  const uint8_t in[20] = {0xA5,0x5A,1,1,0,1,13,0x20,0,0,0,0,0,0,0,0,0,0,0x96,0xC2};
-  const uint8_t out[20] = {0xA5,0x5A,1,2,0,1,13,0x20,0,0,0,0,9,0xF6,3,0,0,0,0x54,0x0A};
+  // Transparent temperature exchange; independent frozen vectors are tested across repositories.
+  uint8_t in[hardware_api::kFrameSize]; Frame req = request(13,1); hardware_api::encode(req,in);
+  uint8_t out[hardware_api::kFrameSize]; Frame reply = hardware_api::response(req); reply.data[2]=9; reply.data[3]=0xF6; reply.data[4]=3; hardware_api::encode(reply,out);
   Gateway g(13); ready(g);
-  for (uint8_t i = 0; i < 20; ++i) g.receiveBus(in[i], 251 + i * 8);
+  for (uint8_t i = 0; i < hardware_api::kFrameSize; ++i) g.receiveBus(in[i], 251 + i * 8);
   Frame f; assert(g.takeArduinoRequest(f));
-  uint8_t raw[20]; hardware_api::encode(f, raw);
-  assert(memcmp(in, raw, 20) == 0);
+  uint8_t raw[hardware_api::kFrameSize]; hardware_api::encode(f, raw);
+  assert(memcmp(in, raw, hardware_api::kFrameSize) == 0);
   assert(!g.takeArduinoRequest(f));
-  for (uint8_t i = 0; i < 20; ++i) g.receiveArduino(out[i], 500 + i * 5);
+  for (uint8_t i = 0; i < hardware_api::kFrameSize; ++i) g.receiveArduino(out[i], 500 + i * 5);
   assert(g.takeHubResponse(f)); hardware_api::encode(f, raw);
-  assert(memcmp(out, raw, 20) == 0);
+  assert(memcmp(out, raw, hardware_api::kFrameSize) == 0);
   assert(!g.takeHubResponse(f));
   g.hubResponseSent(750); assert(g.state() == Gateway::Idle);
 }
@@ -72,7 +72,7 @@ static void correlation() {
   Gateway g(14); ready(g); Frame f = request(), received;
   bus(g, f, 251); assert(g.takeArduinoRequest(received));
   const Frame success = hardware_api::response(f);
-  for (uint8_t field = 0; field < 6; ++field) {
+  for (uint8_t field = 0; field < 7; ++field) {
     Frame wrong = success;
     switch (field) {
       case 0: ++wrong.tx_id; break;
@@ -80,9 +80,10 @@ static void correlation() {
       case 2: ++wrong.command; break;
       case 3: ++wrong.idx; break;
       case 4: wrong.kind = 1; break;
-      case 5: wrong.version = 2; break;
+      case 5: wrong.version = 1; break;
+      case 6: ++wrong.session_id; break;
     }
-    arduino(g, wrong, 300 + field * 20);
+    arduino(g, wrong, 300 + field * hardware_api::kFrameSize);
     assert(!g.takeHubResponse(received));
   }
   Frame malformed = success; malformed.status = 1; malformed.data[0] = 1;
@@ -127,8 +128,8 @@ static void busy_is_deferred() {
 
 static void crc_truncation_and_wrap() {
   Gateway g(14); ready(g); Frame f = request(), result;
-  uint8_t bytes[20]; hardware_api::encode(f, bytes); bytes[19] ^= 1;
-  for (uint8_t i = 0; i < 20; ++i) g.receiveBus(bytes[i], 300);
+  uint8_t bytes[hardware_api::kFrameSize]; hardware_api::encode(f, bytes); bytes[hardware_api::kFrameSize - 1] ^= 1;
+  for (uint8_t i = 0; i < hardware_api::kFrameSize; ++i) g.receiveBus(bytes[i], 300);
   assert(!g.takeArduinoRequest(result)); assert(!g.takeHubResponse(result));
   hardware_api::encode(f, bytes);
   for (uint8_t i = 0; i < 10; ++i) g.receiveBus(bytes[i], 400);

@@ -4,7 +4,7 @@
 using namespace hardware_api;
 using tjc_hub::Hub;
 static Frame request(uint8_t node = 14, uint8_t cmd = kSetPwm) {
-  Frame frame = {}; frame.version = 1; frame.kind = kRequest;
+  Frame frame = {}; frame.version = hardware_api::kVersion; frame.kind = kRequest;
   frame.tx_id = 123; frame.node = node; frame.command = cmd;
   frame.data[0] = cmd == kSetPwm ? 100 : 0;
   return frame;
@@ -26,6 +26,8 @@ int main() {
     Hub hub; hub.tick(250); assert(hub.state()==Hub::Idle);
     const Frame req=request(); start(hub,req);
     Frame reply=response(req); reply.data[0]=230;
+    Frame old_session=reply; ++old_session.session_id; feed(hub,old_session,490);
+    assert(!hub.takeHostResponse(out));
     Frame wrong=reply; ++wrong.tx_id; feed(hub,wrong,500);
     assert(!hub.takeHostResponse(out));
     wrong=reply; wrong.status=5; feed(hub,wrong,510);
@@ -88,7 +90,7 @@ int main() {
       if(command==kGetMode) req.idx=0xff;
       start(hub,req);
       Frame reply=response(req);
-      Frame wrong=reply; wrong.version=2; feed(hub,wrong,500);
+      Frame wrong=reply; wrong.version=1; feed(hub,wrong,500);
       wrong=reply; wrong.node^=1; feed(hub,wrong,510);
       wrong=reply; wrong.command^=1; feed(hub,wrong,520);
       wrong=reply; wrong.idx^=1; feed(hub,wrong,530);
