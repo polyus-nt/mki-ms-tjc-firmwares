@@ -52,6 +52,17 @@ class RuntimeTests(unittest.TestCase):
             self.assertTrue((Path(tmp) / "hub/platform/UART.hpp").is_file())
             self.assertFalse((Path(tmp) / "hub/platform/arduino_link.c").exists())
             self.assertTrue((Path(tmp) / "gateways/platform/arduino_link.c").is_file())
+            self.assertFalse((Path(tmp) / "hub-test").exists())
+
+    def test_hub_test_is_separate_opt_in_target(self):
+        with tempfile.TemporaryDirectory(prefix="hub test build ") as tmp:
+            result = subprocess.run([sys.executable, str(ROOT / "scripts/build.py"),
+                                     "--target", "hub-test", "--prepare-only", "--out", tmp],
+                                    cwd=tmp, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((Path(tmp) / "hub-test/platform/UART.hpp").is_file())
+            self.assertFalse((Path(tmp) / "hub").exists())
+            self.assertFalse((Path(tmp) / "hub-test/platform/ArduinoAdapter.hpp").exists())
 
     def test_windows_exe_tool_names_and_missing_tools(self):
         with tempfile.TemporaryDirectory(prefix="ARM GCC ") as tmp:
