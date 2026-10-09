@@ -51,7 +51,9 @@ class RuntimeTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertTrue((Path(tmp) / "hub/platform/UART.hpp").is_file())
             self.assertFalse((Path(tmp) / "hub/platform/arduino_link.c").exists())
+            self.assertNotIn("hub_test::uart_rx_count", (Path(tmp) / "hub/platform/UART.hpp").read_text())
             self.assertTrue((Path(tmp) / "gateways/platform/arduino_link.c").is_file())
+            self.assertNotIn("hub_test::uart_rx_count", (Path(tmp) / "gateways/platform/UART.hpp").read_text())
             self.assertFalse((Path(tmp) / "hub-test").exists())
 
     def test_hub_test_is_separate_opt_in_target(self):
@@ -63,6 +65,11 @@ class RuntimeTests(unittest.TestCase):
             self.assertTrue((Path(tmp) / "hub-test/platform/UART.hpp").is_file())
             self.assertTrue((Path(tmp) / "hub-test/platform/LED.h").is_file())
             self.assertTrue((Path(tmp) / "hub-test/platform/PWMInit.hpp").is_file())
+            uart = (Path(tmp) / "hub-test/platform/UART.hpp").read_text()
+            self.assertEqual(uart.count("++hub_test::uart_rx_count"), 1)
+            handler = uart[uart.index("void UARTInsertion__(USART, _IRQHandlerSimpleBus)"):]
+            self.assertLess(handler.index("USART_ISR_RXNE_RXFNE"), handler.index("-> RDR"))
+            self.assertLess(handler.index("++hub_test::uart_rx_count"), handler.index("// save to buffer"))
             self.assertFalse((Path(tmp) / "hub").exists())
             self.assertFalse((Path(tmp) / "hub-test/platform/ArduinoAdapter.hpp").exists())
 

@@ -2,7 +2,7 @@
 """Build handwritten main-a4 hub using the pinned, verified SimpleBus runtime."""
 import argparse
 from pathlib import Path
-from build_gateways import FILES, REVISION, find_tools, prepare_runtime, run
+from build_gateways import FILES, REVISION, find_tools, prepare_runtime, replace_once, run
 
 LED_FILES = {
     "LED.h": "025c3116db4eebcbde5cd082a5e42bf71ce3522ee15bfac5b61b5a939ea7f68b",
@@ -10,6 +10,19 @@ LED_FILES = {
     "PWMInit.hpp": "dc59b198513aed95034a465102b16f2dfc9e97ac03c070c587bb6c69516ed033",
     "Connector.hpp": "a634b3fac8a97e23c5912d6900f9626611319f2ac12d8418c2f99553adcb4a2a",
 }
+
+
+def patch_test_uart(text):
+    """Observe actual RX bytes before SimpleBus parsing; only in hub-test copy."""
+    start = text.index("void UARTInsertion__(USART, _IRQHandlerSimpleBus) (void)")
+    head, handler = text[:start], text[start:]
+    handler = replace_once(handler,
+        "uint8_t gotByte = UARTConcat__(USART) -> RDR;",
+        """// Test only: observe RXNE before reading RDR clears it.
+                if (UARTConcat__(USART)->ISR & USART_ISR_RXNE_RXFNE)
+                    ++hub_test::uart_rx_count;
+                uint8_t gotByte = UARTConcat__(USART) -> RDR;""")
+    return head + handler
 
 
 def main():
@@ -35,6 +48,9 @@ def main():
     source = (args.compiler_root.resolve() / "compiler/library/tjc-ms1-main-a4/1.0/source"
               if args.compiler_root else root / "firmware/runtime")
     prepare_runtime(source, platform, files)
+    if args.test_echo:
+        uart = platform / "UART.hpp"
+        uart.write_text(patch_test_uart(uart.read_text()), encoding="utf-8")
     if args.prepare_only:
         print("Verified and patched main-a4 runtime in", platform)
         return
