@@ -8,8 +8,40 @@
   `tjc-ms1-ard-a1/1.0`, адреса 13 и 14.
 - [Общий аппаратный протокол](../tjc-commutator/docs/HARDWARE-PROTOCOL.md).
 
-Сборка: `python3 scripts/build_hub.py --compiler-root /path/to/lapki-compiler`
-и `python3 scripts/build_gateways.py --compiler-root /path/to/lapki-compiler`.
+## Сборка одной командой
+
+Нужны Make, Python 3 и ARM GCC (`arm-none-eabi-g++`, `arm-none-eabi-objcopy`,
+`arm-none-eabi-size`) в PATH, а также исходники lapki-compiler ревизии
+`c0e235f364f21b1a7ba8dbb598ef0bc983511af6`.
+
+Из каталога `tjc-sketch`:
+
+```sh
+make build COMPILER_ROOT=/path/to/lapki-compiler
+```
+
+Если lapki-compiler лежит рядом с проектом (`../lapki-compiler`), достаточно
+`make build` (или просто `make`). Отдельные цели: `make build-hub` и
+`make build-gateways`; справка — `make help`. Все цели сборки используют
+одинаковые параметры COMPILER_ROOT, TOOLCHAIN_BIN и PYTHON.
+Если ARM-инструменты не в PATH, добавьте `TOOLCHAIN_BIN=/path/to/arm/bin`.
+
+Для Nix можно получить зависимости без системной установки:
+
+```sh
+nix --extra-experimental-features 'nix-command flakes' shell \
+  nixpkgs#gnumake nixpkgs#python3 nixpkgs#gcc-arm-embedded \
+  --command make build COMPILER_ROOT=/path/to/lapki-compiler
+```
+
+Готовые `.bin`, `.elf` и `.map`:
+
+- `build/hub/sketch.*` — центральный хаб;
+- `build/gateways/sensors/sketch.*` — шлюз датчиков, адрес 13;
+- `build/gateways/actuator/sketch.*` — шлюз актуаторов, адрес 14.
+
+Команда только собирает, ничего не прошивает. Существующие Python-скрипты
+`scripts/build_hub.py` и `scripts/build_gateways.py` остаются доступны напрямую.
 Ревизия upstream закреплена, подробности и ограничения — в документации выше.
 Старые GraphML и документы ниже сохранены как исторические материалы; они не
 описывают текущий v2 и не входят в сборку прошивок.
