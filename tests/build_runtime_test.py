@@ -61,6 +61,8 @@ class RuntimeTests(unittest.TestCase):
                                     cwd=tmp, capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertTrue((Path(tmp) / "hub-test/platform/UART.hpp").is_file())
+            self.assertTrue((Path(tmp) / "hub-test/platform/LED.h").is_file())
+            self.assertTrue((Path(tmp) / "hub-test/platform/PWMInit.hpp").is_file())
             self.assertFalse((Path(tmp) / "hub").exists())
             self.assertFalse((Path(tmp) / "hub-test/platform/ArduinoAdapter.hpp").exists())
 

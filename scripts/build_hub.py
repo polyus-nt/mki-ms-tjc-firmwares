@@ -4,6 +4,13 @@ import argparse
 from pathlib import Path
 from build_gateways import FILES, REVISION, find_tools, prepare_runtime, run
 
+LED_FILES = {
+    "LED.h": "025c3116db4eebcbde5cd082a5e42bf71ce3522ee15bfac5b61b5a939ea7f68b",
+    "PWM.hpp": "44aaf6df004ed7144c703c470ce55e5baa18376c7e593228ecb8e89c3edf4e1e",
+    "PWMInit.hpp": "dc59b198513aed95034a465102b16f2dfc9e97ac03c070c587bb6c69516ed033",
+    "Connector.hpp": "a634b3fac8a97e23c5912d6900f9626611319f2ac12d8418c2f99553adcb4a2a",
+}
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -23,6 +30,8 @@ def main():
     # Exclude Arduino-specific files: the hub has no Austere hardware interface.
     files = {name: sha for name, sha in FILES.items()
              if name not in ("ArduinoAdapter.hpp", "arduino_link.c")}
+    if args.test_echo:
+        files.update(LED_FILES)
     source = (args.compiler_root.resolve() / "compiler/library/tjc-ms1-main-a4/1.0/source"
               if args.compiler_root else root / "firmware/runtime")
     prepare_runtime(source, platform, files)
@@ -31,7 +40,9 @@ def main():
         return
     tools = find_tools(args.toolchain_bin)
     elf = out / "sketch.elf"
-    run([tools["arm-none-eabi-g++"], "-std=gnu++11", "-mcpu=cortex-m0plus",
+    # Upstream PWMInit.hpp uses C++14 digit separators in integer literals.
+    standard = "-std=gnu++14" if args.test_echo else "-std=gnu++11"
+    run([tools["arm-none-eabi-g++"], standard, "-mcpu=cortex-m0plus",
          "-mthumb", "-DSTM32G030x6", '-D_FIR_GIT_REV="' + REVISION + '"',
          "-I", platform, "-T", platform / "tjc-ms1-b4272ba421624bbe-usercode.ld",
          platform / "startup_stm32g030xx.s", root / "firmware" / variant / "sketch.cpp",
