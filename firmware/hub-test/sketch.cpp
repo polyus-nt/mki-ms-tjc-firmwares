@@ -28,11 +28,11 @@ int main() {
   __disable_irq();
   LED heartbeat(1);
   LED uart_received(2);   // LED.h main-a4: PA6.
-  LED packet_received(3); // LED.h main-a4: PA7.
+  LED tx_pending(3); // LED.h main-a4: PA7; пакет принят, отправка ещё не завершена.
   heartbeat.on();
   __set_PRIMASK(saved_irq);
   uint32_t last_blink = millis();
-  bool saw_uart = false, saw_packet = false;
+  bool saw_uart = false;
   for (;;) {
     const uint32_t now = millis();
     // Неблокирующее мигание: приём SimpleBus продолжается между переключениями.
@@ -48,14 +48,16 @@ int main() {
     }
     if (bus.packetReceived()) {
       // Пакет прошёл проверку CR/LF и адреса 12, ещё ДО отправки ответа.
-      if (!saw_packet) {
-        packet_received.on();
-        saw_packet = true;
-      }
+      tx_pending.on();
       // Компьютер должен дождаться ответа перед отправкой следующего пакета.
-      // Пауза даёт передатчику компьютера время освободить полудуплексную шину.
-      delay(2);
+      // Только для диагностики: короткая видимая вспышка перед передачей.
+      // Пауза также даёт компьютеру время освободить полудуплексную шину.
+      delay(100);
       bus.sendPacket(99, 0xAA);
+      // До этой строки дойдём лишь после возврата sendPacket(): UART дождался
+      // завершения передачи (TC), а драйвер RS485 переведён обратно в приём.
+      // Это НЕ доказывает, что ответ физически дошёл до USB-адаптера.
+      tx_pending.off();
     }
   }
 }
