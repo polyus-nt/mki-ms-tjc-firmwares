@@ -99,20 +99,39 @@ serial-порт, но не заменяют стендовую проверку)
 
 ## Сборка одной командой
 
-Нужны Make, Python 3 и ARM GCC (`arm-none-eabi-g++`, `arm-none-eabi-objcopy`,
-`arm-none-eabi-size`) в PATH, а также исходники lapki-compiler ревизии
-`c0e235f364f21b1a7ba8dbb598ef0bc983511af6`.
+Нужны только Python 3 и ARM GCC (`arm-none-eabi-g++`, `arm-none-eabi-objcopy`,
+`arm-none-eabi-size`). Runtime МС-ТЮК уже находится в [firmware/runtime](firmware/runtime).
+Отдельный lapki-compiler, скачивание исходников и COMPILER_ROOT больше не нужны.
+
+### Windows
+
+В PowerShell/CMD из каталога проекта:
+
+```powershell
+py -3 scripts/build.py
+```
+
+Если ARM GCC не в PATH, укажите каталог с `.exe` инструментов:
+
+```powershell
+py -3 scripts/build.py --toolchain-bin "C:\путь\к\ARM GCC\bin"
+```
+
+Отдельно: `--target hub` или `--target gateways`. Make на Windows не требуется.
+
+### Linux/macOS
 
 Из каталога `tjc-sketch`:
 
 ```sh
-make build COMPILER_ROOT=/path/to/lapki-compiler
+python3 scripts/build.py
+# Либо при установленном Make:
+make build
 ```
 
-Если lapki-compiler лежит рядом с проектом (`../lapki-compiler`), достаточно
-`make build` (или просто `make`). Отдельные цели: `make build-hub` и
+Отдельные цели: `make build-hub` и
 `make build-gateways`; справка — `make help`. Все цели сборки используют
-одинаковые параметры COMPILER_ROOT, TOOLCHAIN_BIN и PYTHON.
+одинаковые параметры TOOLCHAIN_BIN и PYTHON.
 Если ARM-инструменты не в PATH, добавьте `TOOLCHAIN_BIN=/path/to/arm/bin`.
 
 Для Nix можно получить зависимости без системной установки:
@@ -120,7 +139,7 @@ make build COMPILER_ROOT=/path/to/lapki-compiler
 ```sh
 nix --extra-experimental-features 'nix-command flakes' shell \
   nixpkgs#gnumake nixpkgs#python3 nixpkgs#gcc-arm-embedded \
-  --command make build COMPILER_ROOT=/path/to/lapki-compiler
+  --command make build
 ```
 
 Готовые `.bin`, `.elf` и `.map`:
@@ -132,6 +151,9 @@ nix --extra-experimental-features 'nix-command flakes' shell \
 Команда только собирает, ничего не прошивает. Существующие Python-скрипты
 `scripts/build_hub.py` и `scripts/build_gateways.py` остаются доступны напрямую.
 Ревизия upstream закреплена, подробности и ограничения — в документации выше.
+Источник, лицензии и локальные исправления описаны в
+[firmware/runtime/UPSTREAM.md](firmware/runtime/UPSTREAM.md).
+Проверка runtime/CRLF и сборочного входа: `python3 tests/build_runtime_test.py`.
 Старые GraphML и документы ниже сохранены как исторические материалы; они не
 описывают текущий v2 и не входят в сборку прошивок.
 

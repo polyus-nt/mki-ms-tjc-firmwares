@@ -28,15 +28,17 @@ Arduino: шлюз не содержит старую карту оборудов
 `compiler/library/tjc-ms1-ard-a1/1.0/source/`.
 
 Нужны Python 3 и `arm-none-eabi-g++`, `arm-none-eabi-objcopy`,
-`arm-none-eabi-size`. Укажите checkout или распакованный архив этой ревизии:
+`arm-none-eabi-size`. Runtime этой ревизии уже входит в проект:
 
 ```sh
-python3 scripts/build_gateways.py --compiler-root /path/to/lapki-compiler
+python3 scripts/build_gateways.py
 ```
 
 Если ARM-инструменты не в PATH, добавьте `--toolchain-bin /path/to/toolchain/bin`.
 `--prepare-only` проверяет и подготавливает runtime без компиляции.
-Скрипт не скачивает зависимости и не изменяет upstream.
+Runtime уже включён в `firmware/runtime`; отдельный checkout не требуется.
+На Windows: `py -3 scripts/build_gateways.py`, ARM `.exe` выбираются автоматически.
+Скрипт не скачивает зависимости и не изменяет исходники runtime.
 
 Результаты: `build/gateways/sensors/sketch.{elf,bin,map}` и
 `build/gateways/actuator/sketch.{elf,bin,map}`. Каталог build исключён из Git.

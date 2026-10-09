@@ -1,0 +1,67 @@
+"""Local runtime integrity, CRLF compatibility and offline build entry point."""
+import hashlib
+import importlib.util
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+spec = importlib.util.spec_from_file_location("build_gateways", ROOT / "scripts/build_gateways.py")
+builder = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(builder)
+RUNTIME = ROOT / "firmware/runtime"
+
+
+class RuntimeTests(unittest.TestCase):
+    def test_pinned_local_files_and_patches(self):
+        for name, expected in builder.FILES.items():
+            content = (RUNTIME / name).read_bytes().replace(b"\r\n", b"\n")
+            self.assertEqual(hashlib.sha256(content).hexdigest(), expected, name)
+        with tempfile.TemporaryDirectory() as tmp:
+            builder.prepare_runtime(RUNTIME, Path(tmp))
+            uart = (Path(tmp) / "UART.hpp").read_text()
+            self.assertIn("SIZESimpleBus = 64", uart)
+            self.assertIn("bool takeOverflow()", uart)
+            self.assertIn("__set_PRIMASK(saved)", uart)
+            self.assertNotIn("*reinterpret_cast<uint16_t* const>(&interruptBuffer[0])", uart)
+            self.assertIn("Preserve the latched failure", (Path(tmp) / "ArduinoAdapter.hpp").read_text())
+
+    def test_crlf_accepted_but_actual_modification_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source, dest = Path(tmp) / "source", Path(tmp) / "out"
+            shutil.copytree(RUNTIME, source)
+            for name in builder.FILES:
+                path = source / name
+                path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
+            builder.prepare_runtime(source, dest)
+            self.assertNotIn(b"\r\n", (dest / "UART.hpp").read_bytes())
+            uart = source / "UART.hpp"
+            uart.write_bytes(uart.read_bytes().replace(b"SIZESimpleBus = 5", b"SIZESimpleBus = 6"))
+            with self.assertRaisesRegex(ValueError, "UART.hpp"):
+                builder.prepare_runtime(source, dest)
+
+    def test_all_targets_prepare_without_external_compiler(self):
+        with tempfile.TemporaryDirectory(prefix="runtime build ") as tmp:
+            result = subprocess.run([sys.executable, str(ROOT / "scripts/build.py"),
+                                     "--prepare-only", "--out", tmp],
+                                    cwd=tmp, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((Path(tmp) / "hub/platform/UART.hpp").is_file())
+            self.assertFalse((Path(tmp) / "hub/platform/arduino_link.c").exists())
+            self.assertTrue((Path(tmp) / "gateways/platform/arduino_link.c").is_file())
+
+    def test_windows_exe_tool_names_and_missing_tools(self):
+        with tempfile.TemporaryDirectory(prefix="ARM GCC ") as tmp:
+            directory = Path(tmp)
+            for tool in ("arm-none-eabi-g++", "arm-none-eabi-objcopy", "arm-none-eabi-size"):
+                (directory / (tool + ".exe")).write_bytes(b"")
+            self.assertTrue(all(path.endswith(".exe") for path in builder.find_tools(directory).values()))
+        with tempfile.TemporaryDirectory() as tmp, self.assertRaisesRegex(SystemExit,"Missing ARM target tool"):
+            builder.find_tools(Path(tmp))
+
+
+if __name__ == "__main__":
+    unittest.main()

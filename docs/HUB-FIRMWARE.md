@@ -77,14 +77,17 @@ v2 содержит 64-битную session_id: Arduino копирует её в
 ## Сборка и проверки
 
 ```sh
-python3 scripts/build_hub.py --compiler-root /path/to/lapki-compiler
+python3 scripts/build_hub.py
 g++ -std=c++11 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
   tests/hub_test.cpp -o /tmp/tjc-hub-test
 ASAN_OPTIONS=detect_leaks=0 /tmp/tjc-hub-test
 ```
 
-Для ARM tools вне PATH: `--toolchain-bin /path/to/bin`. `--prepare-only` проверяет
-runtime без компиляции. Проверяются SHA-256 всех используемых upstream файлов;
+Для ARM tools вне PATH: `--toolchain-bin /path/to/bin`.
+Runtime находится в `firmware/runtime`: отдельный lapki-compiler не нужен.
+На Windows запускайте `py -3 scripts/build_hub.py`.
+`--prepare-only` проверяет runtime без компиляции. Проверяются SHA-256
+исходников после нормализации CRLF в LF;
 готовится локальная копия с теми же исправлениями SimpleBus, что и у шлюзов:
 64-ячейковая FIFO, overflow, безопасные короткие IRQ-секции и побайтный сдвиг
 без невыравненных halfword-доступов. Upstream не изменяется, зависимостей скрипт

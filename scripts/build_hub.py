@@ -2,13 +2,13 @@
 """Build handwritten main-a4 hub using the pinned, verified SimpleBus runtime."""
 import argparse
 from pathlib import Path
-import shutil
-from build_gateways import FILES, REVISION, prepare_runtime, run
+from build_gateways import FILES, REVISION, find_tools, prepare_runtime, run
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--compiler-root", type=Path, required=True)
+    parser.add_argument("--compiler-root", type=Path,
+                        help="optional external runtime override; default: firmware/runtime")
     parser.add_argument("--out", type=Path)
     parser.add_argument("--toolchain-bin", type=Path)
     parser.add_argument("--prepare-only", action="store_true")
@@ -20,17 +20,13 @@ def main():
     # Exclude Arduino-specific files: the hub has no Austere hardware interface.
     files = {name: sha for name, sha in FILES.items()
              if name not in ("ArduinoAdapter.hpp", "arduino_link.c")}
-    source = args.compiler_root.resolve() / "compiler/library/tjc-ms1-main-a4/1.0/source"
+    source = (args.compiler_root.resolve() / "compiler/library/tjc-ms1-main-a4/1.0/source"
+              if args.compiler_root else root / "firmware/runtime")
     prepare_runtime(source, platform, files)
     if args.prepare_only:
         print("Verified and patched main-a4 runtime in", platform)
         return
-    tools = {}
-    for tool in ("arm-none-eabi-g++", "arm-none-eabi-objcopy", "arm-none-eabi-size"):
-        located = str(args.toolchain_bin / tool) if args.toolchain_bin else shutil.which(tool)
-        if not located or not Path(located).is_file():
-            raise SystemExit("Missing ARM target tool: " + tool)
-        tools[tool] = located
+    tools = find_tools(args.toolchain_bin)
     elf = out / "sketch.elf"
     run([tools["arm-none-eabi-g++"], "-std=gnu++11", "-mcpu=cortex-m0plus",
          "-mthumb", "-DSTM32G030x6", '-D_FIR_GIT_REV="' + REVISION + '"',

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build both handwritten ARM gateways from a verified lapki-compiler snapshot."""
+"""Build both handwritten ARM gateways using the runtime stored in this project."""
 import argparse
 import hashlib
 from pathlib import Path
@@ -81,7 +81,8 @@ def patch_uart(text):
 def prepare_runtime(source, dest, files=None):
     dest.mkdir(parents=True, exist_ok=True)
     for filename, expected in (FILES if files is None else files).items():
-        contents = (source / filename).read_bytes()
+        # Git Windows может заменить LF на CRLF; проверяем содержание, не ОС.
+        contents = (source / filename).read_bytes().replace(b"\r\n", b"\n")
         if hashlib.sha256(contents).hexdigest() != expected:
             raise ValueError("Wrong upstream revision or modified file: " + filename)
         if filename == "UART.hpp":
@@ -101,10 +102,24 @@ def run(command):
     subprocess.run(list(map(str, command)), check=True)
 
 
+def find_tools(directory=None):
+    tools = {}
+    for tool in ("arm-none-eabi-g++", "arm-none-eabi-objcopy", "arm-none-eabi-size"):
+        if directory:
+            located = next((str(directory / name) for name in (tool, tool + ".exe")
+                            if (directory / name).is_file()), None)
+        else:
+            located = shutil.which(tool)
+        if not located:
+            raise SystemExit("Missing ARM target tool: " + tool + "; use --toolchain-bin or PATH")
+        tools[tool] = located
+    return tools
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--compiler-root", type=Path, required=True,
-                        help="lapki-compiler checkout/archive at " + REVISION)
+    parser.add_argument("--compiler-root", type=Path,
+                        help="optional external runtime override; default: firmware/runtime")
     parser.add_argument("--out", type=Path)
     parser.add_argument("--toolchain-bin", type=Path,
                         help="Directory of ARM GCC tools, otherwise use PATH")
@@ -112,18 +127,14 @@ def main():
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     out = (args.out or root / "build" / "gateways").resolve()
-    source = args.compiler_root.resolve() / "compiler/library/tjc-ms1-ard-a1/1.0/source"
+    source = (args.compiler_root.resolve() / "compiler/library/tjc-ms1-ard-a1/1.0/source"
+              if args.compiler_root else root / "firmware/runtime")
     platform = out / "platform"
     prepare_runtime(source, platform)
     if args.prepare_only:
         print("Verified and patched pinned runtime in", platform)
         return
-    tools = {}
-    for tool in ("arm-none-eabi-g++", "arm-none-eabi-objcopy", "arm-none-eabi-size"):
-        located = str(args.toolchain_bin / tool) if args.toolchain_bin else shutil.which(tool)
-        if not located or not Path(located).is_file():
-            raise SystemExit("Missing ARM target tool: " + tool)
-        tools[tool] = located
+    tools = find_tools(args.toolchain_bin)
     for name, node in (("sensors", 13), ("actuator", 14)):
         target = out / name
         target.mkdir(parents=True, exist_ok=True)
