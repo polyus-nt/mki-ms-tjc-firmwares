@@ -1,6 +1,7 @@
 """Standard-library tests; PTY is an adapter simulator, not a hardware proof."""
 import binascii
 import importlib.util
+import io
 import os
 from pathlib import Path
 import select
@@ -11,6 +12,7 @@ import time
 import unittest
 from unittest.mock import patch
 from types import SimpleNamespace
+from contextlib import redirect_stdout
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location("sensor_console", ROOT / "scripts/sensor_console.py")
@@ -26,6 +28,68 @@ def response(request, data=bytes(8), status=0):
 
 
 class ConsoleTests(unittest.TestCase):
+    def test_raw_trace_keeps_noise_and_reports_timeout_bytes(self):
+        class FakePort:
+            def __init__(self, chunk):
+                self.chunk = chunk
+                self.now = 0
+            def send(self, packet):
+                pass
+            def read(self, timeout):
+                self.now += 1
+                chunk, self.chunk = self.chunk, b""
+                return chunk
+        request = console.request_frame(0x20, 0, 1, 1)
+        for chunk in (b"", b"legacy\r63\x0c\n"):
+            port, trace = FakePort(chunk), []
+            with patch.object(console.time, "monotonic", side_effect=lambda: port.now):
+                with self.assertRaisesRegex(TimeoutError, f"сырых байтов RX: {len(chunk)}"):
+                    console.exchange(port, request, trace.append)
+            self.assertTrue(trace[0].startswith("TX RAW: 0D 30 43 A5 0A"))
+            if chunk:
+                self.assertIn("RX RAW: " + chunk.hex(" ").upper(), trace)
+
+    def test_raw_trace_and_matching_response(self):
+        request = console.request_frame(0x20, 3, 1, 1)
+        stale = response(console.request_frame(0x20, 3, 2, 1), status=1)
+        reply = response(request, status=1)
+        chunks = [b"noise", b"".join(console.envelope(b, 99) for b in stale + reply)]
+        port = SimpleNamespace(send=lambda packet: None, read=lambda timeout: chunks.pop(0))
+        trace = []
+        self.assertEqual(console.exchange(port, request, trace.append), reply)
+        self.assertIn("RX RAW: 6E 6F 69 73 65", trace)
+        self.assertTrue(any("другого запроса/версии" in line for line in trace))
+
+    def test_probe_command_uses_hub_validation_only(self):
+        class FakePort:
+            def __init__(self, path):
+                self.sent = bytearray()
+                self.closed = False
+            def quiet(self, trace=None):
+                pass
+            def send(self, packet):
+                self.sent.extend(packet)
+            def read(self, timeout):
+                request = bytes(self.sent[3::5])
+                self_request = console.request_frame(0x20, 3,
+                    int.from_bytes(request[4:6], "big"), int.from_bytes(request[18:26], "big"))
+                if request != self_request:
+                    raise AssertionError("Probe must be GET_TEMP with invalid index 3")
+                return b"".join(console.envelope(b, 99) for b in response(request, status=1))
+            def close(self):
+                self.closed = True
+        port = FakePort("test")
+        output = io.StringIO()
+        with patch.object(sys, "argv", ["sensor_console.py", "test", "--raw"]), \
+                patch.object(console, "Port", return_value=port), \
+                patch.object(console, "WindowsPort", return_value=port), \
+                patch("builtins.input", side_effect=["probe", "exit"]), redirect_stdout(output):
+            console.main()
+        self.assertTrue(port.closed)
+        self.assertIn("HUB_OK:", output.getvalue())
+        self.assertIn("RX RAW:", output.getvalue())
+        self.assertNotIn("Ошибка 1", output.getvalue())
+
     def test_windows_backend_without_windows_hardware(self):
         class Serial:
             def __init__(self, **kwargs):

@@ -18,7 +18,7 @@ STATUSES = ("OK", "INVALID_INDEX", "INVALID_ARGUMENT", "UNKNOWN_COMMAND",
             "NOT_IMPLEMENTED", "SENSOR_UNAVAILABLE", "BUSY", "DEVICE_TIMEOUT",
             "UNSUPPORTED_VERSION", "INTERNAL_ERROR", "REQUEST_ID_CONFLICT",
             "INVALID_NODE", "TRANSPORT_OVERFLOW")
-HELP = "temp 0..2 | pressure 0..2 | voc 0..1 | humidity 0..2 | dust 0..1 | help | exit"
+HELP = "probe (проверка хаба) | temp 0..2 | pressure 0..2 | voc 0..1 | humidity 0..2 | dust 0..1 | help | exit"
 
 
 def parse_command(line):
@@ -153,12 +153,15 @@ class Port:
         self.termios.tcdrain(self.fd)
         time.sleep(.002)
 
-    def quiet(self):
+    def quiet(self, trace=None):
         started = last = time.monotonic()
         while time.monotonic() - last < 1:
             if time.monotonic() - started >= 3:
                 raise OSError("На шине нет секунды тишины; проверьте другие инициаторы")
-            if self.read(.05):
+            data = self.read(.05)
+            if data:
+                if trace:
+                    trace("RX RAW (ожидание тишины): " + data.hex(" ").upper())
                 last = time.monotonic()
 
     def close(self):
@@ -214,27 +217,44 @@ def list_ports():
     return sorted(glob.glob("/dev/ttyUSB*") + glob.glob("/dev/ttyACM*") + glob.glob("/dev/cu.*"))
 
 
-def exchange(port, request):
+def exchange(port, request, trace=None):
     parser = ReplyParser()
-    deadline = time.monotonic() + 5
+    started = time.monotonic()
+    deadline = started + 5
+    received = 0
+    if trace:
+        trace("TX RAW: " + b"".join(envelope(byte) for byte in request).hex(" ").upper())
     for byte in request:
         port.send(envelope(byte))
+    if trace:
+        trace(f"TX: отправлено 28 пакетов SimpleBus (140 байт) за {time.monotonic()-started:.3f} с")
     while time.monotonic() < deadline:
-        for reply in parser.feed(port.read(min(.05, deadline-time.monotonic())), time.monotonic()):
+        chunk = port.read(max(0, min(.05, deadline-time.monotonic())))
+        received += len(chunk)
+        if chunk and trace:
+            trace("RX RAW: " + chunk.hex(" ").upper())
+        for reply in parser.feed(chunk, time.monotonic()):
             if (reply[2:4] == b"\x02\x02" and reply[4:8] == request[4:8]
                     and reply[9] == request[9] and reply[18:26] == request[18:26]):
                 try:
                     describe(reply)
-                except ValueError:
+                except ValueError as error:
+                    if trace:
+                        trace(f"RX API отклонён: {error}; " + reply.hex(" ").upper())
                     continue
                 return reply
-    raise TimeoutError("HOST_TIMEOUT: подходящий ответ от хаба не пришёл за 5 с")
+            elif trace:
+                trace("RX API другого запроса/версии: " + reply.hex(" ").upper())
+    detail = ("сырых байтов RX: 0 — порт не вернул ни одного байта"
+              if not received else f"сырых байтов RX: {received} — данные пришли, подходящий ответ не разобран")
+    raise TimeoutError("HOST_TIMEOUT: подходящий ответ от хаба не пришёл за 5 с; " + detail)
 
 
 def main():
     args = argparse.ArgumentParser(description=__doc__)
     args.add_argument("port", nargs="?", help="порт адаптера МС-ТЮК, например COM3 или /dev/ttyUSB0")
     args.add_argument("--hex", action="store_true", help="показывать кадры TX/RX без SimpleBus-обёртки")
+    args.add_argument("--raw", action="store_true", help="показывать все сырые RX до фильтрации, TX и длительность отправки")
     args.add_argument("--list-ports", action="store_true")
     options = args.parse_args()
     if options.list_ports:
@@ -248,8 +268,9 @@ def main():
     port = None
     try:
         port = WindowsPort(options.port) if os.name == "nt" else Port(options.port)
+        trace = (lambda message: print(message, flush=True)) if options.raw else None
         print("9600, 8N1. Через ХАБ 12 и шлюз sensors 13. Закройте commutator/другие владельцы порта.")
-        port.quiet()
+        port.quiet(trace)
         print(HELP)
         session, tx = secrets.randbits(64) or 1, 1
         while True:
@@ -262,7 +283,10 @@ def main():
                 print(HELP)
                 continue
             try:
-                command, idx = parse_command(line)
+                # Индекс 3 не существует: хаб сам отвечает INVALID_INDEX,
+                # не отправляя запрос шлюзу. Проверяем только PC <-> Hub.
+                probe = line == "probe"
+                command, idx = (0x20, 3) if probe else parse_command(line)
             except ValueError as error:
                 print(error)
                 continue
@@ -273,16 +297,21 @@ def main():
             if options.hex:
                 print("TX HEX:", request.hex(" ").upper())
             try:
-                reply = exchange(port, request)
+                reply = exchange(port, request, trace)
             except TimeoutError as error:
                 print(error)
-                port.quiet()
+                port.quiet(trace)
                 continue  # no automatic retry
-            print(describe(reply))
+            if probe and reply[8] == 1:
+                print("HUB_OK: хаб ответил INVALID_INDEX, как и ожидалось. Шлюз и Arduino не участвовали.")
+            elif probe:
+                print("HUB_PROBE: неожиданный ответ; " + describe(reply))
+            else:
+                print(describe(reply))
             if options.hex:
                 print("RX HEX:", reply.hex(" ").upper())
             if reply[8] in (7, 9, 12):
-                port.quiet()
+                port.quiet(trace)
     except (KeyboardInterrupt, EOFError):
         print("\nКонсоль закрыта.")
     except (OSError, ImportError) as error:
