@@ -10,7 +10,33 @@
 
 ## Проверка хаба и датчиков без сервера
 
-Интерактивная read-only консоль (Linux/macOS, только стандартная библиотека Python 3):
+Интерактивная read-only консоль для Windows/Linux/macOS. Для Windows нужен Python 3
+и pyserial; для Linux/macOS достаточно стандартной библиотеки Python.
+
+### Windows (PowerShell или CMD)
+
+Из каталога `tjc-sketch`:
+
+```powershell
+py -3 -m pip install pyserial
+py -3 scripts/sensor_console.py --list-ports
+py -3 scripts/sensor_console.py COM3
+```
+
+Замените COM3 на порт адаптера МС-ТЮК из списка или диспетчера устройств.
+Поддерживаются и COM10/COM12 и выше. Для отображения кадров:
+
+```powershell
+py -3 scripts/sensor_console.py COM3 --hex
+```
+
+Если команда `py` отсутствует, используйте `python` вместо `py -3` (Python 3
+должен быть в PATH). Библиотека устанавливается в тот же интерпретатор,
+который запускает скрипт. Источник Windows-backend —
+[pySerial](https://github.com/pyserial/pyserial/blob/master/serial/serialwin32.py).
+Проверены mock-тесты этого backend; реальный COM-адаптер Windows пока не проверялся.
+
+### Linux/macOS
 
 ```sh
 python3 scripts/sensor_console.py --list-ports
@@ -22,6 +48,8 @@ python3 scripts/sensor_console.py /dev/ttyUSB0
 Хаб, шлюз sensors и Arduino должны иметь совместимые прошивки v2;
 на Arduino флаг TEST для этой проверки не требуется, лучше выключить.
 Протокол/уровни адаптера должны соответствовать физической SimpleBus-линии.
+
+### Команды и результаты (одинаковы на всех ОС)
 
 В консоли:
 

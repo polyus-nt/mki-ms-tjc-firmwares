@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Read-only sensor console: PC -> SimpleBus hub -> gateway -> Arduino (v2).
 
-Python standard library only; Linux/macOS. Use the MC-TUK adapter, not Arduino
-USB. No automatic retries. Close the commutator before opening the same adapter.
+Windows requires pyserial; Linux/macOS use the standard library. Use the MC-TUK
+adapter, not Arduino USB. No automatic retries. Close other owners of the port.
 """
 import argparse
 import binascii
@@ -165,6 +165,55 @@ class Port:
         os.close(self.fd)
 
 
+class WindowsPort(Port):
+    def __init__(self, path):
+        try:
+            import serial
+        except ImportError as error:
+            raise ImportError("Установите pyserial: py -3 -m pip install pyserial") from error
+        self.serial = serial.Serial(port=path, baudrate=9600, bytesize=serial.EIGHTBITS,
+                                    parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
+                                    timeout=.05, write_timeout=1,
+                                    xonxoff=False, rtscts=False, dsrdtr=False)
+
+    def read(self, timeout):
+        self.serial.timeout = max(0, timeout)
+        return self.serial.read(1024)
+
+    def send(self, packet):
+        deadline = time.monotonic() + 1
+        earliest_end = time.monotonic() + len(packet) * 10 / 9600
+        while packet:
+            if time.monotonic() >= deadline:
+                raise OSError("Тайм-аут записи")
+            written = self.serial.write(packet)
+            if not written:
+                raise OSError("COM-порт не принимает данные")
+            packet = packet[written:]
+        # pyserial Windows flush polls at 50 ms: 28 packets could exceed the
+        # hub's 1 s frame budget. Use bounded queue polling without that delay.
+        while self.serial.out_waiting:
+            if time.monotonic() >= deadline:
+                raise OSError("Тайм-аут передачи COM-порта")
+            time.sleep(0)
+        gap_end = max(earliest_end, time.monotonic()) + .002
+        while time.monotonic() < gap_end:
+            time.sleep(0)  # yield; avoid coarse Windows sleep(2ms) rounding
+
+    def close(self):
+        self.serial.close()
+
+
+def list_ports():
+    if os.name == "nt":
+        try:
+            from serial.tools import list_ports as serial_ports
+        except ImportError as error:
+            raise ImportError("Установите pyserial: py -3 -m pip install pyserial") from error
+        return [f"{port.device}: {port.description}" for port in serial_ports.comports()]
+    return sorted(glob.glob("/dev/ttyUSB*") + glob.glob("/dev/ttyACM*") + glob.glob("/dev/cu.*"))
+
+
 def exchange(port, request):
     parser = ReplyParser()
     deadline = time.monotonic() + 5
@@ -184,18 +233,21 @@ def exchange(port, request):
 
 def main():
     args = argparse.ArgumentParser(description=__doc__)
-    args.add_argument("port", nargs="?", help="порт адаптера МС-ТЮК, например /dev/ttyUSB0")
+    args.add_argument("port", nargs="?", help="порт адаптера МС-ТЮК, например COM3 или /dev/ttyUSB0")
     args.add_argument("--hex", action="store_true", help="показывать кадры TX/RX без SimpleBus-обёртки")
     args.add_argument("--list-ports", action="store_true")
     options = args.parse_args()
     if options.list_ports:
-        print("\n".join(sorted(glob.glob("/dev/ttyUSB*") + glob.glob("/dev/ttyACM*") + glob.glob("/dev/cu.*"))) or "Порты не найдены")
+        try:
+            print("\n".join(list_ports()) or "Порты не найдены")
+        except (ImportError, OSError) as error:
+            args.exit(1, str(error) + "\n")
         return
     if not options.port:
         args.error("укажите порт адаптера МС-ТЮК или --list-ports")
     port = None
     try:
-        port = Port(options.port)
+        port = WindowsPort(options.port) if os.name == "nt" else Port(options.port)
         print("9600, 8N1. Через ХАБ 12 и шлюз sensors 13. Закройте commutator/другие владельцы порта.")
         port.quiet()
         print(HELP)
@@ -234,7 +286,7 @@ def main():
     except (KeyboardInterrupt, EOFError):
         print("\nКонсоль закрыта.")
     except (OSError, ImportError) as error:
-        args.exit(1, f"Ошибка порта: {error}\nНужны Linux/macOS и доступ к адаптеру МС-ТЮК.\n")
+        args.exit(1, f"Ошибка порта: {error}\nПроверьте имя порта и закройте другие программы, использующие его.\n")
     finally:
         if port is not None:
             port.close()

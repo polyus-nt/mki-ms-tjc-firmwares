@@ -9,6 +9,8 @@ import sys
 import threading
 import time
 import unittest
+from unittest.mock import patch
+from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location("sensor_console", ROOT / "scripts/sensor_console.py")
@@ -24,6 +26,52 @@ def response(request, data=bytes(8), status=0):
 
 
 class ConsoleTests(unittest.TestCase):
+    def test_windows_backend_without_windows_hardware(self):
+        class Serial:
+            def __init__(self, **kwargs):
+                self.options=kwargs; self.writes=[]; self.closed=False
+                self.pending=[1,0]
+            def write(self, data):
+                self.writes.append(data[:2]); return min(2,len(data))
+            @property
+            def out_waiting(self):
+                return self.pending.pop(0) if self.pending else 0
+            def read(self, size):
+                self.size=size; return b"\r63\xa5\n"
+            def close(self):
+                self.closed=True
+        serial=SimpleNamespace(Serial=Serial, EIGHTBITS=8, PARITY_NONE="N", STOPBITS_ONE=1)
+        with patch.dict(sys.modules, {"serial":serial}):
+            port=console.WindowsPort("COM12")
+        self.assertEqual(port.serial.options["port"],"COM12")
+        self.assertEqual(port.serial.options["baudrate"],9600)
+        self.assertFalse(port.serial.options["xonxoff"])
+        self.assertEqual(port.read(.01), b"\r63\xa5\n")
+        self.assertEqual(port.serial.timeout,.01)
+        clock=iter(i*.001 for i in range(3000))
+        with patch.object(console.time,"monotonic",side_effect=lambda: next(clock)), \
+                patch.object(console.time,"sleep"):
+            port.send(b"\r0C\xa5\n")
+        self.assertEqual(b"".join(port.serial.writes),b"\r0C\xa5\n")
+        port.close(); self.assertTrue(port.serial.closed)
+        port.serial.write=lambda data: 0
+        with self.assertRaises(OSError):
+            port.send(b"\r0C\xa5\n")
+        port.serial.write=lambda data: len(data)
+        port.serial.pending=[1]*2000
+        clock=iter(i*.01 for i in range(3000))
+        with patch.object(console.time,"monotonic",side_effect=lambda: next(clock)), \
+                patch.object(console.time,"sleep"), self.assertRaises(OSError):
+            port.send(b"\r0C\xa5\n")
+
+    def test_windows_port_list_and_missing_dependency(self):
+        ports=SimpleNamespace(comports=lambda: [SimpleNamespace(device="COM12", description="USB adapter")])
+        with patch.object(console.os,"name","nt"), patch.dict(sys.modules,
+                {"serial":SimpleNamespace(), "serial.tools":SimpleNamespace(list_ports=ports)}):
+            self.assertEqual(console.list_ports(),["COM12: USB adapter"])
+        with patch.dict(sys.modules,{"serial":None}), self.assertRaisesRegex(ImportError,"pip install pyserial"):
+            console.WindowsPort("COM3")
+
     def test_commands_and_golden_request(self):
         self.assertEqual(console.request_frame(0x25, 0, 1, 1), bytes.fromhex(
             "A5 5A 02 01 00 01 0D 25 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 89 2C"))
