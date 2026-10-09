@@ -8,6 +8,67 @@
   `tjc-ms1-ard-a1/1.0`, адреса 13 и 14.
 - [Общий аппаратный протокол](../tjc-commutator/docs/HARDWARE-PROTOCOL.md).
 
+## Проверка хаба и датчиков без сервера
+
+Интерактивная read-only консоль (Linux/macOS, только стандартная библиотека Python 3):
+
+```sh
+python3 scripts/sensor_console.py --list-ports
+python3 scripts/sensor_console.py /dev/ttyUSB0
+```
+
+Укажите **порт адаптера МС-ТЮК**, а не USB Arduino. Закройте commutator и другие
+программы, работающие с тем же портом: на общей шине должен быть один инициатор.
+Хаб, шлюз sensors и Arduino должны иметь совместимые прошивки v2;
+на Arduino флаг TEST для этой проверки не требуется, лучше выключить.
+Протокол/уровни адаптера должны соответствовать физической SimpleBus-линии.
+
+В консоли:
+
+```text
+mstjuk> temp 0
+mstjuk> pressure 1
+mstjuk> voc 0
+mstjuk> humidity 2
+mstjuk> dust 1
+mstjuk> help
+mstjuk> exit
+```
+
+Температура/давление/влажность: idx=0..2; VOC/пыль: idx=0..1.
+Скрипт сам создаёт CRC-кадр v2 и SimpleBus-пакеты хабу 12, получает ответ
+компьютеру 99 через шлюз sensors 13, проверяет реквизиты/CRC/данные и печатает
+значение, единицы, valid/fresh и age_ms. Для просмотра байтов добавьте `--hex`:
+
+```sh
+python3 scripts/sensor_console.py /dev/ttyUSB0 --hex
+```
+
+Пример вывода (не измерение стенда):
+
+```text
+Давление: 100653 Па
+valid=1 fresh=1 age_ms=123
+```
+
+SENSOR_UNAVAILABLE означает отсутствие валидного измерения (для VOC возможен
+прогрев около 45 с); DEVICE_TIMEOUT — нижний узел не ответил; HOST_TIMEOUT —
+подходящий ответ не пришёл за 5 с. Потерянные запросы автоматически не повторяются.
+При старте/после тайм-аута скрипт ждёт 1 с тишины; если за 3 с её нет, закрывается
+с ошибкой. tx_id переиспользуется только после смены session_id.
+Это прямой однопоточный тест, без MCP, SQLite и фонового опроса актуаторов.
+Проверяет только чтения; команды PWM/режимов/замков намеренно отсутствуют.
+
+Если Python не установлен, в Nix:
+
+```sh
+nix --extra-experimental-features 'nix-command flakes' shell nixpkgs#python3 \
+  --command python3 scripts/sensor_console.py /dev/ttyUSB0
+```
+
+Автотесты консоли: `python3 tests/sensor_console_test.py` (включают виртуальный
+serial-порт, но не заменяют стендовую проверку). Консоль не прошивает устройства.
+
 ## Сборка одной командой
 
 Нужны Make, Python 3 и ARM GCC (`arm-none-eabi-g++`, `arm-none-eabi-objcopy`,
