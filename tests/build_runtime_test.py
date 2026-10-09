@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location("build_gateways", ROOT / "scripts/build_gateways.py")
@@ -22,12 +23,12 @@ class RuntimeTests(unittest.TestCase):
             self.assertEqual(hashlib.sha256(content).hexdigest(), expected, name)
         with tempfile.TemporaryDirectory() as tmp:
             builder.prepare_runtime(RUNTIME, Path(tmp))
-            uart = (Path(tmp) / "UART.hpp").read_text()
+            uart = (Path(tmp) / "UART.hpp").read_text(encoding="utf-8")
             self.assertIn("SIZESimpleBus = 64", uart)
             self.assertIn("bool takeOverflow()", uart)
             self.assertIn("__set_PRIMASK(saved)", uart)
             self.assertNotIn("*reinterpret_cast<uint16_t* const>(&interruptBuffer[0])", uart)
-            self.assertIn("Preserve the latched failure", (Path(tmp) / "ArduinoAdapter.hpp").read_text())
+            self.assertIn("Preserve the latched failure", (Path(tmp) / "ArduinoAdapter.hpp").read_text(encoding="utf-8"))
 
     def test_crlf_accepted_but_actual_modification_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -51,9 +52,9 @@ class RuntimeTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertTrue((Path(tmp) / "hub/platform/UART.hpp").is_file())
             self.assertFalse((Path(tmp) / "hub/platform/arduino_link.c").exists())
-            self.assertNotIn("hub_test::uart_rx_count", (Path(tmp) / "hub/platform/UART.hpp").read_text())
+            self.assertNotIn("hub_test::uart_rx_count", (Path(tmp) / "hub/platform/UART.hpp").read_text(encoding="utf-8"))
             self.assertTrue((Path(tmp) / "gateways/platform/arduino_link.c").is_file())
-            self.assertNotIn("hub_test::uart_rx_count", (Path(tmp) / "gateways/platform/UART.hpp").read_text())
+            self.assertNotIn("hub_test::uart_rx_count", (Path(tmp) / "gateways/platform/UART.hpp").read_text(encoding="utf-8"))
             self.assertFalse((Path(tmp) / "hub-test").exists())
 
     def test_hub_test_is_separate_opt_in_target(self):
@@ -65,13 +66,31 @@ class RuntimeTests(unittest.TestCase):
             self.assertTrue((Path(tmp) / "hub-test/platform/UART.hpp").is_file())
             self.assertTrue((Path(tmp) / "hub-test/platform/LED.h").is_file())
             self.assertTrue((Path(tmp) / "hub-test/platform/PWMInit.hpp").is_file())
-            uart = (Path(tmp) / "hub-test/platform/UART.hpp").read_text()
+            uart = (Path(tmp) / "hub-test/platform/UART.hpp").read_text(encoding="utf-8")
             self.assertEqual(uart.count("++hub_test::uart_rx_count"), 1)
             handler = uart[uart.index("void UARTInsertion__(USART, _IRQHandlerSimpleBus)"):]
             self.assertLess(handler.index("USART_ISR_RXNE_RXFNE"), handler.index("-> RDR"))
             self.assertLess(handler.index("++hub_test::uart_rx_count"), handler.index("// save to buffer"))
             self.assertFalse((Path(tmp) / "hub").exists())
             self.assertFalse((Path(tmp) / "hub-test/platform/ArduinoAdapter.hpp").exists())
+
+    def test_hub_test_with_cp1251_default_encoding(self):
+        spec = importlib.util.spec_from_file_location("build_hub", ROOT / "scripts/build_hub.py")
+        hub_builder = importlib.util.module_from_spec(spec)
+        with patch.dict(sys.modules, {"build_gateways": builder}):
+            spec.loader.exec_module(hub_builder)
+        original_read = Path.read_text
+
+        def cp1251_read(path, encoding=None, **kwargs):
+            return original_read(path, encoding=encoding or "cp1251", **kwargs)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(Path, "read_text", cp1251_read), patch.object(sys, "argv",
+                    ["build_hub.py", "--test-echo", "--prepare-only", "--out", tmp]):
+                hub_builder.main()
+            uart = (Path(tmp) / "platform/UART.hpp").read_text(encoding="utf-8")
+            self.assertIn("++hub_test::uart_rx_count", uart)
+            self.assertIn("Здесь реализация модулей UART1", uart)
 
     def test_windows_exe_tool_names_and_missing_tools(self):
         with tempfile.TemporaryDirectory(prefix="ARM GCC ") as tmp:

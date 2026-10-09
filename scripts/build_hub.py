@@ -50,7 +50,7 @@ def main():
     prepare_runtime(source, platform, files)
     if args.test_echo:
         uart = platform / "UART.hpp"
-        uart.write_text(patch_test_uart(uart.read_text()), encoding="utf-8")
+        uart.write_text(patch_test_uart(uart.read_text(encoding="utf-8")), encoding="utf-8")
     if args.prepare_only:
         print("Verified and patched main-a4 runtime in", platform)
         return
