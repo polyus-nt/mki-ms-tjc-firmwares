@@ -2,13 +2,15 @@
 
 Актуальный код без GraphML:
 
+Полная распиновка всех плат: [docs/PINOUT.md](docs/PINOUT.md).
+
 - [Центральный хаб](docs/HUB-FIRMWARE.md): `firmware/hub/sketch.cpp`, плата
   `tjc-ms1-main-a4/1.0`, адрес 12.
 - [Arduino-шлюзы](docs/GATEWAY-FIRMWARE.md): `firmware/gateway/sketch.cpp`,
-  `tjc-ms1-ard-a1/1.0`, адреса 13 и 14.
+  `tjc-ms1-ard-a1/1.0`, адреса 13, 14 и 17.
 - [Кнопочница](docs/BUTTONS-FIRMWARE.md): `firmware/buttons/sketch.cpp`,
   `tjc-ms1-btn-a2/1.0`, адрес 15, концевики на пинах 1 и 2.
-- [Общий аппаратный протокол](../tjc-commutator/docs/HARDWARE-PROTOCOL.md).
+- [Общий аппаратный протокол](../tjc-commutator/docs/PROTOCOL.md).
 
 ## Проверка хаба и датчиков без сервера
 

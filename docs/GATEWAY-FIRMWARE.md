@@ -9,8 +9,9 @@
 
 - `firmware/gateway/sketch.cpp` — одна единица трансляции с аппаратным runtime.
 - `firmware/gateway/Gateway.h` — транспортный автомат без зависимостей от STM32.
-- `firmware/common/HardwareProtocol.h` — копия общего C++11-кодека из
-  `tjc-commutator/firmware/common`; при изменении контракта копии синхронизируются.
+- `firmware/common/HardwareProtocol.h` — общий C++11-кодек и проверка контракта
+  хаба. Arduino имеют локальные проверки своих узлов; FastAPI реализует тот же
+  формат в `tjc-commutator/hub_service/protocol.py`.
 - `scripts/build_gateways.py` — проверка upstream SHA-256, исправление локальной
   сборочной копии runtime и создание трёх комплектов ELF/BIN/MAP.
 - `tests/gateway_test.cpp` — native-проверки автомата и опубликованного кадра.
