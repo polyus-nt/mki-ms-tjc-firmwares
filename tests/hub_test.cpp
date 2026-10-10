@@ -66,7 +66,7 @@ int main() {
     Hub hub; hub.tick(250); Frame req=request(13,kSetPwm);
     feed(hub,req,300); assert(hub.takeHostResponse(out)); assert(out.status==INVALID_NODE);
     hub.hostResponseSent(450); req=request(); req.command=kSetDoorLock;
-    feed(hub,req,500); assert(hub.takeHostResponse(out)); assert(out.status==UNKNOWN_COMMAND);
+    feed(hub,req,500); assert(hub.takeHostResponse(out)); assert(out.status==INVALID_NODE);
   }
   {
     Hub hub; hub.tick(250);
@@ -94,11 +94,16 @@ int main() {
   }
   {
     const uint8_t commands[]={kGetTemp,kGetVoc,kGetDoor,kGetPressure,kGetHumidity,kGetDust,
-                              kGetPwm,kGetRpm,kSetPwm,kGetMode,kSetMode};
+                              kGetPwm,kGetRpm,kSetPwm,kGetMode,kSetMode,
+                              kGetDoorLock,kSetDoorLock,kGetRelayLevel,kSetRelayLevel};
     for (unsigned i=0;i<sizeof(commands);++i) {
       Hub hub; hub.tick(250);
       const uint8_t command=commands[i];
-      Frame req=request(command==kGetDoor ? kButtonsNode : (command<kGetPwm ? 13 : 14),command);
+      const uint8_t node = command == kGetDoor ? kButtonsNode :
+          ((command == kGetDoorLock || command == kSetDoorLock ||
+            command == kGetRelayLevel || command == kSetRelayLevel) ? kLmp8Node :
+           (command < kGetPwm ? kSensorsNode : kActuatorNode));
+      Frame req=request(node,command);
       if(command==kGetMode) req.idx=0xff;
       start(hub,req);
       Frame reply=response(req);

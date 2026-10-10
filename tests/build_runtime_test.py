@@ -55,6 +55,7 @@ class RuntimeTests(unittest.TestCase):
             self.assertNotIn("hub_test::uart_rx_count", (Path(tmp) / "hub/platform/UART.hpp").read_text(encoding="utf-8"))
             self.assertTrue((Path(tmp) / "gateways/platform/arduino_link.c").is_file())
             self.assertTrue((Path(tmp) / "buttons/platform/Button.hpp").is_file())
+            self.assertTrue((Path(tmp) / "lmp8/platform/LEDController.hpp").is_file())
             self.assertFalse((Path(tmp) / "buttons/platform/arduino_link.c").exists())
             self.assertNotIn("hub_test::uart_rx_count", (Path(tmp) / "gateways/platform/UART.hpp").read_text(encoding="utf-8"))
             self.assertFalse((Path(tmp) / "hub-test").exists())
