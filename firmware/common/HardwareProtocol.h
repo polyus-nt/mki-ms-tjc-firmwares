@@ -9,7 +9,7 @@
 namespace hardware_api {
 enum {
   kFrameSize = 28, kVersion = 2, kRequest = 1, kResponse = 2,
-  kSensorsNode = 13, kActuatorNode = 14, kFanCount = 6,
+  kSensorsNode = 13, kActuatorNode = 14, kButtonsNode = 15, kFanCount = 6,
   kGetTemp = 0x20, kGetVoc = 0x21, kGetDoor = 0x22,
   kGetPressure = 0x23, kGetHumidity = 0x24, kGetDust = 0x25,
   kGetPwm = 0x30, kGetRpm = 0x31, kSetPwm = 0x32,
@@ -106,8 +106,10 @@ inline Status validateRequest(const Frame& request, uint8_t localNode) {
   switch (request.command) {
     case kGetTemp: case kGetPressure: case kGetHumidity:
       node = kSensorsNode; count = 3; break;
-    case kGetVoc: case kGetDoor: case kGetDust:
+    case kGetVoc: case kGetDust:
       node = kSensorsNode; count = 2; break;
+    case kGetDoor:
+      node = kButtonsNode; count = 2; break;
     case kGetPwm: case kGetRpm:
       node = kActuatorNode; count = kFanCount; break;
     case kSetPwm: case kSetMode:

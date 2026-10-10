@@ -6,6 +6,8 @@
   `tjc-ms1-main-a4/1.0`, адрес 12.
 - [Arduino-шлюзы](docs/GATEWAY-FIRMWARE.md): `firmware/gateway/sketch.cpp`,
   `tjc-ms1-ard-a1/1.0`, адреса 13 и 14.
+- [Кнопочница](docs/BUTTONS-FIRMWARE.md): `firmware/buttons/sketch.cpp`,
+  `tjc-ms1-btn-a2/1.0`, адрес 15, концевики на пинах 1 и 2.
 - [Общий аппаратный протокол](../tjc-commutator/docs/HARDWARE-PROTOCOL.md).
 
 ## Проверка хаба и датчиков без сервера
@@ -59,11 +61,13 @@ mstjuk> pressure 1
 mstjuk> voc 0
 mstjuk> humidity 2
 mstjuk> dust 1
+mstjuk> door 0
 mstjuk> help
 mstjuk> exit
 ```
 
 Температура/давление/влажность: idx=0..2; VOC/пыль: idx=0..1.
+Концевики: `door 0..1`, отдельная кнопочница на адресе 15, без Arduino.
 Скрипт сам создаёт CRC-кадр v2 и SimpleBus-пакеты хабу 12, получает ответ
 компьютеру 99 через шлюз sensors 13, проверяет реквизиты/CRC/данные и печатает
 значение, единицы, valid/fresh и age_ms. Для просмотра байтов добавьте `--hex`:
@@ -165,7 +169,7 @@ python3 scripts/build.py
 make build
 ```
 
-Отдельные цели: `make build-hub` и
+Отдельные цели: `make build-hub`, `make build-buttons` и
 `make build-gateways`; справка — `make help`. Все цели сборки используют
 одинаковые параметры TOOLCHAIN_BIN и PYTHON.
 Если ARM-инструменты не в PATH, добавьте `TOOLCHAIN_BIN=/path/to/arm/bin`.
@@ -183,6 +187,7 @@ nix --extra-experimental-features 'nix-command flakes' shell \
 - `build/hub/sketch.*` — центральный хаб;
 - `build/gateways/sensors/sketch.*` — шлюз датчиков, адрес 13;
 - `build/gateways/actuator/sketch.*` — шлюз актуаторов, адрес 14.
+- `build/buttons/sketch.*` — кнопочница, адрес 15.
 
 Команда только собирает, ничего не прошивает. Существующие Python-скрипты
 `scripts/build_hub.py` и `scripts/build_gateways.py` остаются доступны напрямую.

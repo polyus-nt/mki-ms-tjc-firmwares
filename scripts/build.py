@@ -8,13 +8,13 @@ import sys
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--target", choices=("all", "hub", "hub-test", "gateways"), default="all")
+    parser.add_argument("--target", choices=("all", "hub", "hub-test", "gateways", "buttons"), default="all")
     parser.add_argument("--toolchain-bin", type=Path, help="ARM GCC bin directory, otherwise PATH")
     parser.add_argument("--out", type=Path, help="build output root, otherwise build/")
     parser.add_argument("--prepare-only", action="store_true")
     args = parser.parse_args()
     scripts = Path(__file__).resolve().parent
-    targets = ("hub", "gateways") if args.target == "all" else (args.target,)
+    targets = ("hub", "gateways", "buttons") if args.target == "all" else (args.target,)
     for target in targets:
         builder = "hub" if target == "hub-test" else target
         command = [sys.executable, str(scripts / f"build_{builder}.py")]

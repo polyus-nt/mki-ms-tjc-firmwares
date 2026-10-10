@@ -69,6 +69,18 @@ int main() {
     feed(hub,req,500); assert(hub.takeHostResponse(out)); assert(out.status==UNKNOWN_COMMAND);
   }
   {
+    Hub hub; hub.tick(250);
+    Frame req=request(kSensorsNode,kGetDoor);
+    feed(hub,req,300); assert(hub.takeHostResponse(out)); assert(out.status==INVALID_NODE);
+    hub.hostResponseSent(450);
+    req=request(kButtonsNode,kGetDoor); req.idx=1;
+    start(hub,req,500);
+    Frame reply=response(req); reply.data[0]=1;
+    feed(hub,reply,700); assert(hub.takeHostResponse(out));
+    assert(out.node==kButtonsNode && out.command==kGetDoor && out.idx==1 && out.data[0]==1);
+    hub.hostResponseSent(850); assert(hub.state()==Hub::Idle);
+  }
+  {
     Hub hub(0xffffff00u); hub.tick(0xfffffffaU); start(hub,request(),0xfffffffbU);
     hub.tick(static_cast<uint32_t>(0xfffffffbU+3000u));
     assert(hub.takeHostResponse(out)); assert(out.status==DEVICE_TIMEOUT);
@@ -86,7 +98,7 @@ int main() {
     for (unsigned i=0;i<sizeof(commands);++i) {
       Hub hub; hub.tick(250);
       const uint8_t command=commands[i];
-      Frame req=request(command<kGetPwm ? 13 : 14,command);
+      Frame req=request(command==kGetDoor ? kButtonsNode : (command<kGetPwm ? 13 : 14),command);
       if(command==kGetMode) req.idx=0xff;
       start(hub,req);
       Frame reply=response(req);

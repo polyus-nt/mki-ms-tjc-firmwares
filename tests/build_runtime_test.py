@@ -54,8 +54,23 @@ class RuntimeTests(unittest.TestCase):
             self.assertFalse((Path(tmp) / "hub/platform/arduino_link.c").exists())
             self.assertNotIn("hub_test::uart_rx_count", (Path(tmp) / "hub/platform/UART.hpp").read_text(encoding="utf-8"))
             self.assertTrue((Path(tmp) / "gateways/platform/arduino_link.c").is_file())
+            self.assertTrue((Path(tmp) / "buttons/platform/Button.hpp").is_file())
+            self.assertFalse((Path(tmp) / "buttons/platform/arduino_link.c").exists())
             self.assertNotIn("hub_test::uart_rx_count", (Path(tmp) / "gateways/platform/UART.hpp").read_text(encoding="utf-8"))
             self.assertFalse((Path(tmp) / "hub-test").exists())
+
+    def test_buttons_target_and_pinned_button_class(self):
+        expected = "3df782c57ce6687d804208585ec54145407f285e58b678fc7a39b4f40a82913a"
+        content = (RUNTIME / "Button.hpp").read_bytes().replace(b"\r\n", b"\n")
+        self.assertEqual(hashlib.sha256(content).hexdigest(), expected)
+        with tempfile.TemporaryDirectory(prefix="buttons build ") as tmp:
+            result = subprocess.run([sys.executable, str(ROOT / "scripts/build.py"),
+                                     "--target", "buttons", "--prepare-only", "--out", tmp],
+                                    cwd=tmp, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            prepared = (Path(tmp) / "buttons/platform/Button.hpp").read_bytes()
+            self.assertEqual(prepared, content)
+            self.assertFalse((Path(tmp) / "hub").exists())
 
     def test_hub_test_is_separate_opt_in_target(self):
         with tempfile.TemporaryDirectory(prefix="hub test build ") as tmp:

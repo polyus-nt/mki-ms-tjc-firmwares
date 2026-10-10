@@ -28,6 +28,22 @@ def response(request, data=bytes(8), status=0):
 
 
 class ConsoleTests(unittest.TestCase):
+    def test_door_routes_to_buttons_and_validates_boolean_payload(self):
+        self.assertEqual(console.parse_command("door 1"), (0x22, 1))
+        with self.assertRaises(ValueError):
+            console.parse_command("door 2")
+        request = console.request_frame(0x22, 1, 42, 99)
+        self.assertEqual(request[6], 15)
+        self.assertIn("закрыта", console.describe(response(request, b"\x01" + bytes(7))))
+        self.assertIn("открыта", console.describe(response(request)))
+        for data in (b"\x02" + bytes(7), b"\x01\x01" + bytes(6)):
+            with self.assertRaises(ValueError):
+                console.describe(response(request, data))
+        reply = response(request, b"\x01" + bytes(7))
+        chunks = [b"".join(console.envelope(b,99) for b in reply)]
+        port = SimpleNamespace(send=lambda packet: None, read=lambda timeout: chunks.pop(0))
+        self.assertEqual(console.exchange(port, request), reply)
+
     def test_raw_trace_keeps_noise_and_reports_timeout_bytes(self):
         class FakePort:
             def __init__(self, chunk):

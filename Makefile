@@ -3,7 +3,7 @@ PYTHON ?= python3
 TOOLCHAIN_BIN ?=
 
 .DEFAULT_GOAL := build
-.PHONY: build build-hub build-hub-test build-gateways help
+.PHONY: build build-hub build-hub-test build-gateways build-buttons help
 
 ifneq ($(strip $(TOOLCHAIN_BIN)),)
 TOOLCHAIN_ARGS := --toolchain-bin "$(TOOLCHAIN_BIN)"
@@ -21,11 +21,15 @@ build-hub-test:
 build-gateways:
 	$(PYTHON) scripts/build.py --target gateways $(TOOLCHAIN_ARGS)
 
+build-buttons:
+	$(PYTHON) scripts/build.py --target buttons $(TOOLCHAIN_ARGS)
+
 help:
 	@printf '%s\n' \
-		'make build           — хаб и оба Arduino-шлюза (также цель по умолчанию)' \
+		'make build           — хаб, оба Arduino-шлюза и кнопочница' \
 		'make build-hub       — только центральный хаб' \
 		'make build-hub-test  — тестовый хаб: ответ 0xAA на байт SimpleBus' \
 		'make build-gateways  — оба Arduino-шлюза' \
+		'make build-buttons   — кнопочница: концевики на пинах 1 и 2' \
 		'TOOLCHAIN_BIN=/path/to/bin (необязательно; ARM GCC по умолчанию из PATH)' \
 		'PYTHON=python3 (необязательно)'
