@@ -95,13 +95,14 @@ int main() {
   {
     const uint8_t commands[]={kGetTemp,kGetVoc,kGetDoor,kGetPressure,kGetHumidity,kGetDust,
                               kGetPwm,kGetRpm,kSetPwm,kGetMode,kSetMode,
-                              kGetDoorLock,kSetDoorLock,kGetRelayLevel,kSetRelayLevel};
+                              kGetDoorLock,kSetDoorLock,kGetRelayLevel,kSetRelayLevel,kGetVacuum,kSetVacuum};
     for (unsigned i=0;i<sizeof(commands);++i) {
       Hub hub; hub.tick(250);
       const uint8_t command=commands[i];
       const uint8_t node = command == kGetDoor ? kButtonsNode :
           ((command == kGetDoorLock || command == kSetDoorLock ||
-            command == kGetRelayLevel || command == kSetRelayLevel) ? kLmp8Node :
+            command == kGetRelayLevel || command == kSetRelayLevel ||
+            command == kGetVacuum || command == kSetVacuum) ? kLmp8Node :
            (command < kGetPwm ? kSensorsNode : kActuatorNode));
       Frame req=request(node,command);
       if(command==kGetMode) req.idx=0xff;

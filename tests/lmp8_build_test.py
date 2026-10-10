@@ -21,7 +21,7 @@ class Lmp8BuildTest(unittest.TestCase):
         patched = patch_controller(original)
         self.assertNotIn("initPin_PP(leds[i].port", patched)
         self.assertLess(patched.index("port->BSRR ="), patched.index("port->MODER ="))
-        self.assertIn("tjc_lmp8::kLockActiveLow", patched)
+        self.assertIn("tjc_lmp8::inactiveHigh(i)", patched)
         self.assertIn("high ? MAX_LED_BRIGHTNESS : 0", patched)
         # Production patch selects the actual BoardConfig value, not a fixed lock level.
         for active_low in (True, False):

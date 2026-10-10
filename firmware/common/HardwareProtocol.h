@@ -14,7 +14,8 @@ enum {
   kGetPressure = 0x23, kGetHumidity = 0x24, kGetDust = 0x25,
   kGetPwm = 0x30, kGetRpm = 0x31, kSetPwm = 0x32,
   kGetMode = 0x40, kSetMode = 0x41, kSetDoorLock = 0x42,
-  kGetDoorLock = 0x43, kGetRelayLevel = 0x50, kSetRelayLevel = 0x51
+  kGetDoorLock = 0x43, kGetRelayLevel = 0x50, kSetRelayLevel = 0x51,
+  kGetVacuum = 0x52, kSetVacuum = 0x53
 };
 enum Status {
   OK = 0, INVALID_INDEX = 1, INVALID_ARGUMENT = 2, UNKNOWN_COMMAND = 3,
@@ -117,9 +118,13 @@ inline Status validateRequest(const Frame& request, uint8_t localNode) {
       node = kActuatorNode; count = kFanCount; argument = true; break;
     case kGetMode:
       node = kActuatorNode; modeRead = true; break;
-    case kSetDoorLock: case kSetRelayLevel:
+    case kSetDoorLock:
+      node = kLmp8Node; count = 2; argument = true; break;
+    case kGetDoorLock:
+      node = kLmp8Node; count = 2; break;
+    case kSetVacuum: case kSetRelayLevel:
       node = kLmp8Node; count = 1; argument = true; break;
-    case kGetDoorLock: case kGetRelayLevel:
+    case kGetVacuum: case kGetRelayLevel:
       node = kLmp8Node; count = 1; break;
     default: return UNKNOWN_COMMAND;
   }
@@ -128,7 +133,7 @@ inline Status validateRequest(const Frame& request, uint8_t localNode) {
   if (!zeros(request.data + (argument ? 1 : 0), argument ? 7 : 8))
     return INVALID_ARGUMENT;
   if (request.command == kSetMode && request.data[0] > 2) return INVALID_ARGUMENT;
-  if (request.command == kSetDoorLock && request.data[0] > 1) return INVALID_ARGUMENT;
+  if ((request.command == kSetDoorLock || request.command == kSetVacuum) && request.data[0] > 1) return INVALID_ARGUMENT;
   if (request.command == kSetRelayLevel && request.data[0] > 10) return INVALID_ARGUMENT;
   return OK;
 }

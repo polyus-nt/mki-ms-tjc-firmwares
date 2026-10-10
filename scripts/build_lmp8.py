@@ -14,14 +14,14 @@ LED_FILES = {
 
 
 def patch_controller(text):
-    # Pin output latch must be HIGH BEFORE switching MODER to output mode.
+    # Set each output's inactive latch BEFORE switching MODER to output mode.
     # Do not call upstream initPin_PP: it first enables a default LOW latch.
     old = """            initPin_PP(leds[i].port, leds[i].pin);
             setPin_PP(leds[i].port, leds[i].pin, OFF);"""
     text = replace_once(text, '#include "const.h"', '#include "const.h"\n#include "BoardConfig.h"')
     new = """            const uint32_t pin = leds[i].pin;
             GPIO_TypeDef* port = leds[i].port;
-            const bool high = (i == tjc_lmp8::kLockPin - 1) ? tjc_lmp8::kLockActiveLow : (i >= 1 && i <= 6);
+            const bool high = tjc_lmp8::inactiveHigh(i);
             port->BSRR = 1UL << (high ? pin : pin + 16);  // latch BEFORE output mode
             port->PUPDR &= ~(3UL << (pin * 2));
             port->OTYPER &= ~(1UL << pin);
