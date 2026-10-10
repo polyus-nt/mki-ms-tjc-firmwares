@@ -34,6 +34,6 @@ help:
 		'make build-hub-test  — тестовый хаб: ответ 0xAA на байт SimpleBus' \
 		'make build-gateways  — оба Arduino-шлюза' \
 		'make build-buttons   — кнопочница: концевики на пинах 1 и 2' \
-		'make build-lmp8      — восьмилампочница: замки и релейная матрица' \
+		'make build-lmp8      — восьмилампочница фаблаб: общий выход замков' \
 		'TOOLCHAIN_BIN=/path/to/bin (необязательно; ARM GCC по умолчанию из PATH)' \
 		'PYTHON=python3 (необязательно)'

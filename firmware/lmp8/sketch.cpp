@@ -12,6 +12,8 @@ LED relay[6] = {LED(2), LED(3), LED(4), LED(5), LED(6), LED(7)};
 SimpleBus bus;
 struct Outputs {
   void relays(uint8_t mask) {
+    // Фаблаб вызывает этот метод ТОЛЬКО с mask=0 при старте.
+    // Выполнение матрицы химреактора закомментировано в Lmp8Api.h.
     // LED.on(100) означает HIGH. Реле active-low, поэтому инверсия.
     for (uint8_t i = 0; i < 6; ++i) {
       if (mask & (1u << i)) relay[i].off(); else relay[i].on();

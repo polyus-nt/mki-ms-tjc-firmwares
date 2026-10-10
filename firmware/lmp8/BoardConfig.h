@@ -4,6 +4,7 @@ namespace tjc_lmp8 {
 const uint8_t kBusAddress = 16, kHubAddress = 12;
 const uint8_t kLockPin = 1;
 const uint8_t kRelayPins[6] = {2, 3, 4, 5, 6, 7};
+// Реле и матрица ниже — сохранённая заготовка химреактора. Фаблаб их не включает.
 const uint32_t kBreakMs = 250;
 // Полярность внешнего драйвера замков обязательно проверить без нагрузки.
 // По умолчанию, как у реле: HIGH = отключено, LOW = включено.

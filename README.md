@@ -169,8 +169,10 @@ python3 scripts/build.py
 make build
 ```
 
-Отдельная восьмилампочница: [замки и релейная матрица](docs/LMP8-FIRMWARE.md),
+Отдельная восьмилампочница фаблаб: [общий выход магнитных замков](docs/LMP8-FIRMWARE.md),
 `py -3 scripts/build.py --target lmp8` или `make build-lmp8`.
+Управление релейным вентилятором закомментировано: это заготовка химреактора,
+а не функция текущей фаблаб-прошивки.
 
 Отдельные цели: `make build-hub`, `make build-buttons` и
 `make build-gateways`; справка — `make help`. Все цели сборки используют
@@ -191,7 +193,7 @@ nix --extra-experimental-features 'nix-command flakes' shell \
 - `build/gateways/sensors/sketch.*` — шлюз датчиков, адрес 13;
 - `build/gateways/actuator/sketch.*` — шлюз актуаторов, адрес 14.
 - `build/buttons/sketch.*` — кнопочница, адрес 15.
-- `build/lmp8/sketch.*` — восьмилампочница, адрес 16, замки и реле.
+- `build/lmp8/sketch.*` — восьмилампочница фаблаб, адрес 16, только общий выход замков.
 
 Команда только собирает, ничего не прошивает. Существующие Python-скрипты
 `scripts/build_hub.py` и `scripts/build_gateways.py` остаются доступны напрямую.
