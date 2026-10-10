@@ -147,5 +147,13 @@ static void crc_truncation_and_wrap() {
 int main() {
   vector_round_trip(); errors_and_transparency(); correlation();
   timeout_and_late_reply(); busy_is_deferred(); crc_truncation_and_wrap();
-  puts("gateway: 6 suites passed (both nodes, fixed vectors, CRC, correlation, timeout, late replies, BUSY, overflow, millis wrap)");
+  {
+    Gateway g(17); ready(g); Frame req=request(17), out; req.idx=1; req.data[0]=230;
+    bus(g,req,300); assert(g.takeArduinoRequest(out));
+    assert(out.node==17 && out.idx==1 && out.data[0]==230);
+    Frame reply=hardware_api::response(req); reply.data[0]=230;
+    arduino(g,reply,500); assert(g.takeHubResponse(out));
+    assert(out.node==17 && out.idx==1 && out.data[0]==230);
+  }
+  puts("gateway: 7 suites passed (three nodes, fixed vectors, CRC, correlation, timeout, late replies, BUSY, overflow, millis wrap)");
 }

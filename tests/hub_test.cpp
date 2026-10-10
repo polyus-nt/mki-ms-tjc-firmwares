@@ -20,6 +20,14 @@ static void start(Hub& hub, const Frame& req, uint32_t now = 300) {
   assert(memcmp(a,b,kFrameSize)==0);
   hub.gatewayRequestSent(now + 150); assert(hub.state()==Hub::Waiting);
 }
+static Frame stage(Hub& hub, uint8_t node, uint8_t cmd, uint8_t idx, uint32_t now) {
+  Frame out; assert(hub.takeGatewayRequest(out));
+  assert(out.node == node && out.command == cmd && out.idx == idx);
+  hub.gatewayRequestSent(now); return out;
+}
+static void modeReply(Hub& hub, const Frame& req, uint8_t mode, uint8_t idx, uint32_t now) {
+  Frame reply=response(req); reply.data[0]=mode; reply.data[1]=idx; feed(hub,reply,now);
+}
 int main() {
   Frame out;
   {
@@ -94,7 +102,7 @@ int main() {
   }
   {
     const uint8_t commands[]={kGetTemp,kGetVoc,kGetDoor,kGetPressure,kGetHumidity,kGetDust,
-                              kGetPwm,kGetRpm,kSetPwm,kGetMode,kSetMode,
+                              kGetPwm,kGetRpm,kSetPwm,
                               kGetDoorLock,kSetDoorLock,kGetRelayLevel,kSetRelayLevel,kGetVacuum,kSetVacuum};
     for (unsigned i=0;i<sizeof(commands);++i) {
       Hub hub; hub.tick(250);
@@ -117,6 +125,71 @@ int main() {
       assert(!hub.takeHostResponse(out));
       feed(hub,reply,560); assert(hub.takeHostResponse(out));
     }
+  }
+  {
+    for (uint8_t idx=0; idx<6; ++idx) {
+      Hub hub; hub.tick(250); Frame req=request(); req.idx=idx; feed(hub,req,300);
+      Frame physical=stage(hub,idx<4 ? 14 : 17,kSetPwm,idx<4 ? idx : idx-4,400);
+      Frame reply=response(physical); reply.data[0]=230;
+      if (idx>=4) { feed(hub,response(req),420); assert(!hub.takeHostResponse(out)); }
+      feed(hub,reply,450); assert(hub.takeHostResponse(out));
+      assert(sameRequest(req,out) && out.data[0]==230);
+    }
+    Hub hub; hub.tick(250); feed(hub,request(17),300);
+    assert(hub.takeHostResponse(out) && out.status==INVALID_NODE);
+  }
+  {
+    Hub hub; hub.tick(250); Frame req=request(14,kGetMode); req.idx=0xff; feed(hub,req,300);
+    Frame a=stage(hub,14,kGetMode,0xff,400); modeReply(hub,a,0,0xff,450);
+    Frame b=stage(hub,17,kGetMode,0xff,500); modeReply(hub,b,2,1,550);
+    assert(hub.takeHostResponse(out) && sameRequest(req,out));
+    assert(out.data[0]==2 && out.data[1]==5);
+    hub.hostResponseSent(600); feed(hub,req,700);
+    a=stage(hub,14,kGetMode,0xff,800); modeReply(hub,a,1,0,850);
+    b=stage(hub,17,kGetMode,0xff,900); modeReply(hub,b,2,1,950);
+    assert(hub.takeHostResponse(out) && out.status==INTERNAL_ERROR && zeros(out.data,8));
+  }
+  {
+    Hub hub; hub.tick(250); Frame req=request(14,kSetMode); req.idx=4; req.data[0]=1; feed(hub,req,300);
+    Frame a=stage(hub,14,kGetMode,0xff,400); modeReply(hub,a,2,2,450);
+    Frame b=stage(hub,17,kGetMode,0xff,500); modeReply(hub,b,0,0xff,550);
+    a=stage(hub,14,kSetMode,0,600); assert(a.data[0]==0); modeReply(hub,a,0,0xff,650);
+    b=stage(hub,17,kSetMode,0,700); assert(b.data[0]==0); modeReply(hub,b,0,0xff,750);
+    Frame c=stage(hub,17,kSetMode,0,800); assert(c.data[0]==1 && c.session_id!=b.session_id);
+    modeReply(hub,b,0,0xff,820); assert(!hub.takeHostResponse(out));
+    modeReply(hub,c,1,0,850); assert(hub.takeHostResponse(out));
+    assert(sameRequest(req,out) && out.data[0]==1 && out.data[1]==4);
+    hub.hostResponseSent(900); feed(hub,req,1000);
+    a=stage(hub,14,kGetMode,0xff,1100); modeReply(hub,a,0,0xff,1150);
+    b=stage(hub,17,kGetMode,0xff,1200); modeReply(hub,b,1,0,1250);
+    assert(hub.takeHostResponse(out) && out.status==OK && out.data[1]==4);
+    assert(!hub.takeGatewayRequest(out)); // Idempotent: no writes / re-randomization.
+  }
+  {
+    Hub hub; hub.tick(250); Frame req=request(14,kSetMode); req.idx=5; req.data[0]=2; feed(hub,req,300);
+    Frame a=stage(hub,14,kGetMode,0xff,400); modeReply(hub,a,1,0,450);
+    Frame b=stage(hub,17,kGetMode,0xff,500); modeReply(hub,b,0,0xff,550);
+    a=stage(hub,14,kSetMode,0,600); feed(hub,response(a,DEVICE_TIMEOUT),650);
+    assert(hub.takeHostResponse(out) && sameRequest(req,out) && out.status==DEVICE_TIMEOUT);
+    assert(!hub.takeGatewayRequest(out)); // Failed reset must never enable another fault.
+  }
+  {
+    Hub hub; hub.tick(250); Frame req=request(14,kGetMode); req.idx=0xff; feed(hub,req,300);
+    Frame a=stage(hub,14,kGetMode,0xff,400); modeReply(hub,a,0,0,450); // Bad normal-mode sentinel.
+    assert(!hub.takeGatewayRequest(out) && !hub.takeHostResponse(out));
+    hub.tick(4300); assert(hub.takeHostResponse(out) && out.status==DEVICE_TIMEOUT);
+  }
+  {
+    // Реалистичные ~700 мс на полный SimpleBus+Austere обмен: пять шагов
+    // превышают обычный 3-секундный дедлайн, но укладываются в режимный 4 с.
+    Hub hub; hub.tick(250); Frame req=request(14,kSetMode); req.idx=5; req.data[0]=2;
+    feed(hub,req,300);
+    Frame a=stage(hub,14,kGetMode,0xff,450); modeReply(hub,a,1,0,1000);
+    Frame b=stage(hub,17,kGetMode,0xff,1150); modeReply(hub,b,0,0xff,1700);
+    a=stage(hub,14,kSetMode,0,1850); modeReply(hub,a,0,0xff,2400);
+    b=stage(hub,17,kSetMode,0,2550); modeReply(hub,b,0,0xff,3100);
+    Frame c=stage(hub,17,kSetMode,1,3250); modeReply(hub,c,2,1,3800);
+    assert(hub.takeHostResponse(out) && out.status==OK && out.data[1]==5);
   }
   {
     Hub hub; hub.tick(250); const Frame req=request(); feed(hub,req,300);

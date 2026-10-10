@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build both handwritten ARM gateways using the runtime stored in this project."""
+"""Build three handwritten ARM gateways using the local runtime."""
 import argparse
 import hashlib
 from pathlib import Path
@@ -124,6 +124,7 @@ def main():
     parser.add_argument("--toolchain-bin", type=Path,
                         help="Directory of ARM GCC tools, otherwise use PATH")
     parser.add_argument("--prepare-only", action="store_true")
+    parser.add_argument("--gateway", choices=("all", "sensors", "actuator", "actuator-2"), default="all")
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     out = (args.out or root / "build" / "gateways").resolve()
@@ -135,7 +136,9 @@ def main():
         print("Verified and patched pinned runtime in", platform)
         return
     tools = find_tools(args.toolchain_bin)
-    for name, node in (("sensors", 13), ("actuator", 14)):
+    for name, node in (("sensors", 13), ("actuator", 14), ("actuator-2", 17)):
+        if args.gateway != "all" and args.gateway != name:
+            continue
         target = out / name
         target.mkdir(parents=True, exist_ok=True)
         elf = target / "sketch.elf"

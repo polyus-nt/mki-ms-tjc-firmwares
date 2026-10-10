@@ -9,7 +9,8 @@
 namespace hardware_api {
 enum {
   kFrameSize = 28, kVersion = 2, kRequest = 1, kResponse = 2,
-  kSensorsNode = 13, kActuatorNode = 14, kButtonsNode = 15, kLmp8Node = 16, kFanCount = 6,
+  kSensorsNode = 13, kActuatorNode = 14, kButtonsNode = 15, kLmp8Node = 16,
+  kActuator2Node = 17, kFanCount = 6,
   kGetTemp = 0x20, kGetVoc = 0x21, kGetDoor = 0x22,
   kGetPressure = 0x23, kGetHumidity = 0x24, kGetDust = 0x25,
   kGetPwm = 0x30, kGetRpm = 0x31, kSetPwm = 0x32,

@@ -28,6 +28,17 @@ def response(request, data=bytes(8), status=0):
 
 
 class ConsoleTests(unittest.TestCase):
+    def test_global_fan_indices_remain_virtual_node14(self):
+        for name, command in (("pwm", 0x30), ("rpm", 0x31)):
+            self.assertEqual(console.parse_command(name + " 5"), (command, 5))
+            request = console.request_frame(command, 5, 42, 99)
+            self.assertEqual(request[6], 14)
+            value = 230 if name == "pwm" else 1800
+            width = 1 if name == "pwm" else 4
+            self.assertIn(str(value), console.describe(response(request, value.to_bytes(width, "big") + bytes(8-width))))
+            with self.assertRaises(ValueError):
+                console.parse_command(name + " 6")
+
     def test_door_routes_to_buttons_and_validates_boolean_payload(self):
         self.assertEqual(console.parse_command("door 1"), (0x22, 1))
         with self.assertRaises(ValueError):
@@ -160,7 +171,7 @@ class ConsoleTests(unittest.TestCase):
             for arg in (str(count), "-1", "1.0", "x", "00000000", "１"):
                 with self.assertRaises(ValueError):
                     console.parse_command(f"{name} {arg}")
-        for line in ("", "pwm 0", "temp", "temp 0 junk"):
+        for line in ("", "unknown 0", "temp", "temp 0 junk"):
             with self.assertRaises(ValueError):
                 console.parse_command(line)
 

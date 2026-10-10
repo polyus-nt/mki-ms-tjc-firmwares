@@ -17,6 +17,14 @@ RUNTIME = ROOT / "firmware/runtime"
 
 
 class RuntimeTests(unittest.TestCase):
+    def test_second_actuator_gateway_target_prepares_offline(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            result = subprocess.run([sys.executable, str(ROOT / "scripts/build.py"),
+                                     "--target", "gateway-actuator-2", "--prepare-only", "--out", tmp],
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((Path(tmp) / "gateway-actuator-2/platform/ArduinoAdapter.hpp").is_file())
+
     def test_pinned_local_files_and_patches(self):
         for name, expected in builder.FILES.items():
             content = (RUNTIME / name).read_bytes().replace(b"\r\n", b"\n")

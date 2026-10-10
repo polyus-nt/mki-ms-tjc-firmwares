@@ -13,12 +13,13 @@ import select
 import time
 
 COMMANDS = {"temp": (0x20, 3), "pressure": (0x23, 3), "voc": (0x21, 2),
-            "humidity": (0x24, 3), "dust": (0x25, 2), "door": (0x22, 2)}
+            "humidity": (0x24, 3), "dust": (0x25, 2), "door": (0x22, 2),
+            "pwm": (0x30, 6), "rpm": (0x31, 6)}
 STATUSES = ("OK", "INVALID_INDEX", "INVALID_ARGUMENT", "UNKNOWN_COMMAND",
             "NOT_IMPLEMENTED", "SENSOR_UNAVAILABLE", "BUSY", "DEVICE_TIMEOUT",
             "UNSUPPORTED_VERSION", "INTERNAL_ERROR", "REQUEST_ID_CONFLICT",
             "INVALID_NODE", "TRANSPORT_OVERFLOW")
-HELP = "probe (проверка хаба) | temp 0..2 | pressure 0..2 | voc 0..1 | humidity 0..2 | dust 0..1 | door 0..1 | help | exit"
+HELP = "probe (проверка хаба) | temp 0..2 | pressure 0..2 | voc 0..1 | humidity 0..2 | dust 0..1 | door 0..1 | pwm 0..5 | rpm 0..5 | help | exit"
 
 
 def parse_command(line):
@@ -36,7 +37,7 @@ def parse_command(line):
 
 def request_frame(command, idx, tx_id, session):
     frame = b"\xa5\x5a\x02\x01" + tx_id.to_bytes(2, "big")
-    node = 15 if command == 0x22 else 13
+    node = 15 if command == 0x22 else (14 if command in (0x30, 0x31) else 13)
     frame += bytes((node, command, 0, idx)) + bytes(8) + session.to_bytes(8, "big")
     return frame + binascii.crc_hqx(frame[2:], 0xffff).to_bytes(2, "big")
 
@@ -62,6 +63,12 @@ def describe(reply):
         if data[0] not in (0, 1) or any(data[1:]):
             raise ValueError("Некорректное состояние концевика/резервные байты")
         return f"Дверь {reply[9]}: {'закрыта' if data[0] else 'открыта'} (state={bool(data[0])})"
+    if command in (0x30, 0x31):
+        width = 1 if command == 0x30 else 4
+        if any(data[width:]):
+            raise ValueError("Ненулевые резервные байты вентилятора")
+        value = int.from_bytes(data[:width], "big")
+        return f"Вентилятор {reply[9]}: {'PWM' if command == 0x30 else 'RPM'}={value}"
     age = int.from_bytes(data[5:7], "big")
     if data[4] not in (1, 3) or age == 65535 or data[7]:
         raise ValueError("Некорректное качество/резервные байты")

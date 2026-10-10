@@ -12,10 +12,12 @@
 - `firmware/common/HardwareProtocol.h` — копия общего C++11-кодека из
   `tjc-commutator/firmware/common`; при изменении контракта копии синхронизируются.
 - `scripts/build_gateways.py` — проверка upstream SHA-256, исправление локальной
-  сборочной копии runtime и создание двух комплектов ELF/BIN/MAP.
+  сборочной копии runtime и создание трёх комплектов ELF/BIN/MAP.
 - `tests/gateway_test.cpp` — native-проверки автомата и опубликованного кадра.
 
-Сборки отличаются только `GATEWAY_NODE`: 13 для датчиков, 14 для актуаторов.
+Сборки отличаются только `GATEWAY_NODE`: 13 для датчиков, 14 для первых четырёх
+вентиляторов, 17 для оставшихся двух. На линии шлюз→Arduino индексы локальные:
+14: `0..3`, 17: `0..1`. Глобальные `0..5` преобразует хаб, не шлюз.
 Ответы SimpleBus адресуются хабу 12. Шлюз проверяет CRC, version, kind, статус
 запроса и собственный node. Конкретные команды, индексы и типы датчиков проверяет
 Arduino: шлюз не содержит старую карту оборудования и не управляет замками.
@@ -41,7 +43,11 @@ Runtime уже включён в `firmware/runtime`; отдельный checkout
 Скрипт не скачивает зависимости и не изменяет исходники runtime.
 
 Результаты: `build/gateways/sensors/sketch.{elf,bin,map}` и
-`build/gateways/actuator/sketch.{elf,bin,map}`. Каталог build исключён из Git.
+`build/gateways/actuator/sketch.{elf,bin,map}` и
+`build/gateways/actuator-2/sketch.{elf,bin,map}`. Каталог build исключён из Git.
+
+Только новый шлюз: `py -3 scripts/build.py --target gateway-actuator-2` или
+`make build-gateway-actuator-2`; результат `build/gateways/actuator-2/sketch.bin`.
 
 Сохраняются Cortex-M0+, Thumb, `STM32G030x6`, `nosys.specs`, `-Os`, startup,
 `system.c` и linker script платформы. Добавлены C++11, отсутствие RTTI и
@@ -108,13 +114,13 @@ g++ -std=c++11 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
 памяти запуск выполнен с `ASAN_OPTIONS=detect_leaks=0`; AddressSanitizer и
 UndefinedBehaviorSanitizer остаются включены.
 
-Проверяются оба node, неизменность опубликованного request/response, повреждённый
+Проверяются три node, неизменность опубликованного request/response, повреждённый
 CRC, неполный запрос, неверный node/version/status, прозрачность специальных
 байтов, все поля корреляции, applied PWM вместо запрошенного, timeout/поздний
 ответ/восстановление, отложенный BUSY, overflow и переполнение millis.
 
 Целевая сборка выполнена ARM GCC 14.3.1 с исходниками указанной ревизии: создано
-два ELF/BIN, таблица векторов подтверждена по `0x08003800`; обработчики
+три ELF/BIN, таблица векторов подтверждена по `0x08003800`; обработчики
 USART1/EXTI4_15/SysTick присутствуют по одному. Линкер сохраняет предупреждения
 nosys о недоступных POSIX syscalls и RWX-сегменте из исходного linker script.
 Результаты native не означают проверку GPIO/IRQ или доставки на стенде.
