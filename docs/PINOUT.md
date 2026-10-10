@@ -38,8 +38,9 @@
 
 ## Arduino actuator-1 → шлюз 14
 
-Источник: `arduino-actuator/BoardConfig.h`, ветка `feat/hardware-api-firmware`.
-Открыть `arduino-actuator.ino`, выбрать `API_ACTUATOR_BOARD=1` и прошить первую UNO.
+Источник: `arduino-actuator/arduino-actuator-1/BoardConfig.h`,
+ветка `feat/hardware-api-firmware`. Открыть отдельный проект
+`arduino-actuator-1/arduino-actuator-1.ino` и прошить первую UNO.
 
 | Индекс API | Локальный индекс | PWM | Тахометр | Реле |
 | --- | --- | --- | --- | --- |
@@ -54,8 +55,10 @@ D0/D1 оставлены для Serial; A5 не используется.
 
 ## Arduino actuator-2 → шлюз 17
 
-Тот же проект `arduino-actuator`, но выбрать `API_ACTUATOR_BOARD=2`
-и прошить вторую UNO. Глобальные индексы 4/5 преобразует хаб в локальные 0/1.
+Отдельный проект `arduino-actuator-2/arduino-actuator-2.ino` в репозитории
+`arduino-actuator`, та же ветка. Собственная распиновка находится в
+`arduino-actuator-2/BoardConfig.h`; переключать конфигурацию не нужно.
+Прошить вторую UNO. Глобальные индексы 4/5 преобразует хаб в локальные 0/1.
 
 | Индекс API | Локальный индекс | PWM | Тахометр | Реле |
 | --- | --- | --- | --- | --- |
