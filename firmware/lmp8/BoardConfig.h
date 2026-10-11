@@ -7,14 +7,15 @@ const uint8_t kVacuumPin = 3;
 const uint8_t kRelayPins[6] = {2, 3, 4, 5, 6, 7};
 // Реле и матрица ниже — сохранённая заготовка химреактора. Фаблаб их не включает.
 const uint32_t kBreakMs = 250;
+const uint32_t kOpenMs = 5000;
 // Полярность внешнего драйвера замков обязательно проверить без нагрузки.
 // По умолчанию, как у реле: HIGH = отключено, LOW = включено.
 const bool kLockActiveLow = true;
 // Пылесос: HIGH включает, LOW выключает (не как магнитные замки).
 const bool kVacuumActiveLow = false;
-// Логический HIGH неактивных выходов; used до GPIO output-mode при старте.
-inline bool inactiveHigh(uint8_t ledIndex) {
-  if (ledIndex == kLockPins[0] - 1 || ledIndex == kLockPins[1] - 1) return kLockActiveLow;
+// Уровни до GPIO output-mode: замки включены, пылесос/реле выключены.
+inline bool startupHigh(uint8_t ledIndex) {
+  if (ledIndex == kLockPins[0] - 1 || ledIndex == kLockPins[1] - 1) return !kLockActiveLow;
   if (ledIndex == kVacuumPin - 1) return kVacuumActiveLow;
   return ledIndex < 7; // Неиспользуемые 4..7 HIGH; 8 LOW.
 }

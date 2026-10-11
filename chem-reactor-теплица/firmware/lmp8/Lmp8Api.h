@@ -5,9 +5,9 @@ namespace tjc_lmp8 {
 // Никаких delay(): шина обслуживается и во время паузы переключения.
 template<class Hardware> class Lmp8Api {
  public:
-  explicit Lmp8Api(Hardware& hw) : hw_(hw), level_(0), lock_(false),
-      switching_(false), replyReady_(false), cached_(false), started_(0) {
-    hw_.lock(false); hw_.relays(0);
+  explicit Lmp8Api(Hardware& hw) : hw_(hw), level_(0), lock_(true),
+      switching_(false), replyReady_(false), cached_(false), started_(0), opened_(0), timed_(false) {
+    hw_.lock(true); hw_.relays(0);
   }
   void receive(const hardware_api::Frame& request, uint32_t now) {
     using namespace hardware_api;
@@ -29,7 +29,11 @@ template<class Hardware> class Lmp8Api {
       switching_ = true; started_ = now; return;
     }
     if (request.command == kSetDoorLock) {
+      timed_=false; // Явная команда отменяет таймер.
       lock_ = request.data[0] != 0; hw_.lock(lock_);
+    }
+    if (request.command == kOpenDoorTimed) {
+      lock_=false; opened_=now; timed_=true; hw_.lock(false);
     }
     Frame reply = response(request);
     if (request.command == kGetDoorLock) reply.data[0] = lock_ ? 1 : 0;
@@ -37,6 +41,10 @@ template<class Hardware> class Lmp8Api {
     complete(request, reply);
   }
   void tick(uint32_t now) {
+    // Таймер замка независим от очереди ответов и релейной паузы.
+    if (timed_ && static_cast<uint32_t>(now-opened_) >= kOpenMs) {
+      timed_=false; lock_=true; hw_.lock(true);
+    }
     if (!switching_ || replyReady_ || static_cast<uint32_t>(now - started_) < kBreakMs) return;
     level_ = pending_.data[0]; hw_.relays(relayMask(level_)); switching_ = false;
     hardware_api::Frame reply = hardware_api::response(pending_);
@@ -59,7 +67,8 @@ template<class Hardware> class Lmp8Api {
   }
   Hardware& hw_;
   uint8_t level_; bool lock_, switching_, replyReady_, cached_;
-  uint32_t started_;
+  uint32_t started_, opened_;
+  bool timed_;
   hardware_api::Frame pending_, reply_, lastRequest_, lastReply_;
 };
 }

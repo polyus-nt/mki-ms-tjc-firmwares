@@ -52,7 +52,7 @@ class ConsoleTests(unittest.TestCase):
                 console.describe(response(request, data))
         reply = response(request, b"\x01" + bytes(7))
         chunks = [b"".join(console.envelope(b,99) for b in reply)]
-        port = SimpleNamespace(send=lambda packet: None, read=lambda timeout: chunks.pop(0))
+        port = SimpleNamespace(quiet=lambda trace=None: None, send=lambda packet: None, read=lambda timeout: chunks.pop(0))
         self.assertEqual(console.exchange(port, request), reply)
 
     def test_raw_trace_keeps_noise_and_reports_timeout_bytes(self):
@@ -60,6 +60,8 @@ class ConsoleTests(unittest.TestCase):
             def __init__(self, chunk):
                 self.chunk = chunk
                 self.now = 0
+            def quiet(self, trace=None):
+                pass
             def send(self, packet):
                 pass
             def read(self, timeout):
@@ -81,7 +83,7 @@ class ConsoleTests(unittest.TestCase):
         stale = response(console.request_frame(0x20, 3, 2, 1), status=1)
         reply = response(request, status=1)
         chunks = [b"noise", b"".join(console.envelope(b, 99) for b in stale + reply)]
-        port = SimpleNamespace(send=lambda packet: None, read=lambda timeout: chunks.pop(0))
+        port = SimpleNamespace(quiet=lambda trace=None: None, send=lambda packet: None, read=lambda timeout: chunks.pop(0))
         trace = []
         self.assertEqual(console.exchange(port, request, trace.append), reply)
         self.assertIn("RX RAW: 6E 6F 69 73 65", trace)

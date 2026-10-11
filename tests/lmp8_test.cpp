@@ -60,10 +60,10 @@ int main() {
 
 int main() {
   Hardware hw; tjc_lmp8::Lmp8Api<Hardware> api(hw); Frame reply;
-  assert(hw.mask == 0 && !hw.locked[0] && !hw.locked[1] && !hw.vacuumOn && hw.changes == 0);
-  assert(tjc_lmp8::inactiveHigh(0) && tjc_lmp8::inactiveHigh(1));
-  assert(!tjc_lmp8::inactiveHigh(2));
-  for(uint8_t i=3;i<7;++i) assert(tjc_lmp8::inactiveHigh(i));
+  assert(hw.mask == 0 && hw.locked[0] && hw.locked[1] && !hw.vacuumOn && hw.changes == 0);
+  assert(!tjc_lmp8::startupHigh(0) && !tjc_lmp8::startupHigh(1));
+  assert(!tjc_lmp8::startupHigh(2));
+  for(uint8_t i=3;i<7;++i) assert(tjc_lmp8::startupHigh(i));
   const uint8_t masks[] = {0,49,51,55,63,33,17,35,39,47,1};
   for (uint8_t i = 0; i <= 10; ++i) {
     // Матрица сохранилась, но любая корректная команда реле отключена.
@@ -81,7 +81,7 @@ int main() {
   Frame bad=req(kSetRelayLevel,1,22); bad.idx=1; api.receive(bad,1000);
   assert(api.takeReply(reply) && reply.status==INVALID_INDEX);
   Frame lock=req(kSetDoorLock,1,30); api.receive(lock,1000);
-  assert(api.takeReply(reply) && reply.status==OK && hw.locked[0] && !hw.locked[1]);
+  assert(api.takeReply(reply) && reply.status==OK && hw.locked[0] && hw.locked[1]);
   api.receive(lock,1200); assert(api.takeReply(reply) && reply.status==OK && hw.locked[0]);
   lock.data[0]=0; api.receive(lock,1300);
   assert(api.takeReply(reply) && reply.status==REQUEST_ID_CONFLICT && hw.locked[0]);

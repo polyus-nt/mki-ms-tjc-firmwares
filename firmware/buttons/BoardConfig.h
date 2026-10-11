@@ -5,6 +5,8 @@ namespace tjc_buttons {
 // Пользовательские номера Button, не номера выводов STM32:
 // Button(1) -> PA1, Button(2) -> PA8 в tjc-ms1-btn-a2/1.0.
 static const uint8_t kDoorPins[2] = {1, 2};
+// Button(3/4): отдельные кнопки открытия, замыкание на GND.
+static const uint8_t kOpenPins[2] = {3, 4};
 static const uint8_t kBusAddress = hardware_api::kButtonsNode;  // 15
 static const uint8_t kHubAddress = 12;
 static const uint32_t kDebounceMs = 50;

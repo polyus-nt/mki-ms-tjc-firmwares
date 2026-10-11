@@ -234,6 +234,8 @@ def list_ports():
 
 
 def exchange(port, request, trace=None):
+    # Автономные опросы хаба используют общую полудуплексную шину.
+    port.quiet(trace)
     parser = ReplyParser()
     started = time.monotonic()
     deadline = started + 5

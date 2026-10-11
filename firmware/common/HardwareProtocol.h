@@ -12,9 +12,9 @@ enum {
   kSensorsNode = 13, kActuatorNode = 14, kButtonsNode = 15, kLmp8Node = 16,
   kActuator2Node = 17, kFanCount = 6,
   kGetTemp = 0x20, kGetVoc = 0x21, kGetDoor = 0x22,
-  kGetPressure = 0x23, kGetHumidity = 0x24, kGetDust = 0x25,
+  kGetPressure = 0x23, kGetHumidity = 0x24, kGetDust = 0x25, kGetOpenButtons = 0x27,
   kGetPwm = 0x30, kGetRpm = 0x31, kSetPwm = 0x32,
-  kGetMode = 0x40, kSetMode = 0x41, kSetDoorLock = 0x42,
+  kGetMode = 0x40, kSetMode = 0x41, kSetDoorLock = 0x42, kOpenDoorTimed = 0x44,
   kGetDoorLock = 0x43, kGetRelayLevel = 0x50, kSetRelayLevel = 0x51,
   kGetVacuum = 0x52, kSetVacuum = 0x53
 };
@@ -129,6 +129,10 @@ inline Status validateRequest(const Frame& request, uint8_t localNode) {
       node = kLmp8Node; count = 1; argument = true; break;
     case kGetVacuum: case kGetRelayLevel:
       node = kLmp8Node; count = 1; break;
+    case kGetOpenButtons:
+      node = kButtonsNode; count = 1; break;
+    case kOpenDoorTimed:
+      node = kLmp8Node; count = 2; break;
     default: return UNKNOWN_COMMAND;
   }
   if (request.node != node || localNode != node) return INVALID_NODE;
@@ -146,6 +150,7 @@ class StreamParser {
  public:
   StreamParser() : size_(0), firstMs_(0), lastMs_(0) {}
   void reset() { size_ = 0; }
+  bool partial() const { return size_ != 0; }
   void tick(uint32_t now) {
     if (size_ && (static_cast<uint32_t>(now - lastMs_) >= 250UL ||
                   static_cast<uint32_t>(now - firstMs_) >= 1000UL)) reset();

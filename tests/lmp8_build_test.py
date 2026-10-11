@@ -16,17 +16,17 @@ class Lmp8BuildTest(unittest.TestCase):
             source = (ROOT / "firmware/runtime-lmp8" / name).read_bytes().replace(b"\r\n", b"\n")
             self.assertEqual(hashlib.sha256(source).hexdigest(), expected)
 
-    def test_no_low_pulse_and_both_polarities(self):
+    def test_startup_latch_before_output_mode(self):
         original = (ROOT / "firmware/runtime-lmp8/LEDController.hpp").read_text(encoding="utf-8")
         patched = patch_controller(original)
         self.assertNotIn("initPin_PP(leds[i].port", patched)
         self.assertLess(patched.index("port->BSRR ="), patched.index("port->MODER ="))
-        self.assertIn("tjc_lmp8::inactiveHigh(i)", patched)
+        self.assertIn("tjc_lmp8::startupHigh(i)", patched)
         self.assertIn("high ? MAX_LED_BRIGHTNESS : 0", patched)
         # Production patch selects the actual BoardConfig value, not a fixed lock level.
         for active_low in (True, False):
-            high = active_low
-            self.assertEqual((not high) if active_low else high, False)
+            high = not active_low
+            self.assertEqual((not high) if active_low else high, True)
 
     def test_build_prepare_from_other_directory(self):
         with tempfile.TemporaryDirectory(prefix="lmp8 test ") as temp:

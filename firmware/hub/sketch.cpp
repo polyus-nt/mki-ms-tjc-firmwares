@@ -5,25 +5,28 @@
 #include "UART.hpp"
 #include "SimpleBus.hpp"
 #include "Hub.h"
+#include "DoorHub.h"
 
 // main-a4: PC и платы используют ОДНУ шину USART1, PB6/PB7, PA0 ReDe.
 // Здесь нет второго UART и нет автоматически назначенного адреса восьмилампочницы.
 SimpleBus bus;
-tjc_hub::Hub hub;
+tjc_hub::DoorHub<tjc_hub::Hub> hub(2);
 
 int main() {
   bus.setAddress(12);
   detail::hal::initUartWrapper();
+  hub.setSessionSeed(*reinterpret_cast<volatile uint32_t*>(UID_BASE) ^ SysTick->VAL);
   uint8_t outgoing[hardware_api::kFrameSize];
   uint8_t position = hardware_api::kFrameSize, address = 0;
   bool to_host = false, ever_sent = false;
   uint32_t last_end = 0;
   for (;;) {
-    hub.tick(millis());
     if (detail::simpleBusHelpers::Api::takeOverflow()) hub.overflow(millis());
     if (hub.takeCancelTransmission() && !to_host)
       position = hardware_api::kFrameSize;
     while (bus.packetReceived()) hub.receiveBus(bus.lastData, millis());
+    // Сначала учесть входящие байты; не начинать опрос поверх начала кадра PC.
+    hub.tick(millis());
     if (hub.takeCancelTransmission() && !to_host)
       position = hardware_api::kFrameSize;
     if (position == hardware_api::kFrameSize) {

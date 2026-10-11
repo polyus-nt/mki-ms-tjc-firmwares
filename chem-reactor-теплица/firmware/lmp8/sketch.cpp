@@ -27,7 +27,7 @@ struct Outputs {
 };
 int main() {
   using namespace hardware_api;
-  LEDController::init(); // Подготовленный runtime предзагружает HIGH до MODER.
+  LEDController::init(); // Замок LOW, реле HIGH: уровни загружены до MODER.
   bus.setAddress(tjc_lmp8::kBusAddress); detail::hal::initUartWrapper();
   Outputs outputs; tjc_lmp8::Lmp8Api<Outputs> api(outputs);
   StreamParser parser; ReplyBuffer tx;

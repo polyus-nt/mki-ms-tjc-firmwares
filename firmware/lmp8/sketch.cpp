@@ -37,7 +37,7 @@ struct Outputs {
 };
 int main() {
   using namespace hardware_api;
-  // В подготовленном runtime init начинает с HIGH для active-low выходов.
+  // Стартовые уровни выставлены до GPIO output-mode: замки заблокированы.
   // Исходные upstream файлы сохранены отдельно и не модифицированы.
   LEDController::init();
   bus.setAddress(tjc_lmp8::kBusAddress); detail::hal::initUartWrapper();

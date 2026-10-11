@@ -8,8 +8,9 @@ template<class Hardware> class Lmp8Api {
  public:
   explicit Lmp8Api(Hardware& hw) : hw_(hw), level_(0), vacuum_(false),
       switching_(false), replyReady_(false), cached_(false), started_(0) {
-    lock_[0] = lock_[1] = false;
-    hw_.lock(0, false); hw_.lock(1, false); hw_.vacuum(false);
+    lock_[0] = lock_[1] = true;
+    timed_[0]=timed_[1]=false; opened_[0]=opened_[1]=0;
+    hw_.lock(0, true); hw_.lock(1, true); hw_.vacuum(false);
   }
   void receive(const hardware_api::Frame& request, uint32_t now) {
     using namespace hardware_api;
@@ -43,7 +44,12 @@ template<class Hardware> class Lmp8Api {
     }
 #endif
     if (request.command == kSetDoorLock) {
+      timed_[request.idx]=false; // Явная команда отменяет импульс открытия.
       lock_[request.idx] = request.data[0] != 0; hw_.lock(request.idx, lock_[request.idx]);
+    }
+    if (request.command == kOpenDoorTimed) {
+      lock_[request.idx]=false; timed_[request.idx]=true; opened_[request.idx]=now;
+      hw_.lock(request.idx,false);
     }
     if (request.command == kSetVacuum) {
       vacuum_ = request.data[0] != 0; hw_.vacuum(vacuum_);
@@ -55,7 +61,11 @@ template<class Hardware> class Lmp8Api {
     complete(request, reply);
   }
   void tick(uint32_t now) {
-    (void)now;
+    for (uint8_t i=0;i<2;++i) {
+      if (timed_[i] && static_cast<uint32_t>(now-opened_[i]) >= kOpenMs) {
+        timed_[i]=false; lock_[i]=true; hw_.lock(i,true);
+      }
+    }
 #if 0  // Заготовка химреактора отключена: фаблаб никогда не коммутирует реле.
     if (!switching_ || replyReady_ || static_cast<uint32_t>(now - started_) < kBreakMs) return;
     level_ = pending_.data[0]; hw_.relays(relayMask(level_)); switching_ = false;
@@ -78,7 +88,8 @@ template<class Hardware> class Lmp8Api {
   }
   Hardware& hw_;
   uint8_t level_; bool lock_[2], vacuum_, switching_, replyReady_, cached_;
-  uint32_t started_;
+  uint32_t started_, opened_[2];
+  bool timed_[2];
   hardware_api::Frame pending_, reply_, lastRequest_, lastReply_;
 };
 }

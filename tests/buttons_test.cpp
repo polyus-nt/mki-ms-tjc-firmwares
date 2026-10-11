@@ -89,5 +89,29 @@ int main() {
   assert(wrapping.execute(request()).status == SENSOR_UNAVAILABLE);
   wrapping.sample(true,false,0x23u);
   assert(wrapping.execute(request()).status == OK);
+  // Реальный Button(3/4): удержание при старте, дребезг, повторное нажатие.
+  now=1000;
+  Button open0(tjc_buttons::kOpenPins[0]), open1(tjc_buttons::kOpenPins[1]);
+  assert(btns[2].port==GPIOA && btns[2].num==11);
+  assert(btns[3].port==GPIOA && btns[3].num==12);
+  portA.IDR=(1u<<12); // Button 3 зажат при включении.
+  open0.scan();open1.scan();
+  tjc_buttons::ButtonsApi keys(now);
+  Frame snapshot=request();snapshot.command=kGetOpenButtons;
+  now=1051;open0.scan();open1.scan();
+  keys.sample(false,false,now);keys.sampleOpen(open0.isPressed(),open1.isPressed(),now);
+  assert(readU32(keys.execute(snapshot).data)==0);
+  now=2000;open0.scan();keys.sampleOpen(open0.isPressed(),open1.isPressed(),now);
+  assert(readU32(keys.execute(snapshot).data)==0); // удержание не событие.
+  portA.IDR|=(1u<<11);now=2001;open0.scan();
+  now=2052;open0.scan();keys.sampleOpen(open0.isPressed(),open1.isPressed(),now);
+  portA.IDR&=~(1u<<11);now=2053;open0.scan();
+  now=2090;open0.scan();keys.sampleOpen(open0.isPressed(),open1.isPressed(),now);
+  assert(readU32(keys.execute(snapshot).data)==0);
+  now=2104;open0.scan();keys.sampleOpen(open0.isPressed(),open1.isPressed(),now);
+  assert(readU32(keys.execute(snapshot).data)==1);
+  portA.IDR&=~(1u<<12);now=2105;open1.scan();
+  now=2156;open1.scan();keys.sampleOpen(open0.isPressed(),open1.isPressed(),now);
+  assert(readU32(keys.execute(snapshot).data+4)==1);
   puts("buttons tests passed");
 }
