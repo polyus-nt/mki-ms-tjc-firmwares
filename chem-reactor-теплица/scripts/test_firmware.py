@@ -32,6 +32,9 @@ def main():
         ("CHEM_SENSOR_API_HEADER", sensor / "src/SensorApi.h"),
         ("CHEM_MQ2_HEADER", sensor / "MQ2.h")))
     with tempfile.TemporaryDirectory(prefix="chem-firmware-") as directory:
+        outputs = Path(directory) / "outputs.exe"
+        compile_test(root / "tests/lmp8_outputs_test.cpp", outputs, args.cxx, ("-DCHEM_OUTPUTS",))
+        subprocess.run([str(outputs)], check=True)
         doors = Path(directory) / "doors.exe"
         compile_test(root / "tests/door_automation_test.cpp", doors, args.cxx, ("-DCHEM_DOORS",))
         subprocess.run([str(doors)], check=True)

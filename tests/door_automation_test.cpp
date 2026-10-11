@@ -3,7 +3,7 @@
 #include "../firmware/hub/Hub.h"
 #include "../firmware/hub/DoorHub.h"
 #include "../firmware/buttons/ButtonsApi.h"
-#include "../firmware/lmp8/Lmp8Api.h"
+#include "../firmware/lmp/LmpApi.h"
 using namespace hardware_api;
 #ifdef CHEM_DOORS
 const uint8_t lockCount=1;
@@ -32,7 +32,7 @@ template<class Target> void feed(Target& t,const Frame& f,uint32_t now) {
   for(uint8_t i=0;i<kFrameSize;++i)t.receiveBus(wire[i],now);
 }
 int main() {
-  Outputs hw;tjc_lmp8::Lmp8Api<Outputs> lmp(hw);Frame r;
+  Outputs hw;tjc_lmp::LmpApi<Outputs> lmp(hw);Frame r;
   for(uint8_t i=0;i<lockCount;++i)assert(hw.state(i));
   // Локальный таймер: 5 с, повтор новым запросом продлевает; дубликат не продлевает.
   Frame open=req(16,kOpenDoorTimed);

@@ -13,6 +13,9 @@ def main():
     with tempfile.TemporaryDirectory(prefix="greenhouse-doors-") as directory:
         for name, source, flags in (
             ("fablab", root / "tests/door_automation_test.cpp", []),
+            ("fablab-outputs", root / "tests/lmp_outputs_test.cpp", []),
+            ("chem-outputs", root / "chem-reactor-теплица/tests/lmp8_outputs_test.cpp",
+             ["-DCHEM_OUTPUTS"]),
             ("chem", root / "chem-reactor-теплица/tests/door_automation_test.cpp",
              ["-DCHEM_DOORS"]),
         ):

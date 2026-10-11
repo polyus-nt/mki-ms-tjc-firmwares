@@ -3,7 +3,7 @@ PYTHON ?= python3
 TOOLCHAIN_BIN ?=
 
 .DEFAULT_GOAL := build
-.PHONY: build build-hub build-hub-test build-gateways build-gateway-actuator-2 build-buttons build-lmp8 help
+.PHONY: build build-hub build-hub-test build-gateways build-gateway-actuator-2 build-buttons build-lmp build-lmp8 help
 
 ifneq ($(strip $(TOOLCHAIN_BIN)),)
 TOOLCHAIN_ARGS := --toolchain-bin "$(TOOLCHAIN_BIN)"
@@ -27,17 +27,21 @@ build-gateway-actuator-2:
 build-buttons:
 	$(PYTHON) scripts/build.py --target buttons $(TOOLCHAIN_ARGS)
 
-build-lmp8:
-	$(PYTHON) scripts/build.py --target lmp8 $(TOOLCHAIN_ARGS)
+build-lmp:
+	$(PYTHON) scripts/build.py --target lmp $(TOOLCHAIN_ARGS)
+
+# Старое имя не собирает восьмилампочницу: это alias новой цели lmp.
+build-lmp8: build-lmp
 
 help:
 	@printf '%s\n' \
-		'make build           — хаб, три Arduino-шлюза, кнопочница и lmp8' \
+		'make build           — хаб, три Arduino-шлюза, кнопочница и обычная lmp' \
 		'make build-hub       — только центральный хаб' \
 		'make build-hub-test  — тестовый хаб: ответ 0xAA на байт SimpleBus' \
 		'make build-gateways  — три Arduino-шлюза' \
 		'make build-gateway-actuator-2 — второй actuator-шлюз, адрес 17' \
 		'make build-buttons   — кнопочница: концевики на пинах 1 и 2' \
-		'make build-lmp8      — восьмилампочница фаблаб: два замка и пылесос' \
+		'make build-lmp       — обычная лампочница фаблаб: два замка и пылесос' \
+		'make build-lmp8      — устаревший alias build-lmp' \
 		'TOOLCHAIN_BIN=/path/to/bin (необязательно; ARM GCC по умолчанию из PATH)' \
 		'PYTHON=python3 (необязательно)'
