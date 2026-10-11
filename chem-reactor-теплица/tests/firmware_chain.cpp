@@ -40,7 +40,6 @@ struct Fans : FanHardware {
   }
   uint8_t readPwm(uint8_t idx) const override { return pwm[idx]; }
   uint32_t readRpm(uint8_t idx) const override { return 1200 + idx; }
-  uint8_t randomPwm() override { return 230; }
 };
 struct Outputs {
   bool locked = false; uint8_t mask = 0; unsigned writes = 0;
@@ -121,15 +120,12 @@ void tests() {
     assert(chain.execute(request(16, kGetRelayLevel)).data[0] == level);
   }
   assert(chain.execute(request(16, kSetRelayLevel, 0, 11)).status == INVALID_ARGUMENT);
-  assert(chain.execute(request(14, kSetMode, 1, 2)).data[0] == 2);
-  assert(chain.execute(request(14, kSetPwm, 1, 100)).data[0] == 230);
-  assert(chain.execute(request(14, kGetPwm, 1)).data[0] == 230);
-  assert(chain.execute(request(14, kSetMode, 0, 0)).data[1] == 255);
-  assert(chain.fans.pwm[1] == 230);
-  assert(chain.execute(request(14, kSetMode, 0, 1)).data[0] == 1);
   const unsigned writes = chain.fans.writes;
-  assert(chain.execute(request(14, kSetMode, 0, 1)).status == OK && chain.fans.writes == writes);
-  assert(chain.actuatorApi.tick(30300) && chain.fans.writes == writes + 1);
+  for (uint8_t command : {0x40, 0x41})
+    assert(chain.execute(request(14, command, 0, 1)).status == UNKNOWN_COMMAND);
+  assert(chain.fans.writes == writes);
+  assert(chain.execute(request(14, kSetPwm, 1, 100)).data[0] == 100);
+  assert(chain.execute(request(14, kGetPwm, 1)).data[0] == 100);
 
   // Пауза реле переносит wrap millis, дубликат не продлевает её.
   Outputs hw; tjc_lmp8::Lmp8Api<Outputs> api(hw);
@@ -173,7 +169,7 @@ void tests() {
   busyApi.receive(request(16, kGetRelayLevel), 1100);
   assert(busyApi.takeReply(r) && r.status == BUSY && busyHw.mask == 0);
   busyApi.tick(1250); assert(busyApi.takeReply(r) && r.data[0] == 10 && busyHw.mask == 1);
-  puts("chemreactor: hub/gateway/sensors/fans/buttons/lmp8, all levels, modes, wrap and timeout passed");
+  puts("chemreactor: hub/gateway/sensors/fans/buttons/lmp8, all levels, rejected fault commands, wrap and timeout passed");
 }
 int main(int argc, char**) {
   if (argc == 1) { tests(); return 0; }

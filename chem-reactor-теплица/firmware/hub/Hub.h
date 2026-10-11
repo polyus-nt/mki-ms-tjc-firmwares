@@ -3,7 +3,7 @@
 
 namespace tjc_hub {
 // Химреактор: одна actuator Arduino, индексы 0/1 без перевода в node17.
-// Включая режим неисправности: запрос идёт ровно на один конечный узел.
+// Запросы PWM/RPM идут ровно на один конечный узел; режимов отказа нет.
 class Hub {
  public:
   enum State { Recovering, Idle, Forwarding, Waiting, Responding };

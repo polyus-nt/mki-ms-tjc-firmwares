@@ -13,17 +13,21 @@ import select
 import time
 
 COMMANDS = {"temp": (0x20, 3), "pressure": (0x23, 3), "voc": (0x21, 2),
-            "humidity": (0x24, 3), "dust": (0x25, 2), "door": (0x22, 2),
+            "humidity": (0x24, 3), "dust": (0x25, 1), "door": (0x22, 2),
             "pwm": (0x30, 6), "rpm": (0x31, 6)}
 STATUSES = ("OK", "INVALID_INDEX", "INVALID_ARGUMENT", "UNKNOWN_COMMAND",
             "NOT_IMPLEMENTED", "SENSOR_UNAVAILABLE", "BUSY", "DEVICE_TIMEOUT",
             "UNSUPPORTED_VERSION", "INTERNAL_ERROR", "REQUEST_ID_CONFLICT",
             "INVALID_NODE", "TRANSPORT_OVERFLOW")
-HELP = "probe (проверка хаба) | temp 0..2 | pressure 0..2 | voc 0..1 | humidity 0..2 | dust 0..1 | door 0..1 | pwm 0..5 | rpm 0..5 | help | exit"
+HELP = "probe (проверка хаба) | temp 0..2 | pressure 0..2 | voc 0..1 | humidity 0..2 | dust | door 0..1 | pwm 0..5 | rpm 0..5 | help | exit"
 
 
 def parse_command(line):
     parts = line.split()
+    if parts == ["dust"]:
+        return 0x25, 0
+    if parts and parts[0] == "dust":
+        raise ValueError("Команда dust не принимает индекс.")
     if len(parts) != 2 or parts[0] not in COMMANDS:
         raise ValueError("Введите команду и индекс. " + HELP)
     command, count = COMMANDS[parts[0]]

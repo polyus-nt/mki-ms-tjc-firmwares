@@ -167,11 +167,11 @@ class ConsoleTests(unittest.TestCase):
         self.assertEqual(console.request_frame(0x25, 0, 1, 1), bytes.fromhex(
             "A5 5A 02 01 00 01 0D 25 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 89 2C"))
         for name, (command, count) in console.COMMANDS.items():
-            self.assertEqual(console.parse_command(f" {name} {count-1} "), (command, count-1))
+            self.assertEqual(console.parse_command("dust" if name == "dust" else f" {name} {count-1} "), (command, count-1))
             for arg in (str(count), "-1", "1.0", "x", "00000000", "１"):
                 with self.assertRaises(ValueError):
                     console.parse_command(f"{name} {arg}")
-        for line in ("", "unknown 0", "temp", "temp 0 junk"):
+        for line in ("", "unknown 0", "temp", "temp 0 junk", "dust 0", "dust 1"):
             with self.assertRaises(ValueError):
                 console.parse_command(line)
 

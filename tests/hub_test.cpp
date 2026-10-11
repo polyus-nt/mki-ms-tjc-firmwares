@@ -31,6 +31,13 @@ static void modeReply(Hub& hub, const Frame& req, uint8_t mode, uint8_t idx, uin
 int main() {
   Frame out;
   {
+    // Единственный датчик пыли: устаревший idx=1 отклоняется самим хабом.
+    Hub hub; hub.tick(250); Frame req=request(13,kGetDust); req.idx=1;
+    feed(hub,req,300);
+    assert(!hub.takeGatewayRequest(out));
+    assert(hub.takeHostResponse(out) && out.status==INVALID_INDEX);
+  }
+  {
     Hub hub; hub.tick(250); assert(hub.state()==Hub::Idle);
     const Frame req=request(); start(hub,req);
     Frame reply=response(req); reply.data[0]=230;

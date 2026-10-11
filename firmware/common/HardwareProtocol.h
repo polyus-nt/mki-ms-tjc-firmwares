@@ -109,8 +109,10 @@ inline Status validateRequest(const Frame& request, uint8_t localNode) {
   switch (request.command) {
     case kGetTemp: case kGetPressure: case kGetHumidity:
       node = kSensorsNode; count = 3; break;
-    case kGetVoc: case kGetDust:
+    case kGetVoc:
       node = kSensorsNode; count = 2; break;
+    case kGetDust:
+      node = kSensorsNode; count = 1; break;
     case kGetDoor:
       node = kButtonsNode; count = 2; break;
     case kGetPwm: case kGetRpm:

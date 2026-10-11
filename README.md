@@ -65,13 +65,13 @@ mstjuk> temp 0
 mstjuk> pressure 1
 mstjuk> voc 0
 mstjuk> humidity 2
-mstjuk> dust 1
+mstjuk> dust
 mstjuk> door 0
 mstjuk> help
 mstjuk> exit
 ```
 
-Температура/давление/влажность: idx=0..2; VOC/пыль: idx=0..1.
+Температура/давление/влажность: idx=0..2; VOC: idx=0..1; пыль — один датчик, команда dust без индекса.
 Концевики: `door 0..1`, отдельная кнопочница на адресе 15, без Arduino.
 Скрипт сам создаёт CRC-кадр v2 и SimpleBus-пакеты хабу 12, получает ответ
 компьютеру 99 через шлюз sensors 13, проверяет реквизиты/CRC/данные и печатает
@@ -303,3 +303,8 @@ node scripts/generate_protocol_graphml.mjs
 
 Перед прошивкой модель следует открыть в Lapki IDE, собрать для обеих TJC-плат
 и проверить на стенде общие тестовые векторы из `docs/protocol.md`.
+
+## Проверка по частям и полного стенда
+
+[Пошаговый гайд диагностики](../tjc-commutator/docs/TESTING.md) — Arduino USB TEST,
+отдельные аппаратные ветви, хаб, FastAPI, безопасные ручные проверки и автотесты.

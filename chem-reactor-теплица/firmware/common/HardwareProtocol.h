@@ -15,7 +15,7 @@ enum {
   kGetPressure = 0x23, kGetHumidity = 0x24, kGetDust = 0x25,
   kGetGas = 0x26,
   kGetPwm = 0x30, kGetRpm = 0x31, kSetPwm = 0x32,
-  kGetMode = 0x40, kSetMode = 0x41, kSetDoorLock = 0x42,
+  kSetDoorLock = 0x42,
   kGetDoorLock = 0x43, kGetRelayLevel = 0x50, kSetRelayLevel = 0x51,
   kGetVacuum = 0x52, kSetVacuum = 0x53
 };
@@ -107,7 +107,7 @@ inline Status validateRequest(const Frame& request, uint8_t localNode,
   if (request.version != kVersion) return UNSUPPORTED_VERSION;
   if (request.kind != kRequest || request.status != OK) return INVALID_ARGUMENT;
   uint8_t node = 0, count = 0;
-  bool argument = false, modeRead = false;
+  bool argument = false;
   switch (request.command) {
     case kGetTemp: case kGetPressure: case kGetHumidity:
     case kGetGas:
@@ -116,10 +116,8 @@ inline Status validateRequest(const Frame& request, uint8_t localNode,
       node = kButtonsNode; count = 2; break;
     case kGetPwm: case kGetRpm:
       node = kActuatorNode; count = localFanCount; break;
-    case kSetPwm: case kSetMode:
+    case kSetPwm:
       node = kActuatorNode; count = localFanCount; argument = true; break;
-    case kGetMode:
-      node = kActuatorNode; modeRead = true; break;
     case kSetDoorLock:
       node = kLmp8Node; count = 1; argument = true; break;
     case kGetDoorLock:
@@ -131,10 +129,9 @@ inline Status validateRequest(const Frame& request, uint8_t localNode,
     default: return UNKNOWN_COMMAND;
   }
   if (request.node != node || localNode != node) return INVALID_NODE;
-  if (modeRead ? request.idx != 0xff : request.idx >= count) return INVALID_INDEX;
+  if (request.idx >= count) return INVALID_INDEX;
   if (!zeros(request.data + (argument ? 1 : 0), argument ? 7 : 8))
     return INVALID_ARGUMENT;
-  if (request.command == kSetMode && request.data[0] > 2) return INVALID_ARGUMENT;
   if ((request.command == kSetDoorLock || request.command == kSetVacuum) && request.data[0] > 1) return INVALID_ARGUMENT;
   if (request.command == kSetRelayLevel && request.data[0] > 10) return INVALID_ARGUMENT;
   return OK;
