@@ -6,14 +6,12 @@ const uint8_t kLockPin = 1;
 const uint8_t kRelayPins[6] = {2, 3, 4, 5, 6, 7};
 const uint32_t kBreakMs = 250;
 const uint32_t kOpenMs = 2000;
-// Общий выход замков: HIGH открывает, LOW закрывает. Шесть реле включаются LOW.
-const bool kLockActiveLow = true, kRelayActiveLow = true;
-// До GPIO output-mode: замок LOW (закрыт), реле HIGH (выключены).
+// Общий выход замков: HIGH открывает, LOW закрывает. Шесть реле включаются HIGH.
+const bool kLockActiveLow = true, kRelayActiveLow = false;
+// До GPIO output-mode: замок LOW (закрыт), реле LOW (выключены).
 inline bool startupHigh(uint8_t ledIndex) {
   if (ledIndex == kLockPin-1) return !kLockActiveLow;
-  for (uint8_t i=0; i<6; ++i)
-    if (ledIndex == kRelayPins[i]-1) return kRelayActiveLow;
-  return false; // Неиспользуемый пин 8 остаётся LOW.
+  return kRelayActiveLow; // Все неиспользуемые и релейные выходы LOW.
 }
 inline uint8_t relayMask(uint8_t level) {
   const uint8_t masks[11] = {0, 49, 51, 55, 63, 33, 17, 35, 39, 47, 1};

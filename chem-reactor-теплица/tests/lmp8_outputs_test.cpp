@@ -27,17 +27,15 @@ int main() {
   Channel lock,relays[6];cfg::Outputs<Channel> outputs(lock,relays,[](){});
   cfg::Lmp8Api<cfg::Outputs<Channel>> api(outputs);
   assert(!cfg::startupHigh(0)&&!lock.high);
-  for(uint8_t i=1;i<7;++i)assert(cfg::startupHigh(i));
-  assert(!cfg::startupHigh(7)); // Неиспользуемый выход 8 не включаем.
-  for(const auto& ch:relays)assert(ch.high); // Старт: все реле выключены HIGH.
+  for(uint8_t i=1;i<8;++i)assert(!cfg::startupHigh(i));
   const uint8_t masks[]={0,49,51,55,63,33,17,35,39,47,1};
   for(uint8_t level=0;level<=10;++level) {
     const uint32_t start=1000u*level;
     api.receive(request(kSetRelayLevel,0,level),start);
-    for(const auto& ch:relays)assert(ch.high); // break before make: HIGH.
-    api.tick(start+249);for(const auto& ch:relays)assert(ch.high);
+    for(const auto& ch:relays)assert(!ch.high); // break before make: LOW.
+    api.tick(start+249);for(const auto& ch:relays)assert(!ch.high);
     api.tick(start+250);assert(api.takeReply(reply)&&reply.status==OK);
-    for(uint8_t i=0;i<6;++i)assert(relays[i].high==!(masks[level]&(1u<<i)));
+    for(uint8_t i=0;i<6;++i)assert(relays[i].high==!!(masks[level]&(1u<<i)));
     assert(!lock.high); // Переключение скорости не трогает замки.
   }
   api.receive(request(kOpenDoorTimed),20000);
@@ -66,5 +64,5 @@ int main() {
   api.receive(request(kSetVacuum,0,0),10000);
   assert(api.takeReply(reply)&&!vacuum.high);
 #endif
-  puts("MC outputs: startup LOW closed locks, HIGH inactive relays, physical levels, timed opening passed");
+  puts("MC outputs: startup LOW closed locks, LOW motors, physical levels, timed opening passed");
 }

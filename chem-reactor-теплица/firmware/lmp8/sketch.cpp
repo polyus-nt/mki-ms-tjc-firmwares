@@ -15,7 +15,7 @@ LED relay[6] = {LED(tjc_lmp8::kRelayPins[0]), LED(tjc_lmp8::kRelayPins[1]),
 SimpleBus bus;
 int main() {
   using namespace hardware_api;
-  LEDController::init(); // Замок LOW, реле HIGH: уровни загружены до MODER.
+  LEDController::init(); // Замок LOW, реле LOW: уровни загружены до MODER.
   bus.setAddress(tjc_lmp8::kBusAddress); detail::hal::initUartWrapper();
   tjc_lmp8::Outputs<LED> outputs(lockOutput, relay, LEDController::update);
   tjc_lmp8::Lmp8Api<tjc_lmp8::Outputs<LED>> api(outputs);
