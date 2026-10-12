@@ -16,7 +16,7 @@ Build создаёт копию в `build/lmp8/platform`, проверяет х�
 плюс значение PWM-кэша на соответствующий HIGH/LOW для стартового состояния.
 Runtime UART получает обычные IRQ/FIFO/unaligned-access исправления проекта.
 Оригиналы никогда не патчатся. Для химреактора состояние выхода задано
-в `../lmp8/BoardConfig.h`: пин 1 LOW (замки заблокированы), пины 2–7 LOW при запуске.
+в `../lmp8/BoardConfig.h`: пин 1 LOW (замки заблокированы), пины 2–7 HIGH при запуске; неиспользуемый пин 8 LOW.
 
 Лицензия lapki-compiler GPLv3: текст в `../runtime/LICENSE`.
 Copyright/лицензии общих ARM/ST файлов сохранены; см. `../runtime/UPSTREAM.md`.
