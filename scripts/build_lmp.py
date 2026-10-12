@@ -29,7 +29,7 @@ def patch_led(text):
                         '#include "BoardConfig.h"\n#include "PWM.hpp"')
     start = text.index("        RCC -> IOPENR |=")
     end = text.index("        off();", start) + len("        off();")
-    # Never call startup off() for a lock: it would intentionally unlock it.
+    # Honor BoardConfig startup levels instead of an unconditional off().
     text = text[:start] + """        RCC->IOPENR |= RCC_IOPENR_GPIOAEN;
         const bool high = tjc_lmp::startupHigh(ledPin - 1);
         GPIOA->BSRR = 1UL << (high ? pin : pin + 16); // latch BEFORE output mode

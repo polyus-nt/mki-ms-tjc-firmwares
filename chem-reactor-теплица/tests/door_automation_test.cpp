@@ -34,17 +34,17 @@ template<class Target> void feed(Target& t,const Frame& f,uint32_t now) {
 int main() {
   Outputs hw;tjc_lmp8::Lmp8Api<Outputs> lmp(hw);Frame r;
   for(uint8_t i=0;i<lockCount;++i)assert(hw.state(i));
-  // Локальный таймер: 5 с, повтор новым запросом продлевает; дубликат не продлевает.
+  // Локальный таймер: 2 с, повтор новым запросом продлевает; дубликат не продлевает.
   Frame open=req(16,kOpenDoorTimed);
   lmp.receive(open,100);assert(lmp.takeReply(r)&&r.status==OK&&!hw.state(0));
   lmp.receive(open,200);assert(lmp.takeReply(r)&&r.status==OK);
-  lmp.tick(5099);assert(!hw.state(0));lmp.tick(5100);assert(hw.state(0));
+  lmp.tick(2099);assert(!hw.state(0));lmp.tick(2100);assert(hw.state(0));
   open=req(16,kOpenDoorTimed);lmp.receive(open,6000);assert(lmp.takeReply(r));
   open=req(16,kOpenDoorTimed);lmp.receive(open,7000);assert(lmp.takeReply(r));
-  lmp.tick(11000);assert(!hw.state(0));lmp.tick(12000);assert(hw.state(0));
+  lmp.tick(8999);assert(!hw.state(0));lmp.tick(9000);assert(hw.state(0));
   // Таймер работает без связи, с незабранным ответом и через wrap millis.
   open=req(16,kOpenDoorTimed);lmp.receive(open,0xffffff00UL);
-  lmp.tick(0x1287);assert(!hw.state(0));lmp.tick(0x1288);assert(hw.state(0));
+  lmp.tick(0x6cf);assert(!hw.state(0));lmp.tick(0x6d0);assert(hw.state(0));
   assert(lmp.takeReply(r));
   // Явное состояние админки отменяет таймер и для unlock, и для lock.
   open=req(16,kOpenDoorTimed);lmp.receive(open,20000);assert(lmp.takeReply(r));
@@ -56,7 +56,7 @@ int main() {
 #ifndef CHEM_DOORS
   // Независимые двери.
   lmp.receive(req(16,kOpenDoorTimed,1),50000);assert(lmp.takeReply(r));
-  assert(hw.state(0)&&!hw.state(1));lmp.tick(55000);assert(hw.state(1));
+  assert(hw.state(0)&&!hw.state(1));lmp.tick(52000);assert(hw.state(1));
 #endif
   open=req(16,kOpenDoorTimed,lockCount);lmp.receive(open,60000);
   assert(lmp.takeReply(r)&&r.status==INVALID_INDEX);

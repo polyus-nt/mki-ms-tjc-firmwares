@@ -17,7 +17,7 @@ Frame req(uint8_t cmd, uint8_t value = 0, uint16_t tx = 1) {
 int main() {
   Hardware hw; tjc_lmp::LmpApi<Hardware> api(hw); Frame reply;
   assert(hw.mask == 0 && hw.locked[0] && hw.locked[1] && !hw.vacuumOn && hw.changes == 0);
-  assert(tjc_lmp::startupHigh(0) && tjc_lmp::startupHigh(1));
+  assert(!tjc_lmp::startupHigh(0) && !tjc_lmp::startupHigh(1));
   assert(!tjc_lmp::startupHigh(2));
   for(uint8_t i=3;i<8;++i) assert(!tjc_lmp::startupHigh(i));
   for (uint8_t i = 0; i <= 10; ++i) {

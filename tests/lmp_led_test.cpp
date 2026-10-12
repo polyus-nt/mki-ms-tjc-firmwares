@@ -3,7 +3,8 @@
 #include <cstdint>
 #include "../firmware/lmp/BoardConfig.h"
 using byte=uint8_t;
-static uint32_t levels=0;
+// Даже если latch оставлен HIGH, конструктор обязан сбросить его ДО output-mode.
+static uint32_t levels=(1u<<5)|(1u<<6)|(1u<<7);
 static char writes[32];
 static unsigned count=0;
 struct Register {
@@ -43,8 +44,8 @@ int main() {
   LED first(1),second(2),vacuum(3);
   assert(count==6);
   for(unsigned i=0;i<6;++i)assert(writes[i]==(i%2 ? 'M' : 'L'));
-  assert(levels==((1u<<5)|(1u<<6)));
-  assert(first.value&&second.value&&!vacuum.value);
+  assert(levels==0);
+  assert(!first.value&&!second.value&&!vacuum.value);
   first.off();assert(!(levels&(1u<<5))&& !first.value);
   first.on();assert((levels&(1u<<5))&&first.value);
   vacuum.on();assert((levels&(1u<<7))&&vacuum.value);

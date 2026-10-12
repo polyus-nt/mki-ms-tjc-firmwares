@@ -5,10 +5,10 @@ const uint8_t kBusAddress = 16, kHubAddress = 12;
 const uint8_t kLockPin = 1;
 const uint8_t kRelayPins[6] = {2, 3, 4, 5, 6, 7};
 const uint32_t kBreakMs = 250;
-const uint32_t kOpenMs = 5000;
-// Общий выход двух замков и шесть реле МС-ТЮК активны HIGH.
-const bool kLockActiveLow = false, kRelayActiveLow = false;
-// До GPIO output-mode: замок HIGH (включён), реле LOW (выключены).
+const uint32_t kOpenMs = 2000;
+// Общий выход замков: HIGH открывает, LOW закрывает. Шесть реле включаются HIGH.
+const bool kLockActiveLow = true, kRelayActiveLow = false;
+// До GPIO output-mode: замок LOW (закрыт), реле LOW (выключены).
 inline bool startupHigh(uint8_t ledIndex) {
   if (ledIndex == kLockPin-1) return !kLockActiveLow;
   return kRelayActiveLow; // Все неиспользуемые и релейные выходы LOW.
