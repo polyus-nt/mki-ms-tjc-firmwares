@@ -8,8 +8,8 @@ class Hub {
  public:
   enum State { Recovering, Idle, Forwarding, Waiting, Responding };
   static const uint32_t kTransactionMs = 3000;
-  // Пять обменов GET/GET/OFF/OFF/ON требуют ~3.4 с при 9600 бод.
-  // 4 с + кадры PC↔хаб укладываются в стандартный host timeout 5 с.
+  // Смена режима требует пяти обменов GET/GET/OFF/OFF/ON.
+  // Это предел при отказе, не пауза: успешные ответы продолжаются немедленно.
   static const uint32_t kModeTransactionMs = 4000;
   static const uint32_t kQuietMs = 250;
   static const uint32_t kRecoveryMaxMs = 1000;

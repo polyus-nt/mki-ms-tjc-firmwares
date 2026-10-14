@@ -52,7 +52,7 @@ def main():
     port = None
     try:
         port = WindowsPort(args.port) if os.name == "nt" else Port(args.port)
-        print("9600, 8N1. Только тестовая прошивка hub-test! Закройте другие владельцы порта.")
+        print("115200, 8N1. Только тестовая прошивка hub-test! Закройте другие владельцы порта.")
         port.quiet(print)
         print("Введите байт: 0..255 или 0xAA. exit — выход. Ожидаемый ответ: 0xAA.")
         while True:

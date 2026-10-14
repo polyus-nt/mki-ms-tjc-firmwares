@@ -2,8 +2,7 @@
 #include "../common/HardwareProtocol.h"
 
 namespace tjc_hub {
-// Хаб — единственный инициатор внутренних запросов. PC ждёт 1 с тишины;
-// пауза между опросами 1.5 с оставляет ему окно для начала кадра.
+// Внутренний опрос раз в 2 с. HostArbiter исключает его во внешней фазе.
 // Core — существующий Hub; его маршрутизация/ошибки не заменяются.
 // Один запрос PC, пришедший во время фонового обмена, сохраняется до его конца.
 template<class Core> class DoorHub {
@@ -11,14 +10,16 @@ template<class Core> class DoorHub {
   explicit DoorHub(uint8_t lockCount=2)
       : locks_(lockCount), background_(false), hostPending_(false), first_(true),
         lastPoll_(0), started_(0), nextAllowed_(0), pending_(0), activeLock_(0),
-        sequence_(0), session_(UINT64_C(0x444F4F5200000000)), polling_(false) {
+        sequence_(0), session_(UINT64_C(0x444F4F5200000000)), polling_(false), hostPhase_(false) {
     counters_[0]=counters_[1]=0;
   }
   void setSessionSeed(uint32_t seed) { session_ ^= seed; }
+  void setHostPhase(bool enabled) { hostPhase_=enabled; }
+  bool idle() const { return !background_ && core_.state()==Core::Idle && !input_.partial(); }
   void tick(uint32_t now) {
     input_.tick(now); core_.tick(now);
     // Фоновый узел не должен занимать шину на полный host timeout.
-    if (background_ && static_cast<uint32_t>(now-started_) >= 1000)
+    if (background_ && static_cast<uint32_t>(now-started_) >= 250)
       core_.overflow(now);
     if (background_) {
       hardware_api::Frame reply;
@@ -40,7 +41,7 @@ template<class Core> class DoorHub {
             }
             counters_[0]=values[0]; counters_[1]=values[1]; first_=false;
           }
-          lastPoll_=now;
+          // Период отсчитывается от начала опроса, а не от конца ответа.
         } else if (reply.status!=hardware_api::BUSY) {
           // При таймауте команда могла выполниться: не повторяем её автоматически.
           pending_ &= static_cast<uint8_t>(~(1u << activeLock_));
@@ -49,7 +50,7 @@ template<class Core> class DoorHub {
         if (reply.status==hardware_api::BUSY) nextAllowed_=now+500;
       }
     }
-    if (background_ || core_.state()!=Core::Idle || input_.partial()) return;
+    if (hostPhase_ || background_ || core_.state()!=Core::Idle || input_.partial()) return;
     // Импульсы из текущего снимка раньше отложенной команды админки:
     // последняя явная команда сможет отменить уже созданный таймер.
     if (pending_ && static_cast<int32_t>(now-nextAllowed_)>=0) {
@@ -57,7 +58,7 @@ template<class Core> class DoorHub {
       start(hardware_api::kLmp8Node, hardware_api::kOpenDoorTimed,idx,now);
     } else if (hostPending_) {
       hostPending_=false; feedCore(host_,now);
-    } else if (static_cast<uint32_t>(now-lastPoll_)>=1500 &&
+    } else if (static_cast<uint32_t>(now-lastPoll_)>=2000 &&
                static_cast<int32_t>(now-nextAllowed_)>=0) {
       start(hardware_api::kButtonsNode,hardware_api::kGetOpenButtons,0,now);
     }
@@ -92,6 +93,7 @@ template<class Core> class DoorHub {
     f.session_id=session_ ^ (sequence_ >> 16);
     background_=true; started_=now; activeLock_=idx;
     polling_=command==hardware_api::kGetOpenButtons;
+    if (polling_) lastPoll_=now;
     feedCore(f,now);
   }
   Core core_;
@@ -101,7 +103,7 @@ template<class Core> class DoorHub {
   uint32_t lastPoll_,started_,nextAllowed_;
   uint8_t pending_,activeLock_;
   uint64_t sequence_,session_;
-  bool polling_;
+  bool polling_, hostPhase_;
   uint32_t counters_[2];
   hardware_api::Frame host_;
 };

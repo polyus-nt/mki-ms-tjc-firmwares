@@ -5,12 +5,12 @@
 #include "UART.hpp"
 #include "SimpleBus.hpp"
 #include "Hub.h"
-#include "DoorHub.h"
+#include "HostArbiter.h"
 
 // main-a4: PC и платы используют ОДНУ шину USART1, PB6/PB7, PA0 ReDe.
 // Здесь нет второго UART и нет автоматически назначенного адреса восьмилампочницы.
 SimpleBus bus;
-tjc_hub::DoorHub<tjc_hub::Hub> hub(2);
+tjc_hub::HostArbiter<tjc_hub::Hub> hub(2);
 
 int main() {
   bus.setAddress(12);
@@ -18,7 +18,7 @@ int main() {
   hub.setSessionSeed(*reinterpret_cast<volatile uint32_t*>(UID_BASE) ^ SysTick->VAL);
   uint8_t outgoing[hardware_api::kFrameSize];
   uint8_t position = hardware_api::kFrameSize, address = 0;
-  bool to_host = false, ever_sent = false;
+  bool to_host = false;
   uint32_t last_end = 0;
   for (;;) {
     if (detail::simpleBusHelpers::Api::takeOverflow()) hub.overflow(millis());
@@ -39,10 +39,9 @@ int main() {
         hardware_api::encode(frame, outgoing); position = 0;
       }
     }
-    if (position < hardware_api::kFrameSize &&
-        (!ever_sent || static_cast<uint32_t>(millis() - last_end) >= 2)) {
+    if (position < hardware_api::kFrameSize) {
       bus.sendPacket(address, outgoing[position++]);
-      last_end = millis(); ever_sent = true;
+      last_end = millis();
       if (position == hardware_api::kFrameSize) {
         if (to_host) hub.hostResponseSent(last_end);
         else hub.gatewayRequestSent(last_end);

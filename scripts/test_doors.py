@@ -12,6 +12,10 @@ def main():
     root = Path(__file__).resolve().parents[1]
     with tempfile.TemporaryDirectory(prefix="greenhouse-doors-") as directory:
         for name, source, flags in (
+            ("arbiter-fablab", root / "tests/arbiter_test.cpp", []),
+            ("arbiter-chem", root / "tests/arbiter_test.cpp",
+             ['-DHOST_HUB_HEADER="../chem-reactor-теплица/firmware/hub/Hub.h"',
+              '-DHOST_ARBITER_HEADER="../chem-reactor-теплица/firmware/hub/HostArbiter.h"']),
             ("fablab", root / "tests/door_automation_test.cpp", []),
             ("fablab-outputs", root / "tests/lmp_outputs_test.cpp", []),
             ("chem-outputs", root / "chem-reactor-теплица/tests/lmp8_outputs_test.cpp",

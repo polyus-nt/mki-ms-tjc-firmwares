@@ -38,7 +38,7 @@ UART получает общие IRQ/FIFO/unaligned-access исправлени�
 
 ## Команды Hardware API v2
 
-SimpleBus: CR + ASCII HEX адрес + байт + LF, 9600 8N1.
+SimpleBus: CR + ASCII HEX адрес + байт + LF, 115200 8N1.
 28-байтовый Hardware API кадр с CRC, session_id и tx_id не меняется.
 
 | Метод | command | idx | data запроса | data ответа OK |
@@ -90,3 +90,5 @@ py -3 -m unittest discover -s tests -p "*_test.py".
 tests/lmp_test.cpp проверяет API, tests/lmp_outputs_test.cpp — физическую
 полярность замков/пылесоса и таймеры; lmp_build_test.py — платформу и startup-патчи.
 Проверка сборки не заменяет измерение уровней и времени на реальном стенде.
+
+Актуальное согласование PC с хабом, миграция и ограничения: [FAST-SIMPLEBUS.md](FAST-SIMPLEBUS.md).

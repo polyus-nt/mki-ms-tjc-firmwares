@@ -55,7 +55,6 @@ int main() {
   uint8_t outgoing[hardware_api::kFrameSize];
   uint8_t outgoing_pos = hardware_api::kFrameSize;
   uint32_t last_bus_tx_end = 0;
-  bool ever_sent = false;
 
   for (;;) {
     const uint32_t now = millis();
@@ -87,13 +86,11 @@ int main() {
       hardware_api::encode(frame, outgoing);
       outgoing_pos = 0;
     }
-    if (outgoing_pos < hardware_api::kFrameSize &&
-        (!ever_sent || static_cast<uint32_t>(millis() - last_bus_tx_end) >= 2)) {
-      // Upstream sendPacket blocks only for one five-byte UART packet (~5ms).
+    if (outgoing_pos < hardware_api::kFrameSize) {
+      // Upstream sendPacket blocks only for one five-byte UART packet (~0.434 ms at 115200).
       // Never block waiting for the complete transaction or interpacket pause.
       bus.sendPacket(12, outgoing[outgoing_pos++]);
       last_bus_tx_end = millis();
-      ever_sent = true;
       if (outgoing_pos == hardware_api::kFrameSize)
         gateway.hubResponseSent(last_bus_tx_end);
     }

@@ -38,8 +38,6 @@ int main() {
   StreamParser parser;
   uint8_t outgoing[kFrameSize];
   uint8_t position = kFrameSize;
-  uint32_t last_end = 0;
-  bool ever_sent = false;
   for (;;) {
     // Не блокируем опрос концевиков ожиданием запросов или полным кадром TX.
     door0.scan(); door1.scan(); open0.scan(); open1.scan();
@@ -57,10 +55,8 @@ int main() {
       encode(api.execute(request), outgoing);
       position = 0;
     }
-    if (position < kFrameSize &&
-        (!ever_sent || static_cast<uint32_t>(millis() - last_end) >= 2)) {
+    if (position < kFrameSize) {
       bus.sendPacket(tjc_buttons::kHubAddress, outgoing[position++]);
-      last_end = millis(); ever_sent = true;
     }
   }
 }

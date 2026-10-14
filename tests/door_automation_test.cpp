@@ -74,43 +74,43 @@ int main() {
   buttons.sampleOpen(false,true,600);assert(readU32(buttons.execute(snap).data+4)==1);
   // Полная автономная цепочка и отложенный запрос PC.
   tjc_hub::DoorHub<tjc_hub::Hub> hub(lockCount);
-  hub.tick(500);hub.tick(1500);Frame down;
+  hub.tick(500);hub.tick(2000);Frame down;
   assert(hub.takeGatewayRequest(down)&&down.command==kGetOpenButtons);
-  hub.gatewayRequestSent(1500);feed(hub,buttons.execute(down),1600);hub.tick(1600);
+  hub.gatewayRequestSent(2000);feed(hub,buttons.execute(down),2100);hub.tick(2100);
   assert(!hub.takeHostResponse(r)); // Фоновые ответы не попадают на компьютер.
-  buttons.sampleOpen(false,false,1650);buttons.sampleOpen(true,true,1700);
-  hub.tick(3100);assert(hub.takeGatewayRequest(down)&&down.command==kGetOpenButtons);
-  hub.gatewayRequestSent(3100);
-  Frame host=req(16,kSetDoorLock,0,1);feed(hub,host,3150); // Во время фонового чтения.
-  feed(hub,buttons.execute(down),3200);hub.tick(3200);
+  buttons.sampleOpen(false,false,2150);buttons.sampleOpen(true,true,2200);
+  hub.tick(4000);assert(hub.takeGatewayRequest(down)&&down.command==kGetOpenButtons);
+  hub.gatewayRequestSent(4000);
+  Frame host=req(16,kSetDoorLock,0,1);feed(hub,host,4050); // Во время фонового чтения.
+  feed(hub,buttons.execute(down),4100);hub.tick(4100);
   for(uint8_t i=0;i<lockCount;++i) {
     assert(hub.takeGatewayRequest(down)&&down.command==kOpenDoorTimed&&down.idx==i);
-    hub.gatewayRequestSent(3200+i*100);
-    lmp.receive(down,3200+i*100);assert(lmp.takeReply(r));feed(hub,r,3250+i*100);
-    hub.tick(3250+i*100);
+    hub.gatewayRequestSent(4100+i*100);
+    lmp.receive(down,4100+i*100);assert(lmp.takeReply(r));feed(hub,r,4150+i*100);
+    hub.tick(4150+i*100);
   }
   assert(hub.takeGatewayRequest(down)&&down.command==kSetDoorLock);
-  hub.gatewayRequestSent(3500);lmp.receive(down,3500);assert(lmp.takeReply(r));
-  feed(hub,r,3600);assert(hub.takeHostResponse(r)&&sameRequest(host,r)&&r.status==OK);
-  hub.hostResponseSent(3600);assert(hw.state(0));
+  hub.gatewayRequestSent(4400);lmp.receive(down,4400);assert(lmp.takeReply(r));
+  feed(hub,r,4500);assert(hub.takeHostResponse(r)&&sameRequest(host,r)&&r.status==OK);
+  hub.hostResponseSent(4500);assert(hw.state(0));
   lmp.tick(10000);for(uint8_t i=0;i<lockCount;++i)assert(hw.state(i));
   // Нет кнопочницы: bounded timeout, хаб восстанавливается и обслуживает PC.
   tjc_hub::DoorHub<tjc_hub::Hub> missing(lockCount);
-  missing.tick(500);missing.tick(1500);assert(missing.takeGatewayRequest(down));
-  missing.gatewayRequestSent(1500);feed(missing,req(16,kGetDoorLock),1600);
+  missing.tick(500);missing.tick(2000);assert(missing.takeGatewayRequest(down));
+  missing.gatewayRequestSent(2000);feed(missing,req(16,kGetDoorLock),2100);
   missing.tick(2500);assert(!missing.takeHostResponse(r));
   missing.tick(2750);assert(missing.takeGatewayRequest(down)&&down.command==kGetDoorLock);
   // Counter wrap в ноль — событие, а обычный сброс после reboot — нет.
   for(uint8_t scenario=0;scenario<2;++scenario) {
     tjc_hub::DoorHub<tjc_hub::Hub> h(lockCount);
-    h.tick(500);h.tick(1500);assert(h.takeGatewayRequest(down));
-    h.gatewayRequestSent(1500);
+    h.tick(500);h.tick(2000);assert(h.takeGatewayRequest(down));
+    h.gatewayRequestSent(2000);
     Frame values=response(down);
     writeU32(values.data,scenario ? 10u : 0xffffffffUL);
-    feed(h,values,1600);h.tick(1600);
-    h.tick(3100);assert(h.takeGatewayRequest(down));h.gatewayRequestSent(3100);
+    feed(h,values,2100);h.tick(2100);
+    h.tick(4000);assert(h.takeGatewayRequest(down));h.gatewayRequestSent(4000);
     values=response(down); // новое значение 0
-    feed(h,values,3200);h.tick(3200);
+    feed(h,values,4100);h.tick(4100);
     const bool issued=h.takeGatewayRequest(down);
     assert(issued==!scenario);
     if(issued)assert(down.command==kOpenDoorTimed&&down.idx==0);

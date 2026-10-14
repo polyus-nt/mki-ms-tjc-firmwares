@@ -27,6 +27,17 @@ def response(request, data=bytes(8), status=0):
     return bytes(reply)
 
 
+
+def permits(request):
+    ready=bytearray(request)
+    ready[3],ready[6],ready[7],ready[8],ready[9]=2,12,0xf0,0,0
+    ready[10:18]=b"\x00\x64"+bytes(6)
+    ready[18:26]=bytes(8)  # Фикстура: effective session остаётся session запроса.
+    ready[26:28]=binascii.crc_hqx(ready[2:26],0xffff).to_bytes(2,"big")
+    grant=bytearray(ready);grant[7]=0xf2;grant[18:26]=request[18:26]
+    grant[26:28]=binascii.crc_hqx(grant[2:26],0xffff).to_bytes(2,"big")
+    return [b"".join(console.envelope(b,99) for b in f) for f in (ready,grant)]
+
 class ConsoleTests(unittest.TestCase):
     def test_global_fan_indices_remain_virtual_node14(self):
         for name, command in (("pwm", 0x30), ("rpm", 0x31)):
@@ -51,7 +62,7 @@ class ConsoleTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 console.describe(response(request, data))
         reply = response(request, b"\x01" + bytes(7))
-        chunks = [b"".join(console.envelope(b,99) for b in reply)]
+        chunks = permits(request) + [b"".join(console.envelope(b,99) for b in reply)]
         port = SimpleNamespace(quiet=lambda trace=None: None, send=lambda packet: None, read=lambda timeout: chunks.pop(0))
         self.assertEqual(console.exchange(port, request), reply)
 
@@ -74,7 +85,7 @@ class ConsoleTests(unittest.TestCase):
             with patch.object(console.time, "monotonic", side_effect=lambda: port.now):
                 with self.assertRaisesRegex(TimeoutError, f"сырых байтов RX: {len(chunk)}"):
                     console.exchange(port, request, trace.append)
-            self.assertTrue(trace[0].startswith("TX RAW: 0D 30 43 A5 0A"))
+            self.assertFalse(any(line.startswith("TX RAW:") for line in trace))
             if chunk:
                 self.assertIn("RX RAW: " + chunk.hex(" ").upper(), trace)
 
@@ -82,7 +93,7 @@ class ConsoleTests(unittest.TestCase):
         request = console.request_frame(0x20, 3, 1, 1)
         stale = response(console.request_frame(0x20, 3, 2, 1), status=1)
         reply = response(request, status=1)
-        chunks = [b"noise", b"".join(console.envelope(b, 99) for b in stale + reply)]
+        chunks = permits(request) + [b"noise", b"".join(console.envelope(b, 99) for b in stale + reply)]
         port = SimpleNamespace(quiet=lambda trace=None: None, send=lambda packet: None, read=lambda timeout: chunks.pop(0))
         trace = []
         self.assertEqual(console.exchange(port, request, trace.append), reply)
@@ -99,12 +110,18 @@ class ConsoleTests(unittest.TestCase):
             def send(self, packet):
                 self.sent.extend(packet)
             def read(self, timeout):
-                request = bytes(self.sent[3::5])
-                self_request = console.request_frame(0x20, 3,
-                    int.from_bytes(request[4:6], "big"), int.from_bytes(request[18:26], "big"))
-                if request != self_request:
+                if not self.sent:
+                    return permits(console.request_frame(0x20,3,1,0))[0]
+                request = bytes(self.sent[3::5]); self.sent.clear()
+                if request[7]==0xf1:
+                    actual=console.request_frame(0x20,3,int.from_bytes(request[4:6],"big"),
+                                                 int.from_bytes(request[10:18],"big"))
+                    return permits(actual)[1]
+                self_request = console.request_frame(0x20,3,
+                    int.from_bytes(request[4:6],"big"),int.from_bytes(request[18:26],"big"))
+                if request!=self_request:
                     raise AssertionError("Probe must be GET_TEMP with invalid index 3")
-                return b"".join(console.envelope(b, 99) for b in response(request, status=1))
+                return b"".join(console.envelope(b,99) for b in response(request,status=1))
             def close(self):
                 self.closed = True
         port = FakePort("test")
@@ -137,7 +154,7 @@ class ConsoleTests(unittest.TestCase):
         with patch.dict(sys.modules, {"serial":serial}):
             port=console.WindowsPort("COM12")
         self.assertEqual(port.serial.options["port"],"COM12")
-        self.assertEqual(port.serial.options["baudrate"],9600)
+        self.assertEqual(port.serial.options["baudrate"],115200)
         self.assertFalse(port.serial.options["xonxoff"])
         self.assertEqual(port.read(.01), b"\r63\xa5\n")
         self.assertEqual(port.serial.timeout,.01)
@@ -151,10 +168,7 @@ class ConsoleTests(unittest.TestCase):
         with self.assertRaises(OSError):
             port.send(b"\r0C\xa5\n")
         port.serial.write=lambda data: len(data)
-        port.serial.pending=[1]*2000
-        clock=iter(i*.01 for i in range(3000))
-        with patch.object(console.time,"monotonic",side_effect=lambda: next(clock)), \
-                patch.object(console.time,"sleep"), self.assertRaises(OSError):
+        with patch.object(console.time,"sleep",side_effect=AssertionError("no pacing sleeps")):
             port.send(b"\r0C\xa5\n")
 
     def test_windows_port_list_and_missing_dependency(self):
@@ -219,14 +233,24 @@ class ConsoleTests(unittest.TestCase):
     @unittest.skipUnless(os.name == "posix", "PTY requires POSIX")
     def test_real_console_over_pty_with_stale_and_echo(self):
         master, slave = os.openpty()
+        import tty
+        tty.setraw(slave)  # Не эхоить ранний READY до открытия pyserial.
         errors = []
 
         def adapter():
             try:
-                wire = bytearray(); deadline = time.monotonic() + 8
-                while len(wire) < 140 and time.monotonic() < deadline:
-                    if select.select([master], [], [], .05)[0]:
-                        wire.extend(os.read(master, 1024))
+                wire = bytearray(); deadline = time.monotonic()+8; last_ready=0
+                ready=console.request_frame(0x20,3,1,0)
+                claimed=False
+                while len(wire)<140 and time.monotonic()<deadline:
+                    if not claimed and time.monotonic()-last_ready>.03:
+                        os.write(master,permits(ready)[0]);last_ready=time.monotonic()
+                    if select.select([master],[],[],.01)[0]:
+                        wire.extend(os.read(master,1024))
+                        if len(wire)==140 and bytes(wire[3::5])[7]==0xf1:
+                            claim=bytes(wire[3::5])
+                            actual=console.request_frame(0x23,0,1,int.from_bytes(claim[10:18],"big"))
+                            os.write(master,permits(actual)[1]);wire.clear();claimed=True
                 self.assertEqual(len(wire), 140)
                 request = bytes(wire[3::5])
                 self.assertEqual(wire, b"".join(console.envelope(b, 12) for b in request))

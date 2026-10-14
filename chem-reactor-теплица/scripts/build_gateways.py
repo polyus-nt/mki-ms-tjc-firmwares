@@ -6,6 +6,7 @@ from pathlib import Path
 import shutil
 import subprocess
 
+BUS_BAUD = 115200
 REVISION = "c0e235f364f21b1a7ba8dbb598ef0bc983511af6"
 FILES = {
     "UART.hpp": "ac3d1f1c16e96824dd83ecfe43440a1265876167416b7ef290744a85b59790c2",
@@ -33,6 +34,18 @@ def replace_once(text, old, new):
 
 
 def patch_uart(text):
+    text = '#include "BusConfig.h"\n' + text
+    text = text.replace("initUART(9600);", "initUART(TJC_BUS_BAUD);")
+    text = text.replace("-> BRR |=", "-> BRR =")
+    text = text.replace("(uint32_t)( PCLK/baudrate )",
+                        "(uint32_t)((PCLK + baudrate/2u)/baudrate)")
+    text = replace_once(text, "// 3. Настроить скорость", """// Disable before BRR, including when the bootloader left UART enabled.
+            #if defined(UART1__)
+                USART1->CR1 &= ~USART_CR1_UE;
+            #elif defined(UART2__)
+                USART2->CR1 &= ~USART_CR1_UE;
+            #endif
+            // 3. Настроить скорость""")
     text = replace_once(text, "const uint8_t SIZESimpleBus = 5;",
                         "const uint8_t SIZESimpleBus = 64;")
     text = replace_once(text, "uint8_t l = 0, r = 0;",
@@ -80,6 +93,7 @@ def patch_uart(text):
 
 def prepare_runtime(source, dest, files=None):
     dest.mkdir(parents=True, exist_ok=True)
+    (dest / "BusConfig.h").write_text(f"#pragma once\n#define TJC_BUS_BAUD {BUS_BAUD}UL\n", encoding="utf-8")
     for filename, expected in (FILES if files is None else files).items():
         # Git Windows может заменить LF на CRLF; проверяем содержание, не ОС.
         contents = (source / filename).read_bytes().replace(b"\r\n", b"\n")
@@ -87,6 +101,8 @@ def prepare_runtime(source, dest, files=None):
             raise ValueError("Wrong upstream revision or modified file: " + filename)
         if filename == "UART.hpp":
             contents = patch_uart(contents.decode()).encode()
+        elif filename == "SimpleBus.hpp":
+            contents = replace_once(contents.decode(), "initUART(9600);", "initUART(TJC_BUS_BAUD);").encode()
         elif filename == "ArduinoAdapter.hpp":
             text = contents.decode()
             text = replace_once(text, "_isQueueOverflow = false;\n            return;",

@@ -143,7 +143,7 @@ class Port:
             attrs = termios.tcgetattr(self.fd)
             attrs[0] = attrs[1] = attrs[3] = 0  # raw binary; no CR/LF or flow-control transformations
             attrs[2] = termios.CS8 | termios.CREAD | termios.CLOCAL
-            attrs[4] = attrs[5] = termios.B9600
+            attrs[4] = attrs[5] = termios.B115200
             attrs[6][termios.VMIN] = attrs[6][termios.VTIME] = 0
             termios.tcsetattr(self.fd, termios.TCSANOW, attrs)
         except BaseException:
@@ -167,18 +167,14 @@ class Port:
             packet = packet[os.write(self.fd, packet):]
         # Дождаться передачи пакета, затем >=2 мс паузы; не меняем RTS/DTR вручную.
         self.termios.tcdrain(self.fd)
-        time.sleep(.002)
+        # Нет межпакетной паузы: передаём весь API-кадр одной записью.
 
     def quiet(self, trace=None):
-        started = last = time.monotonic()
-        while time.monotonic() - last < 1:
-            if time.monotonic() - started >= 3:
-                raise OSError("На шине нет секунды тишины; проверьте другие инициаторы")
-            data = self.read(.05)
-            if data:
-                if trace:
-                    trace("RX RAW (ожидание тишины): " + data.hex(" ").upper())
-                last = time.monotonic()
+        # Только отбросить старое READY/поздний ответ; не ждать секунду тишины.
+        if hasattr(self, "serial"):
+            self.serial.reset_input_buffer()
+        else:
+            self.termios.tcflush(self.fd, self.termios.TCIFLUSH)
 
     def close(self):
         os.close(self.fd)
@@ -190,7 +186,7 @@ class WindowsPort(Port):
             import serial
         except ImportError as error:
             raise ImportError("Установите pyserial: py -3 -m pip install pyserial") from error
-        self.serial = serial.Serial(port=path, baudrate=9600, bytesize=serial.EIGHTBITS,
+        self.serial = serial.Serial(port=path, baudrate=115200, bytesize=serial.EIGHTBITS,
                                     parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
                                     timeout=.05, write_timeout=1,
                                     xonxoff=False, rtscts=False, dsrdtr=False)
@@ -201,7 +197,6 @@ class WindowsPort(Port):
 
     def send(self, packet):
         deadline = time.monotonic() + 1
-        earliest_end = time.monotonic() + len(packet) * 10 / 9600
         while packet:
             if time.monotonic() >= deadline:
                 raise OSError("Тайм-аут записи")
@@ -209,15 +204,7 @@ class WindowsPort(Port):
             if not written:
                 raise OSError("COM-порт не принимает данные")
             packet = packet[written:]
-        # pyserial Windows flush polls at 50 ms: 28 packets could exceed the
-        # hub's 1 s frame budget. Use bounded queue polling without that delay.
-        while self.serial.out_waiting:
-            if time.monotonic() >= deadline:
-                raise OSError("Тайм-аут передачи COM-порта")
-            time.sleep(0)
-        gap_end = max(earliest_end, time.monotonic()) + .002
-        while time.monotonic() < gap_end:
-            time.sleep(0)  # yield; avoid coarse Windows sleep(2ms) rounding
+        # Одна запись 140 байт; никаких 28 отдельных flush/sleep.
 
     def close(self):
         self.serial.close()
@@ -234,39 +221,57 @@ def list_ports():
 
 
 def exchange(port, request, trace=None):
-    # Автономные опросы хаба используют общую полудуплексную шину.
     port.quiet(trace)
     parser = ReplyParser()
-    started = time.monotonic()
-    deadline = started + 5
-    received = 0
-    if trace:
-        trace("TX RAW: " + b"".join(envelope(byte) for byte in request).hex(" ").upper())
-    for byte in request:
-        port.send(envelope(byte))
-    if trace:
-        trace(f"TX: отправлено 28 пакетов SimpleBus (140 байт) за {time.monotonic()-started:.3f} с")
+    deadline = time.monotonic() + 5
+    received, ticket, sent = 0, None, False
+    nonce = request[18:26]
+
+    def send(frame):
+        wire = b"".join(envelope(byte) for byte in frame)
+        if trace:
+            trace("TX RAW: " + wire.hex(" ").upper())
+        port.send(wire)
+
+    def crc(frame):
+        frame[26:28] = binascii.crc_hqx(frame[2:26],0xffff).to_bytes(2,"big")
+        return bytes(frame)
+
     while time.monotonic() < deadline:
-        chunk = port.read(max(0, min(.05, deadline-time.monotonic())))
+        chunk = port.read(max(0,min(.005,deadline-time.monotonic())))
         received += len(chunk)
         if chunk and trace:
             trace("RX RAW: " + chunk.hex(" ").upper())
-        for reply in parser.feed(chunk, time.monotonic()):
-            if (reply[2:4] == b"\x02\x02" and reply[4:8] == request[4:8]
-                    and reply[9] == request[9] and reply[18:26] == request[18:26]):
+        for reply in parser.feed(chunk,time.monotonic()):
+            is_control = (reply[2:4]==b"\x02\x02" and reply[6]==12 and
+                          reply[8:10]==bytes(2) and reply[10:18]==b"\x00\x64"+bytes(6))
+            if not sent and is_control and reply[7]==0xf0:
+                ticket = reply
+                claim = bytearray(reply)
+                claim[3],claim[7]=1,0xf1
+                claim[10:18]=nonce
+                send(crc(claim))
+                continue
+            effective = (int.from_bytes(ticket[18:26],"big") ^
+                         int.from_bytes(nonce,"big")) if ticket else None
+            if not sent and ticket and is_control and reply[7]==0xf2:
+                if reply[4:6]!=ticket[4:6] or int.from_bytes(reply[18:26],"big")!=effective:
+                    continue
+                actual=bytearray(request); actual[4:6]=reply[4:6]; actual[18:26]=reply[18:26]
+                request=crc(actual); sent=True
+                send(request)
+                continue
+            if sent and (reply[2:4]==b"\x02\x02" and reply[4:8]==request[4:8] and
+                         reply[9]==request[9] and reply[18:26]==request[18:26]):
                 try:
                     describe(reply)
                 except ValueError as error:
-                    if trace:
-                        trace(f"RX API отклонён: {error}; " + reply.hex(" ").upper())
+                    if trace: trace(f"RX API отклонён: {error}; " + reply.hex(" ").upper())
                     continue
                 return reply
             elif trace:
                 trace("RX API другого запроса/версии: " + reply.hex(" ").upper())
-    detail = ("сырых байтов RX: 0 — порт не вернул ни одного байта"
-              if not received else f"сырых байтов RX: {received} — данные пришли, подходящий ответ не разобран")
-    raise TimeoutError("HOST_TIMEOUT: подходящий ответ от хаба не пришёл за 5 с; " + detail)
-
+    raise TimeoutError(f"HOST_TIMEOUT: разрешение/ответ хаба не пришёл за 5 с; сырых байтов RX: {received}; команда отправлена: {sent}")
 
 def main():
     args = argparse.ArgumentParser(description=__doc__)
@@ -287,7 +292,7 @@ def main():
     try:
         port = WindowsPort(options.port) if os.name == "nt" else Port(options.port)
         trace = (lambda message: print(message, flush=True)) if options.raw else None
-        print("9600, 8N1. ХАБ 12: датчики через шлюз 13, двери через кнопочницу 15. Закройте других владельцев порта.")
+        print("115200, 8N1. ХАБ 12: датчики через шлюз 13, двери через кнопочницу 15. Закройте других владельцев порта.")
         port.quiet(trace)
         print(HELP)
         session, tx = secrets.randbits(64) or 1, 1
