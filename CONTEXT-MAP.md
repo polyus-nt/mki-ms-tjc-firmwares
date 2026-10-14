@@ -6,7 +6,7 @@
 аппаратные узлы и координация обращений к ним.
 
 Глоссарий: [docs/hardware-api/CONTEXT.md](docs/hardware-api/CONTEXT.md).
-Собственных ADR этого контекста пока нет.
+Решения: [docs/hardware-api/adr](docs/hardware-api/adr/).
 
 ## Температурный регулятор теплоизоляционного блока — исторический контекст
 
