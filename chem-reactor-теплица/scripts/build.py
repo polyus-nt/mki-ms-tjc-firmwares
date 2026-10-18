@@ -8,7 +8,7 @@ import sys
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--target", choices=("all", "hub", "gateways", "buttons", "lmp8"), default="all")
+    parser.add_argument("--target", choices=("all", "hub", "gateways", "buttons", "lmp8", "mega-link-test"), default="all")
     parser.add_argument("--toolchain-bin", type=Path, help="ARM GCC bin directory, otherwise PATH")
     parser.add_argument("--out", type=Path, help="build output root, otherwise build/")
     parser.add_argument("--prepare-only", action="store_true")
@@ -16,7 +16,7 @@ def main():
     scripts = Path(__file__).resolve().parent
     targets = ("hub", "gateways", "buttons", "lmp8") if args.target == "all" else (args.target,)
     for target in targets:
-        builder = target
+        builder = "mega_link_test" if target == "mega-link-test" else target
         command = [sys.executable, str(scripts / f"build_{builder}.py")]
         if args.toolchain_bin:
             command += ["--toolchain-bin", str(args.toolchain_bin.resolve())]
