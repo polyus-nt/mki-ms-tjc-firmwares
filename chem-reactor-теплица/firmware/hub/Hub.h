@@ -1,8 +1,9 @@
 #pragma once
 #include "../common/HardwareProtocol.h"
+#include "../common/ReactorProtocol.h"
 
 namespace tjc_hub {
-// Химреактор: одна actuator Arduino, индексы 0/1 без перевода в node17.
+// Вентиляторы: одна actuator Arduino 14, индексы 0/1. Mega реактора — отдельный node17.
 // Запросы PWM/RPM идут ровно на один конечный узел; режимов отказа нет.
 class Hub {
  public:
@@ -35,12 +36,13 @@ class Hub {
       answer(frame, false); return;
     }
     if (state_ != Idle) {
-      if (!busy_pending_) { busy_ = response(frame, BUSY); busy_pending_ = true; }
+      if (!busy_pending_) { busy_ = hardware_api::response(frame, BUSY); busy_pending_ = true; }
       return;
     }
     request_ = frame;
-    const Status status = validateRequest(frame, frame.node);
-    if (status != OK) { answer(response(frame, status), false); return; }
+    const Status status = frame.node==reactor_api::kNode ? reactor_api::validate(frame)
+                                                        : validateRequest(frame, frame.node);
+    if (status != OK) { answer(hardware_api::response(frame, status), false); return; }
     started_ = now; request_pending_ = true; state_ = Forwarding;
   }
   bool takeGatewayRequest(hardware_api::Frame& frame) {

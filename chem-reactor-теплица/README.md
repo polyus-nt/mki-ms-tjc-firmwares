@@ -14,6 +14,7 @@
 | Actuator-шлюз | 14 | Arduino, вентиляторы 0/1 |
 | Кнопочница | 15 | Концевики Button(1)/Button(2) |
 | lmp8 | 16 | Общий замок на пине 1, шесть реле на пинах 2–7 |
+| Reactor-шлюз | 17 | Mega: три двигателя, три STM32, DS18B20 и LCD |
 
 Химреактор имеет отдельную физическую шину: адреса пересекаются с фаблабом.
 Релейный вентилятор 0..10: all-off → пауза 250 мс → новая матрица.
@@ -39,8 +40,12 @@ py -3 scripts/build.py --target all --toolchain-bin "C:\tools\arm-gnu\bin"
 | Хаб | `build/hub/sketch.bin` |
 | Sensors-шлюз | `build/gateways/sensors/sketch.bin` |
 | Actuator-шлюз | `build/gateways/actuator/sketch.bin` |
+| Reactor-шлюз | `build/gateways/reactor/sketch.bin` |
 | Кнопочница | `build/buttons/sketch.bin` |
 | lmp8 | `build/lmp8/sketch.bin` |
+
+Интеграция Mega: [REACTOR.md](REACTOR.md), сборка нового шлюза:
+`py -3 scripts/build_gateways.py --gateway reactor`. Обновить хаб, Mega и сервис.
 
 Отдельные цели: hub, gateways, buttons, lmp8. Один шлюз:
 `py -3 scripts/build_gateways.py --gateway sensors` или actuator.

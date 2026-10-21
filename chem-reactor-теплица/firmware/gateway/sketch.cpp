@@ -8,9 +8,9 @@
 #include "Gateway.h"
 
 #ifndef GATEWAY_NODE
-#error "Build with GATEWAY_NODE=13 or 14"
+#error "Build with GATEWAY_NODE=13, 14 or 17"
 #endif
-static_assert(GATEWAY_NODE == 13 || GATEWAY_NODE == 14,
+static_assert(GATEWAY_NODE == 13 || GATEWAY_NODE == 14 || GATEWAY_NODE == 17,
               "Unknown Arduino gateway address");
 
 // Hardware runtime definitions and IRQ handlers are included in this single

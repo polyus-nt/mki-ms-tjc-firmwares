@@ -106,7 +106,8 @@ void tests() {
   }
   assert(chain.execute(request(13, kGetTemp, 2)).status == INVALID_INDEX);
   assert(chain.execute(request(14, kGetPwm, 2)).status == INVALID_INDEX);
-  assert(chain.execute(request(17, kGetPwm)).status == INVALID_NODE);
+  assert(chain.execute(request(17, kGetPwm)).status == UNKNOWN_COMMAND);
+  assert(chain.execute(request(18, kGetPwm)).status == INVALID_NODE);
   for (uint8_t cmd : {kGetVoc, kGetDust, kGetVacuum, kSetVacuum})
     assert(chain.execute(request(cmd < 0x30 ? 13 : 16, cmd)).status == UNKNOWN_COMMAND);
   assert(chain.execute(request(16, kSetDoorLock, 1, 1)).status == INVALID_INDEX);

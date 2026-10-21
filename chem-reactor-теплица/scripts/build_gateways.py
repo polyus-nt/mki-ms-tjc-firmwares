@@ -140,7 +140,7 @@ def main():
     parser.add_argument("--toolchain-bin", type=Path,
                         help="Directory of ARM GCC tools, otherwise use PATH")
     parser.add_argument("--prepare-only", action="store_true")
-    parser.add_argument("--gateway", choices=("all", "sensors", "actuator"), default="all")
+    parser.add_argument("--gateway", choices=("all", "sensors", "actuator", "reactor"), default="all")
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     out = (args.out or root / "build" / "gateways").resolve()
@@ -152,7 +152,7 @@ def main():
         print("Verified and patched pinned runtime in", platform)
         return
     tools = find_tools(args.toolchain_bin)
-    for name, node in (("sensors", 13), ("actuator", 14)):
+    for name, node in (("sensors", 13), ("actuator", 14), ("reactor", 17)):
         if args.gateway != "all" and args.gateway != name:
             continue
         target = out / name
