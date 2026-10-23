@@ -39,6 +39,72 @@ def permits(request):
     return [b"".join(console.envelope(b,99) for b in f) for f in (ready,grant)]
 
 class ConsoleTests(unittest.TestCase):
+    def test_set_pwm_parser_frame_and_applied_value(self):
+        for idx in range(6):
+            for pwm in (0, 100, 150, 255):
+                self.assertEqual(console.parse_command(f"set_pwm {idx} {pwm}"), (0x32, idx, pwm))
+                request = console.request_frame(0x32, idx, 42, 99, pwm)
+                self.assertEqual(request[6:10], bytes((14, 0x32, 0, idx)))
+                self.assertEqual(request[10:18], bytes((pwm,)) + bytes(7))
+                self.assertEqual(int.from_bytes(request[26:], "big"),
+                                 binascii.crc_hqx(request[2:26], 0xffff))
+                # Ответ содержит применённый PWM, не обязательно запрошенный (fault mode).
+                reply = response(request, b"\xe6" + bytes(7))
+                self.assertEqual(console.describe(reply), f"Вентилятор {idx}: PWM применён=230")
+        for line in ("set_pwm", "set_pwm 0", "set_pwm 0 1 extra", "set_pwm -1 0",
+                     "set_pwm 6 0", "set_pwm 0 -1", "set_pwm 0 256", "set_pwm 0 1.5",
+                     "set_pwm x 0", "set_pwm 0 x", "set_pwm １ 0", "set_pwm 0 ２",
+                     "set_pwm 0000 1", "set_pwm 0 0000"):
+            with self.subTest(line=line), self.assertRaises(ValueError):
+                console.parse_command(line)
+        for idx, pwm in ((6, 0), (-1, 0), (0, None), (0, -1), (0, 256), (0, True), (0, 1.5)):
+            with self.assertRaises(ValueError):
+                console.request_frame(0x32, idx, 42, 99, pwm)
+        with self.assertRaises(ValueError):
+            console.request_frame(0x30, 0, 42, 99, 100)
+        with self.assertRaises(ValueError):
+            console.describe(response(console.request_frame(0x32, 0, 42, 99, 0),
+                                      b"\x00\x01" + bytes(6)))
+
+    def test_set_pwm_exchange_sends_once_and_handles_error(self):
+        for status in (0, 7):
+            request = console.request_frame(0x32, 5, 42, 99, 150)
+            reply = response(request, b"\x96" + bytes(7) if status == 0 else bytes(8), status)
+            chunks = permits(request) + [b"".join(console.envelope(b, 99) for b in reply)]
+            sent = []
+            port = SimpleNamespace(quiet=lambda trace=None: None, send=sent.append,
+                                   read=lambda timeout: chunks.pop(0))
+            self.assertEqual(console.exchange(port, request), reply)
+            frames = [wire[3::5] for wire in sent]
+            self.assertEqual([frame[7] for frame in frames], [0xf1, 0x32])
+            self.assertEqual(frames[-1], request)
+            if status:
+                self.assertIn("DEVICE_TIMEOUT", console.describe(reply))
+
+    def test_main_fan_commands_and_invalid_input(self):
+        port = SimpleNamespace(quiet=lambda trace=None: None, close=lambda: None)
+        requests = []
+        def exchange(_port, request, trace):
+            requests.append(request)
+            if request[7] == 0x31:
+                return response(request, (1800).to_bytes(4, "big") + bytes(4))
+            return response(request, bytes((request[10] if request[7] == 0x32 else 150,)) + bytes(7))
+        output = io.StringIO()
+        with patch.object(sys, "argv", ["sensor_console.py", "test"]), \
+                patch.object(console, "Port", return_value=port), \
+                patch.object(console, "WindowsPort", return_value=port), \
+                patch.object(console, "exchange", side_effect=exchange), \
+                patch("builtins.input", side_effect=["set_pwm 5 150", "pwm 5", "rpm 5",
+                                                    "set_pwm 5 256", "set_pwm 5 0", "exit"]), \
+                redirect_stdout(output):
+            console.main()
+        self.assertEqual([r[7] for r in requests], [0x32, 0x30, 0x31, 0x32])
+        self.assertEqual([r[10] for r in requests], [150, 0, 0, 0])
+        self.assertTrue(all(r[6] == 14 and r[9] == 5 for r in requests))
+        self.assertIn("PWM применён=150", output.getvalue())
+        self.assertIn("PWM применён=0", output.getvalue())
+        self.assertIn("RPM=1800", output.getvalue())
+
     def test_global_fan_indices_remain_virtual_node14(self):
         for name, command in (("pwm", 0x30), ("rpm", 0x31)):
             self.assertEqual(console.parse_command(name + " 5"), (command, 5))

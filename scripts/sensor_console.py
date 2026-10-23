@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only sensor console: PC -> SimpleBus hub -> gateway -> Arduino (v2).
+"""Sensor and fan console: PC -> SimpleBus hub -> gateway -> Arduino (v2).
 
 Windows requires pyserial; Linux/macOS use the standard library. Use the MC-TUK
 adapter, not Arduino USB. No automatic retries. Close other owners of the port.
@@ -19,11 +19,24 @@ STATUSES = ("OK", "INVALID_INDEX", "INVALID_ARGUMENT", "UNKNOWN_COMMAND",
             "NOT_IMPLEMENTED", "SENSOR_UNAVAILABLE", "BUSY", "DEVICE_TIMEOUT",
             "UNSUPPORTED_VERSION", "INTERNAL_ERROR", "REQUEST_ID_CONFLICT",
             "INVALID_NODE", "TRANSPORT_OVERFLOW")
-HELP = "probe (проверка хаба) | temp 0..2 | pressure 0..2 | voc 0..1 | humidity 0..2 | dust | door 0..1 | pwm 0..5 | rpm 0..5 | help | exit"
+HELP = ("probe (проверка хаба) | temp 0..2 | pressure 0..2 | voc 0..1 | humidity 0..2 | "
+        "dust | door 0..1 | pwm 0..5 | rpm 0..5 | set_pwm idx(0..5) pwm(0..255) | help | exit\n"
+        "set_pwm реально включает вентилятор; PWM=0 выключает. Индексы общие для шести вентиляторов.")
 
 
 def parse_command(line):
     parts = line.split()
+    if parts and parts[0] == "set_pwm":
+        if len(parts) != 3:
+            raise ValueError("Формат: set_pwm idx(0..5) pwm(0..255).")
+        values = []
+        for text, limit, label in ((parts[1], 5, "Индекс вентилятора"),
+                                   (parts[2], 255, "PWM")):
+            if (not text.isascii() or not text.isdecimal() or len(text) > 3
+                    or int(text) > limit):
+                raise ValueError(f"{label} — целое число 0..{limit}.")
+            values.append(int(text))
+        return 0x32, values[0], values[1]
     if parts == ["dust"]:
         return 0x25, 0
     if parts and parts[0] == "dust":
@@ -39,10 +52,18 @@ def parse_command(line):
     return command, idx
 
 
-def request_frame(command, idx, tx_id, session):
+def request_frame(command, idx, tx_id, session, pwm=None):
+    if command == 0x32:
+        if type(idx) is not int or not 0 <= idx < 6:
+            raise ValueError("Индекс вентилятора — целое число 0..5.")
+        if type(pwm) is not int or not 0 <= pwm <= 255:
+            raise ValueError("PWM — целое число 0..255.")
+    elif pwm is not None:
+        raise ValueError("PWM допустим только для set_pwm.")
     frame = b"\xa5\x5a\x02\x01" + tx_id.to_bytes(2, "big")
-    node = 15 if command == 0x22 else (14 if command in (0x30, 0x31) else 13)
-    frame += bytes((node, command, 0, idx)) + bytes(8) + session.to_bytes(8, "big")
+    node = 15 if command == 0x22 else (14 if command in (0x30, 0x31, 0x32) else 13)
+    data = bytes((pwm,)) + bytes(7) if command == 0x32 else bytes(8)
+    frame += bytes((node, command, 0, idx)) + data + session.to_bytes(8, "big")
     return frame + binascii.crc_hqx(frame[2:], 0xffff).to_bytes(2, "big")
 
 
@@ -67,12 +88,13 @@ def describe(reply):
         if data[0] not in (0, 1) or any(data[1:]):
             raise ValueError("Некорректное состояние концевика/резервные байты")
         return f"Дверь {reply[9]}: {'закрыта' if data[0] else 'открыта'} (state={bool(data[0])})"
-    if command in (0x30, 0x31):
-        width = 1 if command == 0x30 else 4
+    if command in (0x30, 0x31, 0x32):
+        width = 4 if command == 0x31 else 1
         if any(data[width:]):
             raise ValueError("Ненулевые резервные байты вентилятора")
         value = int.from_bytes(data[:width], "big")
-        return f"Вентилятор {reply[9]}: {'PWM' if command == 0x30 else 'RPM'}={value}"
+        label = "RPM" if command == 0x31 else ("PWM применён" if command == 0x32 else "PWM")
+        return f"Вентилятор {reply[9]}: {label}={value}"
     age = int.from_bytes(data[5:7], "big")
     if data[4] not in (1, 3) or age == 65535 or data[7]:
         raise ValueError("Некорректное качество/резервные байты")
@@ -165,7 +187,7 @@ class Port:
             if left <= 0 or not select.select([], [self.fd], [], left)[1]:
                 raise OSError("Тайм-аут записи")
             packet = packet[os.write(self.fd, packet):]
-        # Дождаться передачи пакета, затем >=2 мс паузы; не меняем RTS/DTR вручную.
+        # Дождаться передачи пакета; не меняем RTS/DTR вручную.
         self.termios.tcdrain(self.fd)
         # Нет межпакетной паузы: передаём весь API-кадр одной записью.
 
@@ -292,7 +314,8 @@ def main():
     try:
         port = WindowsPort(options.port) if os.name == "nt" else Port(options.port)
         trace = (lambda message: print(message, flush=True)) if options.raw else None
-        print("115200, 8N1. ХАБ 12: датчики через шлюз 13, двери через кнопочницу 15. Закройте других владельцев порта.")
+        print("115200, 8N1. ХАБ 12: датчики — шлюз 13, двери — кнопочница 15; "
+              "вентиляторы 0..3 — шлюз 14, 4/5 — шлюз 17. Закройте других владельцев порта.")
         port.quiet(trace)
         print(HELP)
         session, tx = secrets.randbits(64) or 1, 1
@@ -309,11 +332,11 @@ def main():
                 # Индекс 3 не существует: хаб сам отвечает INVALID_INDEX,
                 # не отправляя запрос шлюзу. Проверяем только PC <-> Hub.
                 probe = line == "probe"
-                command, idx = (0x20, 3) if probe else parse_command(line)
+                command, idx, *arguments = (0x20, 3) if probe else parse_command(line)
             except ValueError as error:
                 print(error)
                 continue
-            request = request_frame(command, idx, tx, session)
+            request = request_frame(command, idx, tx, session, *arguments)
             tx += 1
             if tx > 65535:
                 tx, session = 1, (session + 1) % (1 << 64) or 1
