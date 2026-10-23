@@ -47,7 +47,7 @@ def main():
         files.update(LED_FILES)
     source = (args.compiler_root.resolve() / "compiler/library/tjc-ms1-main-a4/1.0/source"
               if args.compiler_root else root / "firmware/runtime")
-    prepare_runtime(source, platform, files)
+    prepare_runtime(source, platform, files, baud=9600 if args.test_echo else 115200)
     if args.test_echo:
         uart = platform / "UART.hpp"
         uart.write_text(patch_test_uart(uart.read_text(encoding="utf-8")), encoding="utf-8")

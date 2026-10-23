@@ -73,6 +73,7 @@ class RuntimeTests(unittest.TestCase):
             self.assertFalse((Path(tmp) / "buttons/platform/arduino_link.c").exists())
             self.assertNotIn("hub_test::uart_rx_count", (Path(tmp) / "gateways/platform/UART.hpp").read_text(encoding="utf-8"))
             self.assertFalse((Path(tmp) / "hub-test").exists())
+            self.assertFalse((Path(tmp) / "buttons-test").exists())
 
     def test_buttons_target_and_pinned_button_class(self):
         expected = "3df782c57ce6687d804208585ec54145407f285e58b678fc7a39b4f40a82913a"
@@ -103,6 +104,22 @@ class RuntimeTests(unittest.TestCase):
             self.assertLess(handler.index("++hub_test::uart_rx_count"), handler.index("// save to buffer"))
             self.assertFalse((Path(tmp) / "hub").exists())
             self.assertFalse((Path(tmp) / "hub-test/platform/ArduinoAdapter.hpp").exists())
+            self.assertIn("TJC_BUS_BAUD 9600UL", (Path(tmp) / "hub-test/platform/BusConfig.h").read_text())
+
+    def test_buttons_echo_uses_9600_but_production_stays_115200(self):
+        with tempfile.TemporaryDirectory(prefix="buttons echo build ") as tmp:
+            for target, baud in (("buttons-test", 9600), ("buttons", 115200), ("hub", 115200)):
+                result = subprocess.run([sys.executable, str(ROOT / "scripts/build.py"),
+                                         "--target", target, "--prepare-only", "--out", tmp],
+                                        capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                platform = Path(tmp) / target / "platform"
+                self.assertIn(f"TJC_BUS_BAUD {baud}UL", (platform / "BusConfig.h").read_text())
+                self.assertNotIn("hub_test::uart_rx_count", (platform / "UART.hpp").read_text())
+        source = (ROOT / "firmware/buttons-test/sketch.cpp").read_text()
+        self.assertIn("bus.setAddress(15)", source)
+        self.assertIn("bus.sendPacket(99,0xBB)", source)
+        self.assertNotIn("ButtonsApi", source)
 
     def test_hub_test_with_cp1251_default_encoding(self):
         spec = importlib.util.spec_from_file_location("build_hub", ROOT / "scripts/build_hub.py")

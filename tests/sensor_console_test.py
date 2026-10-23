@@ -155,6 +155,10 @@ class ConsoleTests(unittest.TestCase):
             port=console.WindowsPort("COM12")
         self.assertEqual(port.serial.options["port"],"COM12")
         self.assertEqual(port.serial.options["baudrate"],115200)
+        with patch.dict(sys.modules, {"serial":serial}):
+            test_port=console.WindowsPort("COM12", baudrate=9600)
+        self.assertEqual(test_port.serial.options["baudrate"],9600)
+        test_port.close()
         self.assertFalse(port.serial.options["xonxoff"])
         self.assertEqual(port.read(.01), b"\r63\xa5\n")
         self.assertEqual(port.serial.timeout,.01)

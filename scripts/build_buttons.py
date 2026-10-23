@@ -15,9 +15,12 @@ def main():
     parser.add_argument("--out", type=Path)
     parser.add_argument("--toolchain-bin", type=Path)
     parser.add_argument("--prepare-only", action="store_true")
+    parser.add_argument("--test-echo", action="store_true",
+                        help="9600 SimpleBus byte-response test, no buttons API")
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
-    out = (args.out or root / "build/buttons").resolve()
+    variant = "buttons-test" if args.test_echo else "buttons"
+    out = (args.out or root / "build" / variant).resolve()
     platform = out / "platform"
     # All shared files are byte-identical to the pinned btn-a2 platform.
     files = {name: sha for name, sha in FILES.items()
@@ -25,7 +28,7 @@ def main():
     files.update(BUTTON_FILES)
     source = (args.compiler_root.resolve() / "compiler/library/tjc-ms1-btn-a2/1.0/source"
               if args.compiler_root else root / "firmware/runtime")
-    prepare_runtime(source, platform, files)
+    prepare_runtime(source, platform, files, baud=9600 if args.test_echo else 115200)
     if args.prepare_only:
         print("Verified and patched btn-a2 runtime in", platform)
         return
@@ -34,7 +37,7 @@ def main():
     run([tools["arm-none-eabi-g++"], "-std=gnu++11", "-mcpu=cortex-m0plus",
          "-mthumb", "-DSTM32G030x6", '-D_FIR_GIT_REV="' + REVISION + '"',
          "-I", platform, "-T", platform / "tjc-ms1-b4272ba421624bbe-usercode.ld",
-         platform / "startup_stm32g030xx.s", root / "firmware/buttons/sketch.cpp",
+         platform / "startup_stm32g030xx.s", root / "firmware" / variant / "sketch.cpp",
          "--specs=nosys.specs", "-Os", "-g", "-fno-exceptions", "-fno-rtti",
          "-ffunction-sections", "-fdata-sections", "-fno-strict-aliasing",
          "-Wl,--gc-sections", "-Wl,-Map=" + str(out / "sketch.map"), "-o", elf])

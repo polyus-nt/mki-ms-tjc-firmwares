@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
-"""SimpleBus-only console for firmware/hub-test; no API frames or CRC."""
+"""Direct SimpleBus tests at 9600: hub 12 / buttons 15; no API or routing."""
 import argparse
 import os
 import time
 
 from sensor_console import Port, WindowsPort, envelope
+
+TARGETS = {"hub": 12, "buttons": 15, "12": 12, "15": 15}
+EXPECTED = {12: 0xAA, 15: 0xBB}
+HELP = ("hub 3 / 12 3 — центральная плата, ответ 0xAA\n"
+        "buttons 3 / 15 3 — кнопочница напрямую, ответ 0xBB\n"
+        "Байт: 0..255 или 0xAA. Просто 3 — как раньше, запрос хабу. help | exit")
 
 
 def parse_byte(line):
@@ -18,8 +24,19 @@ def parse_byte(line):
     return value
 
 
-def exchange_byte(port, value, trace=print):
-    packet = envelope(value, 12)
+def parse_command(line):
+    parts = line.split()
+    if len(parts) == 1:
+        return 12, parse_byte(parts[0])
+    if len(parts) == 2 and parts[0].lower() in TARGETS:
+        return TARGETS[parts[0].lower()], parse_byte(parts[1])
+    raise ValueError(HELP)
+
+
+def exchange_byte(port, value, trace=print, address=12):
+    if address not in EXPECTED:
+        raise ValueError("Тестовые адреса: 12 (hub), 15 (buttons)")
+    packet = envelope(value, address)
     trace("TX RAW: " + packet.hex(" ").upper())
     port.send(packet)
     deadline = time.monotonic() + 2
@@ -51,19 +68,26 @@ def main():
     args = parser.parse_args()
     port = None
     try:
-        port = WindowsPort(args.port) if os.name == "nt" else Port(args.port)
-        print("115200, 8N1. Только тестовая прошивка hub-test! Закройте другие владельцы порта.")
+        port = WindowsPort(args.port, baudrate=9600) if os.name == "nt" else Port(args.port, baudrate=9600)
+        print("9600, 8N1. Только hub-test + buttons-test! Остановите FastAPI и других владельцев порта.")
         port.quiet(print)
-        print("Введите байт: 0..255 или 0xAA. exit — выход. Ожидаемый ответ: 0xAA.")
+        print(HELP)
         while True:
             line = input("hub-test> ").strip()
             if line in ("exit", "quit"):
                 break
             if not line:
                 continue
+            if line == "help":
+                print(HELP)
+                continue
             try:
-                reply = exchange_byte(port, parse_byte(line))
-                print(f"{'HUB_OK' if reply == 0xAA else 'НЕОЖИДАННЫЙ ОТВЕТ'}: {reply} (0x{reply:02X})")
+                address, value = parse_command(line)
+                port.quiet(print) # Не принимать накопившийся ответ прошлого запроса.
+                reply = exchange_byte(port, value, address=address)
+                label = "HUB_OK" if address == 12 else "BUTTONS_OK"
+                print(f"{label if reply == EXPECTED[address] else 'НЕОЖИДАННЫЙ ОТВЕТ'}: "
+                      f"{reply} (0x{reply:02X}), ожидалось 0x{EXPECTED[address]:02X}")
             except ValueError as error:
                 print(error)
             except TimeoutError as error:

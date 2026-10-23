@@ -8,7 +8,7 @@ import sys
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--target", choices=("all", "hub", "hub-test", "gateways", "gateway-actuator-2", "buttons", "lmp", "lmp8"), default="all")
+    parser.add_argument("--target", choices=("all", "hub", "hub-test", "buttons-test", "gateways", "gateway-actuator-2", "buttons", "lmp", "lmp8"), default="all")
     parser.add_argument("--toolchain-bin", type=Path, help="ARM GCC bin directory, otherwise PATH")
     parser.add_argument("--out", type=Path, help="build output root, otherwise build/")
     parser.add_argument("--prepare-only", action="store_true")
@@ -19,9 +19,9 @@ def main():
         if target == "lmp8":
             print("Deprecated FabLab target lmp8 -> lmp-a3; output: build/lmp")
             target = "lmp"
-        builder = "hub" if target == "hub-test" else ("gateways" if target == "gateway-actuator-2" else target)
+        builder = target.split("-")[0] if target in ("hub-test", "buttons-test") else ("gateways" if target == "gateway-actuator-2" else target)
         command = [sys.executable, str(scripts / f"build_{builder}.py")]
-        if target == "hub-test":
+        if target in ("hub-test", "buttons-test"):
             command += ["--test-echo"]
         if target == "gateway-actuator-2":
             command += ["--gateway", "actuator-2"]

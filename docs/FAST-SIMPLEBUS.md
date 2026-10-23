@@ -30,8 +30,10 @@ py -3 scripts/build.py --target all
 Обновите tjc-commutator и запустите соответствующий FastAPI обычной командой.
 Его COM-порт теперь автоматически открывается на **115200, 8N1**.
 HTTP API и Rust-программы используют прежние методы и URL.
-Штатная scripts/sensor_console.py и hub_test_console.py также работают на 115200;
-hub-test — отдельная диагностическая прошивка, без согласования READY/CLAIM/GRANT.
+Штатная scripts/sensor_console.py работает на 115200.
+Исключение: hub_test_console.py и отдельные hub-test/buttons-test работают на
+9600, без согласования READY/CLAIM/GRANT. Для проверки двух плат на одной шине
+см. [HUB-FIRMWARE.md](HUB-FIRMWARE.md#две-платы-отделить-общий-usb-тракт-от-конкретной-платы).
 
 **Arduino перепрошивать ради этого изменения не требуется.** AustereMaster между
 Arduino и шлюзом не изменён. Arduino TEST USB Serial остаётся 9600, Newline.

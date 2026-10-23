@@ -91,9 +91,9 @@ def patch_uart(text):
     return text
 
 
-def prepare_runtime(source, dest, files=None):
+def prepare_runtime(source, dest, files=None, baud=BUS_BAUD):
     dest.mkdir(parents=True, exist_ok=True)
-    (dest / "BusConfig.h").write_text(f"#pragma once\n#define TJC_BUS_BAUD {BUS_BAUD}UL\n", encoding="utf-8")
+    (dest / "BusConfig.h").write_text(f"#pragma once\n#define TJC_BUS_BAUD {baud}UL\n", encoding="utf-8")
     for filename, expected in (FILES if files is None else files).items():
         # Git Windows может заменить LF на CRLF; проверяем содержание, не ОС.
         contents = (source / filename).read_bytes().replace(b"\r\n", b"\n")

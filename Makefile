@@ -3,7 +3,7 @@ PYTHON ?= python3
 TOOLCHAIN_BIN ?=
 
 .DEFAULT_GOAL := build
-.PHONY: build build-hub build-hub-test build-gateways build-gateway-actuator-2 build-buttons build-lmp build-lmp8 help
+.PHONY: build build-hub build-hub-test build-buttons-test build-gateways build-gateway-actuator-2 build-buttons build-lmp build-lmp8 help
 
 ifneq ($(strip $(TOOLCHAIN_BIN)),)
 TOOLCHAIN_ARGS := --toolchain-bin "$(TOOLCHAIN_BIN)"
@@ -17,6 +17,9 @@ build-hub:
 
 build-hub-test:
 	$(PYTHON) scripts/build.py --target hub-test $(TOOLCHAIN_ARGS)
+
+build-buttons-test:
+	$(PYTHON) scripts/build.py --target buttons-test $(TOOLCHAIN_ARGS)
 
 build-gateways:
 	$(PYTHON) scripts/build.py --target gateways $(TOOLCHAIN_ARGS)
@@ -38,6 +41,7 @@ help:
 		'make build           — хаб, три Arduino-шлюза, кнопочница и обычная lmp' \
 		'make build-hub       — только центральный хаб' \
 		'make build-hub-test  — тестовый хаб: ответ 0xAA на байт SimpleBus' \
+		'make build-buttons-test — тестовая кнопочница: ответ 0xBB, 9600 бод' \
 		'make build-gateways  — три Arduino-шлюза' \
 		'make build-gateway-actuator-2 — второй actuator-шлюз, адрес 17' \
 		'make build-buttons   — кнопочница: концевики на пинах 1 и 2' \

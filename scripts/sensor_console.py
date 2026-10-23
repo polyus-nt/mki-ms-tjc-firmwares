@@ -135,7 +135,7 @@ class ReplyParser:
 
 
 class Port:
-    def __init__(self, path):
+    def __init__(self, path, baudrate=115200):
         import termios
         self.termios = termios
         self.fd = os.open(path, os.O_RDWR | os.O_NOCTTY | os.O_NONBLOCK)
@@ -143,7 +143,7 @@ class Port:
             attrs = termios.tcgetattr(self.fd)
             attrs[0] = attrs[1] = attrs[3] = 0  # raw binary; no CR/LF or flow-control transformations
             attrs[2] = termios.CS8 | termios.CREAD | termios.CLOCAL
-            attrs[4] = attrs[5] = termios.B115200
+            attrs[4] = attrs[5] = getattr(termios, f"B{baudrate}")
             attrs[6][termios.VMIN] = attrs[6][termios.VTIME] = 0
             termios.tcsetattr(self.fd, termios.TCSANOW, attrs)
         except BaseException:
@@ -181,12 +181,12 @@ class Port:
 
 
 class WindowsPort(Port):
-    def __init__(self, path):
+    def __init__(self, path, baudrate=115200):
         try:
             import serial
         except ImportError as error:
             raise ImportError("Установите pyserial: py -3 -m pip install pyserial") from error
-        self.serial = serial.Serial(port=path, baudrate=115200, bytesize=serial.EIGHTBITS,
+        self.serial = serial.Serial(port=path, baudrate=baudrate, bytesize=serial.EIGHTBITS,
                                     parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
                                     timeout=.05, write_timeout=1,
                                     xonxoff=False, rtscts=False, dsrdtr=False)
