@@ -15,6 +15,7 @@ from types import SimpleNamespace
 from contextlib import redirect_stdout
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
 spec = importlib.util.spec_from_file_location("sensor_console", ROOT / "scripts/sensor_console.py")
 console = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(console)
@@ -39,6 +40,80 @@ def permits(request):
     return [b"".join(console.envelope(b,99) for b in f) for f in (ready,grant)]
 
 class ConsoleTests(unittest.TestCase):
+    def test_ready_burst_claims_only_newest_not_each_old_ticket(self):
+        request = console.request_frame(0x20,3,1,99)
+        ready_wire, _ = permits(request)
+        base = bytearray(ready_wire[3::5])
+        def frame(tx):
+            f=bytearray(base); f[4:6]=tx.to_bytes(2,"big")
+            f[26:28]=binascii.crc_hqx(f[2:26],0xffff).to_bytes(2,"big")
+            return b"".join(console.envelope(b,99) for b in f)
+        initial=b"".join(frame(i) for i in list(range(100,121))+list(range(90,100)))
+        chunks=[initial]; sent=[]
+        def send(wire):
+            f=wire[3::5]; sent.append(f)
+            if f[7]==0xf1:
+                actual=console.request_frame(0x20,3,int.from_bytes(f[4:6],"big"),99)
+                chunks.append(permits(actual)[1])
+            else:
+                chunks.append(b"".join(console.envelope(b,99) for b in response(f,status=1)))
+        port=SimpleNamespace(quiet=lambda trace=None:None,send=send,read=lambda timeout:chunks.pop(0))
+        self.assertEqual(console.exchange(port,request)[8],1)
+        self.assertEqual([int.from_bytes(f[4:6],"big") for f in sent],[120,120])
+        self.assertEqual([f[7] for f in sent],[0xf1,0x20])
+
+    @unittest.skipUnless(os.name == "posix", "PTY requires POSIX")
+    def test_background_rx_sensor_pwm_sensor_after_idle_same_open_port(self):
+        master,slave=os.openpty()
+        import tty
+        tty.setraw(slave)
+        port=console.Port(os.ttyname(slave))
+        port.receiver=console.ContinuousReader(port.read)
+        stop=threading.Event(); errors=[]; claims=[]; commands=[]
+        def hardware():
+            try:
+                pending=bytearray(); ticket=0; last=0; ready=None
+                while not stop.is_set():
+                    if time.monotonic()-last>.05:
+                        ticket+=1
+                        r=console.request_frame(0x20,3,ticket,0)
+                        ready=permits(r)[0]
+                        os.write(master,ready); last=time.monotonic()
+                    if not select.select([master],[],[],.005)[0]:
+                        continue
+                    pending.extend(os.read(master,1024))
+                    while len(pending)>=140:
+                        f=bytes(pending[:140][3::5]); del pending[:140]
+                        if f[7]==0xf1:
+                            claims.append(f)
+                            # Принимать только последнее окно, как настоящий хаб.
+                            if f[4:6]!=ticket.to_bytes(2,"big"):
+                                continue
+                            actual=console.request_frame(0x20,3,ticket,int.from_bytes(f[10:18],"big"))
+                            os.write(master,permits(actual)[1]);last=time.monotonic()
+                        else:
+                            commands.append(f)
+                            if f[7]==0x30: reply=response(f,b"\x96"+bytes(7))
+                            else: reply=response(f,status=1)
+                            os.write(master,b"".join(console.envelope(b,99) for b in reply))
+            except BaseException as error:
+                errors.append(error)
+        worker=threading.Thread(target=hardware,daemon=True);worker.start()
+        try:
+            for command,idx in ((0x20,3),(0x30,0),(0x20,3),(0x30,1),(0x20,3)):
+                count=len(claims)
+                time.sleep(.2) # Несколько окон без читающего main/input/HTTP.
+                self.assertEqual(len(claims),count) # В фоне не передавать CLAIM.
+                self.assertFalse(port.receiver._chunks)
+                reply=console.exchange(port,console.request_frame(command,idx,1,99))
+                self.assertEqual(reply[7],command)
+                self.assertEqual(reply[8],0 if command==0x30 else 1)
+            self.assertEqual(len(commands),5)
+            self.assertFalse(errors,errors)
+        finally:
+            stop.set();worker.join(1);port.receiver.close();port.close()
+            os.close(master);os.close(slave)
+
     def test_set_pwm_parser_frame_and_applied_value(self):
         for idx in range(6):
             for pwm in (0, 100, 150, 255):

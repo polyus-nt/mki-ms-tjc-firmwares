@@ -11,6 +11,7 @@ import os
 import secrets
 import select
 import time
+from continuous_rx import ContinuousReader, PermitTracker
 
 COMMANDS = {"temp": (0x20, 3), "pressure": (0x23, 3), "voc": (0x21, 2),
             "humidity": (0x24, 3), "dust": (0x25, 1), "door": (0x22, 2),
@@ -215,7 +216,9 @@ class WindowsPort(Port):
 
     def read(self, timeout):
         self.serial.timeout = max(0, timeout)
-        return self.serial.read(1024)
+        first = self.serial.read(1)
+        waiting = min(getattr(self.serial, "in_waiting", 0), 4095)
+        return first + self.serial.read(waiting) if first and waiting else first
 
     def send(self, packet):
         deadline = time.monotonic() + 1
@@ -243,11 +246,26 @@ def list_ports():
 
 
 def exchange(port, request, trace=None):
-    port.quiet(trace)
+    receiver = getattr(port, "receiver", None)
+    if receiver is not None:
+        receiver.begin()
+        try:
+            return _exchange(port, request, trace, receiver)
+        finally:
+            receiver.end()
+    return _exchange(port, request, trace)
+
+
+def _exchange(port, request, trace=None, receiver=None):
+    if receiver is None:
+        port.quiet(trace)
     parser = ReplyParser()
     deadline = time.monotonic() + 5
     received, ticket, sent = 0, None, False
     nonce = request[18:26]
+    permits = PermitTracker()
+    claim_until = 0.0
+    ready_seen = claims_sent = grants_seen = 0
 
     def send(frame):
         wire = b"".join(envelope(byte) for byte in frame)
@@ -260,26 +278,30 @@ def exchange(port, request, trace=None):
         return bytes(frame)
 
     while time.monotonic() < deadline:
-        chunk = port.read(max(0,min(.005,deadline-time.monotonic())))
+        chunk = (receiver or port).read(max(0,min(.005,deadline-time.monotonic())))
         received += len(chunk)
-        if chunk and trace:
-            trace("RX RAW: " + chunk.hex(" ").upper())
-        for reply in parser.feed(chunk,time.monotonic()):
+        now = time.monotonic()
+        received_at = receiver.received_at if receiver else now
+        newest = None
+        # Разобрать всю пачку ДО CLAIM, не отправлять по CLAIM на каждый READY.
+        for reply in list(parser.feed(chunk, now)):
             is_control = (reply[2:4]==b"\x02\x02" and reply[6]==12 and
                           reply[8:10]==bytes(2) and reply[10:18]==b"\x00\x64"+bytes(6))
             if not sent and is_control and reply[7]==0xf0:
-                ticket = reply
-                claim = bytearray(reply)
-                claim[3],claim[7]=1,0xf1
-                claim[10:18]=nonce
-                send(crc(claim))
+                ready_seen += 1
+                key = (int.from_bytes(reply[18:26], "big"), int.from_bytes(reply[4:6], "big"))
+                if permits.accept(key, received_at):
+                    newest = reply
                 continue
             effective = (int.from_bytes(ticket[18:26],"big") ^
                          int.from_bytes(nonce,"big")) if ticket else None
             if not sent and ticket and is_control and reply[7]==0xf2:
+                if time.monotonic() >= claim_until:
+                    continue
                 if reply[4:6]!=ticket[4:6] or int.from_bytes(reply[18:26],"big")!=effective:
                     continue
                 actual=bytearray(request); actual[4:6]=reply[4:6]; actual[18:26]=reply[18:26]
+                grants_seen += 1
                 request=crc(actual); sent=True
                 send(request)
                 continue
@@ -293,7 +315,21 @@ def exchange(port, request, trace=None):
                 return reply
             elif trace:
                 trace("RX API другого запроса/версии: " + reply.hex(" ").upper())
-    raise TimeoutError(f"HOST_TIMEOUT: разрешение/ответ хаба не пришёл за 5 с; сырых байтов RX: {received}; команда отправлена: {sent}")
+        if newest is not None and not sent and time.monotonic() >= claim_until:
+            # Отложенный в потоке Python пакет уже не годится для 100-мс окна.
+            if time.monotonic() - received_at < .075:
+                ticket = newest
+                claim = bytearray(ticket)
+                claim[3], claim[7] = 1, 0xf1
+                claim[10:18] = nonce
+                claim_until = received_at + .100
+                claims_sent += 1
+                send(crc(claim))
+        if chunk and trace:
+            suffix = f" ... ({len(chunk)} bytes)" if len(chunk)>160 else ""
+            trace("RX RAW: " + chunk[:160].hex(" ").upper() + suffix)
+    raise TimeoutError(f"HOST_TIMEOUT: разрешение/ответ хаба не пришёл за 5 с; сырых байтов RX: {received}; "
+                       f"команда отправлена: {sent}; READY={ready_seen} CLAIM={claims_sent} GRANT={grants_seen}")
 
 def main():
     args = argparse.ArgumentParser(description=__doc__)
@@ -317,6 +353,10 @@ def main():
         print("115200, 8N1. ХАБ 12: датчики — шлюз 13, двери — кнопочница 15; "
               "вентиляторы 0..3 — шлюз 14, 4/5 — шлюз 17. Закройте других владельцев порта.")
         port.quiet(trace)
+        # Чтение продолжается во время input(), без CLAIM/команд в фоне.
+        if hasattr(port, "read"):
+            port.receiver = ContinuousReader(port.read)
+            print("Фоновый RX включён: порт читается и во время ожидания команды.")
         print(HELP)
         session, tx = secrets.randbits(64) or 1, 1
         while True:
@@ -346,7 +386,7 @@ def main():
                 reply = exchange(port, request, trace)
             except TimeoutError as error:
                 print(error)
-                port.quiet(trace)
+                port.receiver.clear() if hasattr(port, "receiver") else port.quiet(trace)
                 continue  # no automatic retry
             if probe and reply[8] == 1:
                 print("HUB_OK: хаб ответил INVALID_INDEX, как и ожидалось. Шлюз и Arduino не участвовали.")
@@ -357,14 +397,18 @@ def main():
             if options.hex:
                 print("RX HEX:", reply.hex(" ").upper())
             if reply[8] in (7, 9, 12):
-                port.quiet(trace)
+                port.receiver.clear() if hasattr(port, "receiver") else port.quiet(trace)
     except (KeyboardInterrupt, EOFError):
         print("\nКонсоль закрыта.")
     except (OSError, ImportError) as error:
         args.exit(1, f"Ошибка порта: {error}\nПроверьте имя порта и закройте другие программы, использующие его.\n")
     finally:
         if port is not None:
-            port.close()
+            try:
+                if hasattr(port, "receiver"):
+                    port.receiver.close()
+            finally:
+                port.close()
 
 
 if __name__ == "__main__":
