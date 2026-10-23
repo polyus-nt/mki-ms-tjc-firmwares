@@ -4,7 +4,7 @@ import argparse
 import os
 import time
 
-from sensor_console import Port, WindowsPort, envelope
+from sensor_console import Port, WindowsPort, envelope, request_frame
 
 
 def parse_byte(line):
@@ -19,12 +19,17 @@ def parse_byte(line):
 
 
 def exchange_byte(port, value, trace=print):
-    packet = envelope(value, 12)
+    return exchange_packets(port, bytes([value]), 2, trace)[0]
+
+
+def exchange_packets(port, values, timeout, trace=print):
+    packet = b"".join(envelope(value,12) for value in values)
     trace("TX RAW: " + packet.hex(" ").upper())
     port.send(packet)
-    deadline = time.monotonic() + 2
+    deadline = time.monotonic() + timeout
     window = bytearray()
     received = 0
+    replies = []
     while time.monotonic() < deadline:
         chunk = port.read(max(0, min(.05, deadline - time.monotonic())))
         if chunk:
@@ -39,10 +44,13 @@ def exchange_byte(port, value, trace=print):
                 address, payload = int(window[1:3], 16), window[3]
                 window.clear()
                 if address == 99:
-                    return payload
+                    replies.append(payload)
+                    if len(replies)==len(values):
+                        return replies
             else:
                 del window[0]
-    raise TimeoutError(f"Нет пакета на адрес компьютера 99 за 2 с; сырых RX байтов: {received}")
+    raise TimeoutError(f"Получено ответов {len(replies)}/{len(values)} за {timeout} с; "
+                       f"сырых RX байтов: {received}")
 
 
 def main():
@@ -54,7 +62,7 @@ def main():
         port = WindowsPort(args.port) if os.name == "nt" else Port(args.port)
         print("115200, 8N1. Только тестовая прошивка hub-test! Закройте другие владельцы порта.")
         port.quiet(print)
-        print("Введите байт: 0..255 или 0xAA. exit — выход. Ожидаемый ответ: 0xAA.")
+        print("Байт: 0..255 или 0xAA; burst — 140 байт одной записью, ожидаются 28 ответов AA; exit — выход.")
         while True:
             line = input("hub-test> ").strip()
             if line in ("exit", "quit"):
@@ -62,6 +70,14 @@ def main():
             if not line:
                 continue
             try:
+                if line == "burst":
+                    port.quiet(print)
+                    started=time.monotonic()
+                    replies=exchange_packets(port,request_frame(0x20,3,1,1),5)
+                    good=sum(value==0xAA for value in replies)
+                    label="BURST_OK" if good==28 else "BURST_BAD"
+                    print(f"{label}: {good}/28 ответов AA, {(time.monotonic()-started):.3f} с")
+                    continue
                 reply = exchange_byte(port, parse_byte(line))
                 print(f"{'HUB_OK' if reply == 0xAA else 'НЕОЖИДАННЫЙ ОТВЕТ'}: {reply} (0x{reply:02X})")
             except ValueError as error:

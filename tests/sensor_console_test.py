@@ -40,6 +40,19 @@ def permits(request):
     return [b"".join(console.envelope(b,99) for b in f) for f in (ready,grant)]
 
 class ConsoleTests(unittest.TestCase):
+    def test_optional_turnaround_is_only_before_claim_and_action(self):
+        request=console.request_frame(0x20,3,1,99)
+        chunks=permits(request)+[b"".join(console.envelope(b,99) for b in response(request,status=1))]
+        sent=[]
+        port=SimpleNamespace(quiet=lambda trace=None:None,read=lambda timeout:chunks.pop(0),send=sent.append)
+        with patch.object(console.time,"sleep") as sleep:
+            self.assertEqual(console.exchange(port,request,turnaround_ms=5)[8],1)
+        self.assertEqual([call.args for call in sleep.call_args_list],[(.005,),(.005,)])
+        self.assertEqual(len(sent),2)
+        for bad in (-1,21,float("nan"),float("inf")):
+            with self.assertRaises(ValueError):
+                console.exchange(None,None,turnaround_ms=bad)
+
     def test_fresh_grant_after_ready_deadline_is_a_new_lease(self):
         request=console.request_frame(0x20,3,1,99)
         ready,grant=permits(request)

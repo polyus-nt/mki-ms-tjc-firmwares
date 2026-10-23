@@ -10,6 +10,17 @@ import hub_test_console as console
 
 
 class HubTestConsoleTests(unittest.TestCase):
+    def test_full_api_size_sent_in_one_burst(self):
+        values=console.request_frame(0x20,3,1,1)
+        sent=[]
+        chunks=[b"noise"+b"".join(console.envelope(v,12) for v in values),
+                console.envelope(0xAA,99)*10, console.envelope(0xAA,99)*18]
+        port=SimpleNamespace(send=sent.append,read=lambda timeout:chunks.pop(0))
+        self.assertEqual(console.exchange_packets(port,values,5,lambda _:None),[0xAA]*28)
+        self.assertEqual(len(sent),1)
+        self.assertEqual(len(sent[0]),140)
+        self.assertEqual(sent[0][3::5],values)
+
     def test_byte_values(self):
         for text, value in (("0", 0), ("255", 255), ("0xAA", 170), ("0X0D", 13)):
             self.assertEqual(console.parse_byte(text), value)

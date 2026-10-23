@@ -7,6 +7,7 @@ adapter, not Arduino USB. No automatic retries. Close other owners of the port.
 import argparse
 import binascii
 import glob
+import math
 import os
 import secrets
 import select
@@ -245,18 +246,20 @@ def list_ports():
     return sorted(glob.glob("/dev/ttyUSB*") + glob.glob("/dev/ttyACM*") + glob.glob("/dev/cu.*"))
 
 
-def exchange(port, request, trace=None):
+def exchange(port, request, trace=None, turnaround_ms=0):
+    if not math.isfinite(turnaround_ms) or not 0 <= turnaround_ms <= 20:
+        raise ValueError("turnaround-ms должен быть 0..20")
     receiver = getattr(port, "receiver", None)
     if receiver is not None:
         receiver.begin()
         try:
-            return _exchange(port, request, trace, receiver)
+            return _exchange(port, request, trace, receiver, turnaround_ms/1000)
         finally:
             receiver.end()
-    return _exchange(port, request, trace)
+    return _exchange(port, request, trace, delay=turnaround_ms/1000)
 
 
-def _exchange(port, request, trace=None, receiver=None):
+def _exchange(port, request, trace=None, receiver=None, delay=0):
     if receiver is None:
         port.quiet(trace)
     parser = ReplyParser()
@@ -272,6 +275,8 @@ def _exchange(port, request, trace=None, receiver=None):
         wire = b"".join(envelope(byte) for byte in frame)
         if trace:
             trace("TX RAW: " + wire.hex(" ").upper())
+        if delay:
+            time.sleep(delay) # Только диагностическая задержка смены направления.
         started = time.monotonic()
         port.send(wire)
         if trace:
@@ -304,7 +309,7 @@ def _exchange(port, request, trace=None, receiver=None):
             if not sent and is_control and reply[7]==0xf2:
                 grants_seen += 1
                 # GRANT начинает НОВОЕ окно, срок READY к нему не относится.
-                if ticket is None or time.monotonic()-received_at >= .075:
+                if ticket is None or time.monotonic()-received_at+delay >= .075:
                     if trace: trace("GRANT отклонён: нет CLAIM или устарел в очереди RX")
                     continue
                 if reply[4:6]!=ticket[4:6] or int.from_bytes(reply[18:26],"big")!=effective:
@@ -327,7 +332,7 @@ def _exchange(port, request, trace=None, receiver=None):
                 trace("RX API другого запроса/версии: " + reply.hex(" ").upper())
         if newest is not None and not sent and time.monotonic() >= claim_until:
             # Отложенный в потоке Python пакет уже не годится для 100-мс окна.
-            if time.monotonic() - received_at < .075:
+            if time.monotonic() - received_at + delay < .075:
                 ticket = newest
                 claim = bytearray(ticket)
                 claim[3], claim[7] = 1, 0xf1
@@ -352,7 +357,11 @@ def main():
     args.add_argument("--hex", action="store_true", help="показывать кадры TX/RX без SimpleBus-обёртки")
     args.add_argument("--raw", action="store_true", help="показывать все сырые RX до фильтрации, TX и длительность отправки")
     args.add_argument("--list-ports", action="store_true")
+    args.add_argument("--turnaround-ms", type=float, default=0,
+                      help="диагностика: пауза 0..20 мс перед CLAIM/командой, по умолчанию 0")
     options = args.parse_args()
+    if not math.isfinite(options.turnaround_ms) or not 0 <= options.turnaround_ms <= 20:
+        args.error("--turnaround-ms должен быть конечным числом 0..20")
     if options.list_ports:
         try:
             print("\n".join(list_ports()) or "Порты не найдены")
@@ -373,6 +382,8 @@ def main():
             port.receiver = ContinuousReader(port.read)
             print("Фоновый RX включён: порт читается и во время ожидания команды.")
         print(HELP)
+        if options.turnaround_ms:
+            print(f"Диагностическая пауза смены направления: {options.turnaround_ms:g} мс")
         session, tx = secrets.randbits(64) or 1, 1
         while True:
             line = input("mstjuk> ").strip()
@@ -398,7 +409,10 @@ def main():
             if options.hex:
                 print("TX HEX:", request.hex(" ").upper())
             try:
-                reply = exchange(port, request, trace)
+                if options.turnaround_ms:
+                    reply = exchange(port, request, trace, turnaround_ms=options.turnaround_ms)
+                else:
+                    reply = exchange(port, request, trace)
             except TimeoutError as error:
                 print(error)
                 port.receiver.clear() if hasattr(port, "receiver") else port.quiet(trace)
