@@ -265,13 +265,19 @@ def _exchange(port, request, trace=None, receiver=None):
     nonce = request[18:26]
     permits = PermitTracker()
     claim_until = 0.0
-    ready_seen = claims_sent = grants_seen = 0
+    ready_seen = claims_sent = grants_seen = grants_accepted = 0
+    max_claim_write_ms = 0.0
 
     def send(frame):
         wire = b"".join(envelope(byte) for byte in frame)
         if trace:
             trace("TX RAW: " + wire.hex(" ").upper())
+        started = time.monotonic()
         port.send(wire)
+        if trace:
+            trace(f"TX завершён: command=0x{frame[7]:02X} ticket={frame[4:6].hex()} "
+                  f"write_ms={(time.monotonic()-started)*1000:.1f}")
+        return (time.monotonic()-started)*1000
 
     def crc(frame):
         frame[26:28] = binascii.crc_hqx(frame[2:26],0xffff).to_bytes(2,"big")
@@ -295,13 +301,17 @@ def _exchange(port, request, trace=None, receiver=None):
                 continue
             effective = (int.from_bytes(ticket[18:26],"big") ^
                          int.from_bytes(nonce,"big")) if ticket else None
-            if not sent and ticket and is_control and reply[7]==0xf2:
-                if time.monotonic() >= claim_until:
+            if not sent and is_control and reply[7]==0xf2:
+                grants_seen += 1
+                # GRANT начинает НОВОЕ окно, срок READY к нему не относится.
+                if ticket is None or time.monotonic()-received_at >= .075:
+                    if trace: trace("GRANT отклонён: нет CLAIM или устарел в очереди RX")
                     continue
                 if reply[4:6]!=ticket[4:6] or int.from_bytes(reply[18:26],"big")!=effective:
+                    if trace: trace("GRANT отклонён: не совпали ticket/session")
                     continue
                 actual=bytearray(request); actual[4:6]=reply[4:6]; actual[18:26]=reply[18:26]
-                grants_seen += 1
+                grants_accepted += 1
                 request=crc(actual); sent=True
                 send(request)
                 continue
@@ -322,14 +332,19 @@ def _exchange(port, request, trace=None, receiver=None):
                 claim = bytearray(ticket)
                 claim[3], claim[7] = 1, 0xf1
                 claim[10:18] = nonce
-                claim_until = received_at + .100
                 claims_sent += 1
-                send(crc(claim))
+                max_claim_write_ms = max(max_claim_write_ms, send(crc(claim)))
+                # Бюджет ожидания ответа на CLAIM — после завершения его записи.
+                claim_until = time.monotonic() + .100
+                if trace:
+                    trace(f"CLAIM: ticket={ticket[4:6].hex()} rx_age_ms={(time.monotonic()-received_at)*1000:.1f}")
         if chunk and trace:
             suffix = f" ... ({len(chunk)} bytes)" if len(chunk)>160 else ""
             trace("RX RAW: " + chunk[:160].hex(" ").upper() + suffix)
     raise TimeoutError(f"HOST_TIMEOUT: разрешение/ответ хаба не пришёл за 5 с; сырых байтов RX: {received}; "
-                       f"команда отправлена: {sent}; READY={ready_seen} CLAIM={claims_sent} GRANT={grants_seen}")
+                       f"команда отправлена: {sent}; READY={ready_seen} CLAIM={claims_sent} "
+                       f"GRANT_RX={grants_seen} GRANT_OK={grants_accepted}; "
+                       f"max_claim_write_ms={max_claim_write_ms:.1f}")
 
 def main():
     args = argparse.ArgumentParser(description=__doc__)

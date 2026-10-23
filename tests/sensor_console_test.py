@@ -40,6 +40,24 @@ def permits(request):
     return [b"".join(console.envelope(b,99) for b in f) for f in (ready,grant)]
 
 class ConsoleTests(unittest.TestCase):
+    def test_fresh_grant_after_ready_deadline_is_a_new_lease(self):
+        request=console.request_frame(0x20,3,1,99)
+        ready,grant=permits(request)
+        reply=b"".join(console.envelope(b,99) for b in response(request,status=1))
+        chunks=[ready,grant,reply]; now=[1.0]; sent=[]
+        def read(timeout):
+            if len(chunks)==2:
+                now[0]+=.03 # GRANT пришёл свежим, но READY уже старше 100 мс.
+            return chunks.pop(0)
+        def send(wire):
+            sent.append(wire[3::5])
+            if sent[-1][7]==0xf1:
+                now[0]+=.08 # Запись CLAIM/доставка USB заняла 80 мс.
+        port=SimpleNamespace(quiet=lambda trace=None:None,read=read,send=send)
+        with patch.object(console.time,"monotonic",side_effect=lambda:now[0]):
+            self.assertEqual(console.exchange(port,request)[8],1)
+        self.assertEqual([f[7] for f in sent],[0xf1,0x20])
+
     def test_ready_burst_claims_only_newest_not_each_old_ticket(self):
         request = console.request_frame(0x20,3,1,99)
         ready_wire, _ = permits(request)
