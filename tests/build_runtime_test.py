@@ -116,10 +116,25 @@ class RuntimeTests(unittest.TestCase):
                 platform = Path(tmp) / target / "platform"
                 self.assertIn(f"TJC_BUS_BAUD {baud}UL", (platform / "BusConfig.h").read_text())
                 self.assertNotIn("hub_test::uart_rx_count", (platform / "UART.hpp").read_text())
+                uart = (platform / "UART.hpp").read_text(encoding="utf-8")
+                if target == "buttons-test":
+                    self.assertEqual(uart.count("++buttons_test::uart_rx_count"), 1)
+                    handler = uart[uart.index("void UARTInsertion__(USART, _IRQHandlerSimpleBus)"):]
+                    self.assertLess(handler.index("++buttons_test::uart_rx_count"), handler.index("-> RDR"))
+                    for name in ("LED.h", "PWM.hpp", "PWMInit.hpp", "Connector.hpp"):
+                        self.assertEqual((platform / name).read_bytes(), (RUNTIME / name).read_bytes())
+                else:
+                    self.assertNotIn("buttons_test::uart_rx_count", uart)
+                    self.assertFalse((platform / "LED.h").exists())
         source = (ROOT / "firmware/buttons-test/sketch.cpp").read_text()
         self.assertIn("bus.setAddress(15)", source)
         self.assertIn("bus.sendPacket(99,0xBB)", source)
         self.assertNotIn("ButtonsApi", source)
+        for declaration in ("LED heartbeat(1)", "LED uart_received(2)", "LED tx_pending(3)"):
+            self.assertIn(declaration, source)
+        self.assertLess(source.index("__disable_irq()"), source.index("LED heartbeat(1)"))
+        self.assertLess(source.index("tx_pending.on()"), source.index("bus.sendPacket(99,0xBB)"))
+        self.assertLess(source.index("bus.sendPacket(99,0xBB)"), source.index("tx_pending.off()"))
 
     def test_hub_test_with_cp1251_default_encoding(self):
         spec = importlib.util.spec_from_file_location("build_hub", ROOT / "scripts/build_hub.py")

@@ -3,6 +3,7 @@
 import argparse
 from pathlib import Path
 from build_gateways import FILES, REVISION, find_tools, prepare_runtime, run
+from build_hub import LED_FILES, patch_test_uart
 
 BUTTON_FILES = {
     "Button.hpp": "3df782c57ce6687d804208585ec54145407f285e58b678fc7a39b4f40a82913a",
@@ -26,15 +27,23 @@ def main():
     files = {name: sha for name, sha in FILES.items()
              if name not in ("ArduinoAdapter.hpp", "arduino_link.c")}
     files.update(BUTTON_FILES)
+    if args.test_echo:
+        # btn-a2 LED/PWM sources are byte-identical to the pinned main-a4 files.
+        files.update(LED_FILES)
     source = (args.compiler_root.resolve() / "compiler/library/tjc-ms1-btn-a2/1.0/source"
               if args.compiler_root else root / "firmware/runtime")
     prepare_runtime(source, platform, files, baud=9600 if args.test_echo else 115200)
+    if args.test_echo:
+        uart = platform / "UART.hpp"
+        uart.write_text(patch_test_uart(uart.read_text(encoding="utf-8"),
+                                       "buttons_test::uart_rx_count"), encoding="utf-8")
     if args.prepare_only:
         print("Verified and patched btn-a2 runtime in", platform)
         return
     tools = find_tools(args.toolchain_bin)
     elf = out / "sketch.elf"
-    run([tools["arm-none-eabi-g++"], "-std=gnu++11", "-mcpu=cortex-m0plus",
+    standard = "-std=gnu++14" if args.test_echo else "-std=gnu++11"
+    run([tools["arm-none-eabi-g++"], standard, "-mcpu=cortex-m0plus",
          "-mthumb", "-DSTM32G030x6", '-D_FIR_GIT_REV="' + REVISION + '"',
          "-I", platform, "-T", platform / "tjc-ms1-b4272ba421624bbe-usercode.ld",
          platform / "startup_stm32g030xx.s", root / "firmware" / variant / "sketch.cpp",

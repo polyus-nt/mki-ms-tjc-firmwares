@@ -12,15 +12,15 @@ LED_FILES = {
 }
 
 
-def patch_test_uart(text):
-    """Observe actual RX bytes before SimpleBus parsing; only in hub-test copy."""
+def patch_test_uart(text, counter="hub_test::uart_rx_count"):
+    """Observe RX before parsing; only in the generated diagnostic runtime."""
     start = text.index("void UARTInsertion__(USART, _IRQHandlerSimpleBus) (void)")
     head, handler = text[:start], text[start:]
     handler = replace_once(handler,
         "uint8_t gotByte = UARTConcat__(USART) -> RDR;",
-        """// Test only: observe RXNE before reading RDR clears it.
+        f"""// Test only: observe RXNE before reading RDR clears it.
                 if (UARTConcat__(USART)->ISR & USART_ISR_RXNE_RXFNE)
-                    ++hub_test::uart_rx_count;
+                    ++{counter};
                 uint8_t gotByte = UARTConcat__(USART) -> RDR;""")
     return head + handler
 
